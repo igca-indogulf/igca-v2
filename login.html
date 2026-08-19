@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Log In — IGCA</title>
+  <meta
+    name="description"
+    content="Log in to IGCA — a professional network connecting investors, advisors, companies and institutions."
+  >
+
+  <link rel="stylesheet" href="css/login.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <main class="login-page">
+
+    <!-- =========================================
+         LEFT NETWORK EXPERIENCE
+    ========================================== -->
+
+    <section class="network-side">
+
+      <div class="network-bg"></div>
+      <div class="network-grid"></div>
+
+      <!-- Ambient lights -->
+      <div class="ambient ambient-one"></div>
+      <div class="ambient ambient-two"></div>
+
+      <!-- Network SVG -->
+      <div class="network-canvas" aria-hidden="true">
+
+        <svg viewBox="0 0 800 900" preserveAspectRatio="xMidYMid slice">
+
+          <defs>
+
+            <linearGradient id="networkLine" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#4d7cff" stop-opacity="0.08"/>
+              <stop offset="50%" stop-color="#6d8cff" stop-opacity="0.75"/>
+              <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.08"/>
+            </linearGradient>
+
+            <radialGradient id="nodeGlow">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="25%" stop-color="#7c9cff"/>
+              <stop offset="100%" stop-color="#4d7cff" stop-opacity="0"/>
+            </radialGradient>
+
+            <filter id="blur">
+              <feGaussianBlur stdDeviation="12"/>
+            </filter>
+
+          </defs>
+
+          <!-- Glow -->
+          <circle cx="400" cy="450" r="260"
+                  fill="#315cff"
+                  opacity="0.07"
+                  filter="url(#blur)"/>
+
+          <!-- Network lines -->
+          <g
+            stroke="url(#networkLine)"
+            stroke-width="1.2"
+            fill="none"
+          >
+
+            <path d="M95 140 L260 235 L410 150 L610 245"/>
+            <path d="M260 235 L190 420 L350 500"/>
+            <path d="M410 150 L350 500 L555 420 L610 245"/>
+            <path d="M190 420 L95 610 L280 690"/>
+            <path d="M350 500 L280 690 L470 760"/>
+            <path d="M555 420 L470 760 L690 620"/>
+            <path d="M610 245 L720 370 L690 620"/>
+            <path d="M95 610 L350 500"/>
+            <path d="M280 690 L690 620"/>
+
+          </g>
+
+          <!-- Secondary lines -->
+          <g
+            stroke="#7c9cff"
+            stroke-opacity="0.13"
+            stroke-width="0.8"
+            fill="none"
+          >
+            <path d="M95 140 L190 420"/>
+            <path d="M260 235 L555 420"/>
+            <path d="M410 150 L610 245"/>
+            <path d="M350 500 L690 620"/>
+            <path d="M190 420 L470 760"/>
+          </g>
+
+          <!-- Glowing nodes -->
+          <g>
+
+            <circle cx="95" cy="140" r="25" fill="url(#nodeGlow)" opacity=".55"/>
+            <circle cx="95" cy="140" r="4" fill="#9db2ff"/>
+
+            <circle cx="260" cy="235" r="34" fill="url(#nodeGlow)" opacity=".5"/>
+            <circle cx="260" cy="235" r="6" fill="#ffffff"/>
+
+            <circle cx="410" cy="150" r="25" fill="url(#nodeGlow)" opacity=".5"/>
+            <circle cx="410" cy="150" r="4" fill="#8ea7ff"/>
+
+            <circle cx="610" cy="245" r="32" fill="url(#nodeGlow)" opacity=".45"/>
+            <circle cx="610" cy="245" r="5" fill="#ffffff"/>
+
+            <circle cx="190" cy="420" r="23" fill="url(#nodeGlow)" opacity=".4"/>
+            <circle cx="190" cy="420" r="4" fill="#91a7ff"/>
+
+            <circle cx="350" cy="500" r="48" fill="url(#nodeGlow)" opacity=".7"/>
+            <circle cx="350" cy="500" r="8" fill="#ffffff"/>
+
+            <circle cx="555" cy="420" r="25" fill="url(#nodeGlow)" opacity=".45"/>
+            <circle cx="555" cy="420" r="4" fill="#9db2ff"/>
+
+            <circle cx="95" cy="610" r="20" fill="url(#nodeGlow)" opacity=".35"/>
+            <circle cx="95" cy="610" r="3" fill="#7892ff"/>
+
+            <circle cx="280" cy="690" r="28" fill="url(#nodeGlow)" opacity=".4"/>
+            <circle cx="280" cy="690" r="5" fill="#ffffff"/>
+
+            <circle cx="470" cy="760" r="22" fill="url(#nodeGlow)" opacity=".35"/>
+            <circle cx="470" cy="760" r="4" fill="#809aff"/>
+
+            <circle cx="690" cy="620" r="32" fill="url(#nodeGlow)" opacity=".45"/>
+            <circle cx="690" cy="620" r="5" fill="#ffffff"/>
+
+            <circle cx="720" cy="370" r="20" fill="url(#nodeGlow)" opacity=".3"/>
+            <circle cx="720" cy="370" r="3" fill="#809aff"/>
+
+          </g>
+
+        </svg>
+
+      </div>
+
+      <!-- Brand -->
+      <a href="index.html" class="network-brand">
+        <span class="brand-symbol">
+          <i data-lucide="network"></i>
+        </span>
+
+        <span>IGCA</span>
+      </a>
+
+      <!-- Main visual content -->
+      <div class="network-content">
+
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          PROFESSIONAL NETWORK
+        </div>
+
+        <h2>
+          Connections that<br>
+          <span>create opportunity.</span>
+        </h2>
+
+        <p>
+          Access a professional ecosystem built around investors,
+          advisors, companies and institutions.
+        </p>
+
+        <div class="network-stats">
+
+          <div class="network-stat">
+            <strong>12.4K+</strong>
+            <span>Professionals</span>
+          </div>
+
+          <div class="stat-divider"></div>
+
+          <div class="network-stat">
+            <strong>3.1K+</strong>
+            <span>Institutions</span>
+          </div>
+
+          <div class="stat-divider"></div>
+
+          <div class="network-stat">
+            <strong>48</strong>
+            <span>Industries</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Bottom label -->
+      <div class="network-footer">
+        <span>
+          <i data-lucide="shield-check"></i>
+          Built around professional trust
+        </span>
+
+        <span class="network-status">
+          <i data-lucide="radio"></i>
+          Network active
+        </span>
+      </div>
+
+    </section>
+
+
+    <!-- =========================================
+         LOGIN SIDE
+    ========================================== -->
+
+    <section class="login-side">
+
+      <div class="login-container">
+
+        <!-- Mobile brand -->
+        <a href="index.html" class="mobile-brand">
+          <span class="mobile-brand-icon">
+            <i data-lucide="network"></i>
+          </span>
+          IGCA
+        </a>
+
+        <!-- Login Header -->
+        <div class="login-header">
+
+          <div class="login-icon">
+            <i data-lucide="log-in"></i>
+          </div>
+
+          <div>
+            <span class="login-eyebrow">
+              MEMBER ACCESS
+            </span>
+
+            <h1>Welcome back.</h1>
+
+            <p>
+              Sign in to continue building your professional network.
+            </p>
+          </div>
+
+        </div>
+
+
+        <!-- Form -->
+        <form id="login-form" class="login-form">
+
+          <!-- Email -->
+          <div class="form-group">
+
+            <label for="email">
+              Email address
+            </label>
+
+            <div class="input-shell">
+
+              <i data-lucide="mail"></i>
+
+              <input
+                type="email"
+                id="email"
+                name="email"
+                autocomplete="email"
+                placeholder="you@company.com"
+                required
+              >
+
+            </div>
+
+          </div>
+
+
+          <!-- Password -->
+          <div class="form-group">
+
+            <div class="label-row">
+
+              <label for="password">
+                Password
+              </label>
+
+              <a href="#" class="forgot-link">
+                Forgot password?
+              </a>
+
+            </div>
+
+            <div class="input-shell">
+
+              <i data-lucide="lock-keyhole"></i>
+
+              <input
+                type="password"
+                id="password"
+                name="password"
+                autocomplete="current-password"
+                placeholder="Enter your password"
+                required
+              >
+
+              <button
+                type="button"
+                class="password-toggle"
+                id="password-toggle"
+                aria-label="Show password"
+              >
+                <i data-lucide="eye"></i>
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- Remember -->
+          <div class="form-options">
+
+            <label class="remember">
+
+              <input
+                type="checkbox"
+                id="remember"
+                checked
+              >
+
+              <span class="custom-checkbox">
+                <i data-lucide="check"></i>
+              </span>
+
+              <span>Keep me signed in</span>
+
+            </label>
+
+            <span class="secure-label">
+              <i data-lucide="shield-check"></i>
+              Secure login
+            </span>
+
+          </div>
+
+
+          <!-- Error / Status -->
+          <div
+            id="login-message"
+            class="login-message"
+            role="alert"
+            aria-live="polite"
+          ></div>
+
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            class="login-button"
+            id="login-submit"
+          >
+
+            <span class="button-text">
+              Sign in to IGCA
+            </span>
+
+            <span class="button-icon">
+              <i data-lucide="arrow-right"></i>
+            </span>
+
+            <span class="button-loader">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+
+          </button>
+
+        </form>
+
+
+        <!-- Divider -->
+        <div class="or-divider">
+          <span>OR</span>
+        </div>
+
+
+        <!-- Signup -->
+        <div class="signup-card">
+
+          <div class="signup-icon">
+            <i data-lucide="user-plus"></i>
+          </div>
+
+          <div class="signup-copy">
+            <strong>New to IGCA?</strong>
+            <span>Build your professional presence.</span>
+          </div>
+
+          <a href="signup.html" class="signup-link">
+            Create account
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+
+        </div>
+
+
+        <!-- Security note -->
+        <div class="security-note">
+
+          <i data-lucide="lock"></i>
+
+          <span>
+            Your credentials are protected using secure authentication.
+          </span>
+
+        </div>
+
+
+        <!-- Legal -->
+        <div class="login-legal">
+
+          <span>© 2026 IGCA</span>
+
+          <div>
+            <a href="#">Privacy</a>
+            <span>·</span>
+            <a href="#">Terms</a>
+            <span>·</span>
+            <a href="#">Security</a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="js/config.js"></script>
+  <script src="js/backend.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+
+  <!-- UI behaviour -->
+  <script>
+
+    lucide.createIcons();
+
+    const passwordInput =
+      document.getElementById("password");
+
+    const passwordToggle =
+      document.getElementById("password-toggle");
+
+    passwordToggle.addEventListener("click", () => {
+
+      const isPassword =
+        passwordInput.type === "password";
+
+      passwordInput.type =
+        isPassword ? "text" : "password";
+
+      passwordToggle.innerHTML =
+        isPassword
+          ? '<i data-lucide="eye-off"></i>'
+          : '<i data-lucide="eye"></i>';
+
+      passwordToggle.setAttribute(
+        "aria-label",
+        isPassword
+          ? "Hide password"
+          : "Show password"
+      );
+
+      lucide.createIcons();
+
+    });
+
+  </script>
+
+</body>
+</html>

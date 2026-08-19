@@ -1,0 +1,56 @@
+/* ==========================================================================
+   IGCA — Responsive Rules
+   ========================================================================== */
+
+.bottom-nav{ display:none; }
+
+@media (max-width:1080px){
+  .stat-grid{ grid-template-columns:repeat(2,1fr); }
+  .grid-3{ grid-template-columns:repeat(2,1fr); }
+  .grid-4{ grid-template-columns:repeat(2,1fr); }
+  .footer-grid{ grid-template-columns:1.2fr 1fr 1fr; }
+  .footer-grid .col-learn{ display:none; }
+}
+
+@media (max-width:900px){
+  .site-nav{ display:none; }
+  .app-header .search-bar{ display:none; }
+  .messages-shell{ grid-template-columns:1fr; }
+  .convo-list.hide-mobile{ display:none; }
+  .grid-2{ grid-template-columns:1fr; }
+}
+
+@media (max-width:760px){
+  .container{ padding:0 20px; }
+  .section{ padding:64px 0; }
+  .stat-grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
+  .grid-3, .grid-4{ grid-template-columns:1fr 1fr; }
+  .footer-grid{ grid-template-columns:1fr 1fr; gap:28px; }
+  .footer-bottom{ flex-direction:column; gap:10px; }
+
+  /* App shell becomes mobile: sidebar off-canvas, bottom nav appears */
+  .app-sidebar{ transform:translateX(-100%); transition:transform .25s ease; box-shadow:var(--shadow-lg); }
+  .app-sidebar.open{ transform:translateX(0); }
+  .app-main{ margin-left:0; }
+  .app-content{ padding:18px; padding-bottom:88px; }
+  .app-header{ padding:0 16px; }
+  .hamburger{ display:flex; }
+
+  .bottom-nav{
+    display:flex; position:fixed; bottom:0; left:0; right:0; height:64px; background:var(--surface);
+    border-top:1px solid var(--border); z-index:80; justify-content:space-around; align-items:center;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .bottom-nav a{ display:flex; flex-direction:column; align-items:center; gap:3px; font-size:11px; color:var(--text-tertiary); font-weight:600; }
+  .bottom-nav a svg{ width:20px; height:20px; }
+  .bottom-nav a.active{ color:var(--primary-dark); }
+
+  .messages-shell{ height:calc(100vh - 150px); border-radius:var(--radius-md); }
+}
+
+@media (max-width:600px){
+  .hero-grid{ grid-template-columns:1fr; }
+  .stat-grid{ grid-template-columns:1fr 1fr; }
+  .grid-3, .grid-4{ grid-template-columns:1fr; }
+  h1{ font-size:32px !important; }
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company — IGCA</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar"></aside>
+  <div class="app-main">
+    <header class="app-header"></header>
+    <main class="app-content">
+
+      <div class="card" style="padding:32px;margin-bottom:24px;position:relative;overflow:hidden;">
+        <div class="profile-cover" aria-hidden="true"></div>
+        <div style="display:flex;gap:20px;align-items:flex-end;position:relative;">
+          <div class="avatar avatar-lg" id="c-logo" style="background:linear-gradient(135deg,var(--accent-light),var(--accent));"></div>
+          <div style="flex:1;">
+            <h1 id="c-name" style="font-size:24px;"></h1>
+            <p id="c-type" class="text-secondary" style="margin-top:2px;font-size:15px;"></p>
+            <p id="c-meta" class="text-secondary" style="margin-top:4px;font-size:13.5px;"></p>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary">Follow</button>
+            <button class="btn btn-outline">Connect</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-layout">
+        <div>
+          <div class="card card-pad" style="margin-bottom:20px;">
+            <h3 style="font-size:16px;margin-bottom:10px;">About</h3>
+            <p class="text-secondary" id="c-about" style="font-size:14.5px;line-height:1.7;"></p>
+            <p class="text-secondary" style="font-size:13.5px;margin-top:12px;">Website: <a href="#" style="color:var(--accent);">www.example.com</a></p>
+          </div>
+          <div class="card card-pad" style="margin-bottom:20px;">
+            <h3 style="font-size:16px;margin-bottom:12px;">Areas of Focus</h3>
+            <div class="chip-row" id="c-focus"></div>
+          </div>
+          <div class="card card-pad">
+            <h3 style="font-size:16px;margin-bottom:14px;">Updates</h3>
+            <div class="grid-3" id="c-updates"></div>
+          </div>
+        </div>
+        <aside>
+          <div class="card card-pad">
+            <h3 style="font-size:15px;margin-bottom:12px;">Team</h3>
+            <div id="c-team" style="display:flex;flex-direction:column;gap:12px;"></div>
+          </div>
+        </aside>
+      </div>
+
+    </main>
+  </div>
+</div>
+<nav class="bottom-nav"></nav>
+
+<style>
+  .profile-cover{ position:absolute; inset:0; height:90px; background:linear-gradient(120deg,var(--primary-dark),var(--primary-tint)); }
+  .profile-layout{ display:grid; grid-template-columns:1fr 280px; gap:20px; }
+  @media (max-width:900px){ .profile-layout{ grid-template-columns:1fr; } }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

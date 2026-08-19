@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+<title>Settings — IGCA</title>
+
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+<style>
+
+.settings-layout{
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  gap:24px;
+}
+
+.settings-nav{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.settings-nav button{
+  width:100%;
+  border:0;
+  background:transparent;
+  text-align:left;
+  cursor:pointer;
+
+  padding:10px 14px;
+
+  border-radius:8px;
+
+  font-size:14.5px;
+  color:var(--text-secondary);
+  font-weight:500;
+}
+
+.settings-nav button:hover{
+  background:var(--surface-secondary);
+}
+
+.settings-nav button.active{
+  background:var(--surface-secondary);
+  color:var(--primary-dark);
+  font-weight:600;
+}
+
+.settings-panel{
+  display:none;
+}
+
+.settings-panel.active{
+  display:block;
+}
+
+.settings-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:14px 0;
+
+  border-bottom:1px solid var(--border);
+
+  font-size:14.5px;
+}
+
+.settings-row:last-child{
+  border-bottom:none;
+}
+
+.settings-message{
+  min-height:20px;
+  margin-bottom:14px;
+  font-size:13.5px;
+}
+
+.settings-message.success{
+  color:#2f7d4a;
+}
+
+.settings-message.error{
+  color:#b33a3a;
+}
+
+.settings-avatar-wrap{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:24px;
+}
+
+.settings-avatar{
+  width:72px;
+  height:72px;
+
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
+
+  background:var(--surface-secondary);
+
+  color:var(--primary-dark);
+
+  font-weight:700;
+  font-size:20px;
+}
+
+.settings-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.profile-image-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+@media(max-width:760px){
+
+  .settings-layout{
+    grid-template-columns:1fr;
+  }
+
+  .settings-nav{
+    flex-direction:row;
+    overflow-x:auto;
+  }
+
+  .settings-nav button{
+    width:auto;
+    white-space:nowrap;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="app-shell">
+
+  <aside class="app-sidebar"></aside>
+
+  <div class="app-main">
+
+    <header class="app-header"></header>
+
+    <main class="app-content">
+
+      <!-- =========================================================
+           PAGE HEADER
+      ========================================================== -->
+
+      <div class="page-head">
+
+        <div>
+
+          <h1>
+            Settings
+          </h1>
+
+          <p>
+            Manage your profile, notifications and privacy.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="settings-message"
+        class="settings-message">
+      </div>
+
+
+      <div class="settings-layout">
+
+
+        <!-- =======================================================
+             SETTINGS NAV
+        ======================================================== -->
+
+        <nav class="settings-nav">
+
+          <button
+            type="button"
+            class="active"
+            data-panel="account">
+
+            Account
+
+          </button>
+
+          <button
+            type="button"
+            data-panel="notifications">
+
+            Notifications
+
+          </button>
+
+          <button
+            type="button"
+            data-panel="privacy">
+
+            Privacy
+
+          </button>
+
+          <button
+            type="button"
+            data-panel="security">
+
+            Security
+
+          </button>
+
+        </nav>
+
+
+        <!-- =======================================================
+             PANELS
+        ======================================================== -->
+
+        <div>
+
+
+          <!-- =====================================================
+               ACCOUNT
+          ====================================================== -->
+
+          <div
+            class="card card-pad settings-panel active"
+            id="panel-account">
+
+            <h3
+              style="
+                font-size:16px;
+                margin-bottom:18px;
+              ">
+
+              Account
+
+            </h3>
+
+
+            <!-- PROFILE IMAGE -->
+
+            <div class="settings-avatar-wrap">
+
+              <div
+                class="settings-avatar"
+                id="settings-avatar">
+
+                IG
+
+              </div>
+
+              <div>
+
+                <div
+                  style="
+                    font-weight:600;
+                    font-size:14px;
+                    margin-bottom:8px;
+                  ">
+
+                  Profile Photo
+
+                </div>
+
+                <div class="profile-image-actions">
+
+                  <input
+                    type="file"
+                    id="profile-image-input"
+                    accept="image/*"
+                    hidden>
+
+                  <button
+                    type="button"
+                    class="btn btn-outline btn-sm"
+                    id="choose-profile-image">
+
+                    Choose Photo
+
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm"
+                    id="upload-profile-image"
+                    style="display:none;">
+
+                    Upload Photo
+
+                  </button>
+
+                </div>
+
+                <div
+                  class="text-secondary"
+                  style="
+                    font-size:12px;
+                    margin-top:6px;
+                  ">
+
+                  JPG, PNG or WebP. Maximum 5 MB.
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <div class="grid-2">
+
+
+              <div class="field">
+
+                <label for="settings-full-name">
+                  Full name
+                </label>
+
+                <input
+                  id="settings-full-name"
+                  type="text"
+                  autocomplete="name">
+
+              </div>
+
+
+              <div class="field">
+
+                <label for="settings-username">
+                  Username
+                </label>
+
+                <input
+                  id="settings-username"
+                  type="text"
+                  autocomplete="username">
+
+              </div>
+
+
+              <div class="field">
+
+                <label for="settings-headline">
+                  Professional title
+                </label>
+
+                <input
+                  id="settings-headline"
+                  type="text">
+
+              </div>
+
+
+              <div class="field">
+
+                <label for="settings-company">
+                  Company
+                </label>
+
+                <input
+                  id="settings-company"
+                  type="text">
+
+              </div>
+
+
+              <div class="field">
+
+                <label for="settings-location">
+                  Location
+                </label>
+
+                <input
+                  id="settings-location"
+                  type="text">
+
+              </div>
+
+
+              <div class="field">
+
+                <label for="settings-industry">
+                  Industry
+                </label>
+
+                <input
+                  id="settings-industry"
+                  type="text">
+
+              </div>
+
+
+              <div class="field">
+
+                <label for="settings-country">
+                  Country
+                </label>
+
+                <input
+                  id="settings-country"
+                  type="text">
+
+              </div>
+
+
+              <div class="field">
+
+                <label for="settings-phone">
+                  Phone
+                </label>
+
+                <input
+                  id="settings-phone"
+                  type="tel">
+
+              </div>
+
+
+              <div
+                class="field"
+                style="grid-column:1/-1;">
+
+                <label for="settings-website">
+                  Website
+                </label>
+
+                <input
+                  id="settings-website"
+                  type="url">
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="settings-bio">
+                About
+              </label>
+
+              <textarea
+                id="settings-bio"
+                rows="5">
+              </textarea>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="save-profile-btn">
+
+              Save Changes
+
+            </button>
+
+          </div>
+
+
+          <!-- =====================================================
+               NOTIFICATIONS
+          ====================================================== -->
+
+          <div
+            class="card card-pad settings-panel"
+            id="panel-notifications">
+
+            <h3
+              style="
+                font-size:16px;
+                margin-bottom:18px;
+              ">
+
+              Notification Preferences
+
+            </h3>
+
+
+            <div class="settings-row">
+
+              <span>
+                New connection requests
+              </span>
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  data-setting="connection_requests"
+                  checked>
+
+                <span class="slider-track"></span>
+
+              </label>
+
+            </div>
+
+
+            <div class="settings-row">
+
+              <span>
+                Messages
+              </span>
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  data-setting="messages"
+                  checked>
+
+                <span class="slider-track"></span>
+
+              </label>
+
+            </div>
+
+
+            <div class="settings-row">
+
+              <span>
+                Meeting reminders
+              </span>
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  data-setting="meeting_reminders"
+                  checked>
+
+                <span class="slider-track"></span>
+
+              </label>
+
+            </div>
+
+
+            <div class="settings-row">
+
+              <span>
+                Weekly insights digest
+              </span>
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  data-setting="weekly_digest">
+
+                <span class="slider-track"></span>
+
+              </label>
+
+            </div>
+
+          </div>
+
+
+          <!-- =====================================================
+               PRIVACY
+          ====================================================== -->
+
+          <div
+            class="card card-pad settings-panel"
+            id="panel-privacy">
+
+            <h3
+              style="
+                font-size:16px;
+                margin-bottom:18px;
+              ">
+
+              Privacy
+
+            </h3>
+
+
+            <div class="settings-row">
+
+              <span>
+                Show profile to all members
+              </span>
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  data-setting="show_profile"
+                  checked>
+
+                <span class="slider-track"></span>
+
+              </label>
+
+            </div>
+
+
+            <div class="settings-row">
+
+              <span>
+                Show mutual connections
+              </span>
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  data-setting="show_mutual_connections"
+                  checked>
+
+                <span class="slider-track"></span>
+
+              </label>
+
+            </div>
+
+
+            <div class="settings-row">
+
+              <span>
+                Appear in search results
+              </span>
+
+              <label class="switch">
+
+                <input
+                  type="checkbox"
+                  data-setting="appear_in_search"
+                  checked>
+
+                <span class="slider-track"></span>
+
+              </label>
+
+            </div>
+
+          </div>
+
+
+          <!-- =====================================================
+               SECURITY
+          ====================================================== -->
+
+          <div
+            class="card card-pad settings-panel"
+            id="panel-security">
+
+            <h3
+              style="
+                font-size:16px;
+                margin-bottom:18px;
+              ">
+
+              Security
+
+            </h3>
+
+
+            <div class="field">
+
+              <label for="current-password">
+                Current password
+              </label>
+
+              <input
+                id="current-password"
+                type="password"
+                autocomplete="current-password">
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="new-password">
+                New password
+              </label>
+
+              <input
+                id="new-password"
+                type="password"
+                autocomplete="new-password">
+
+            </div>
+
+
+            <div class="field">
+
+              <label for="confirm-password">
+                Confirm new password
+              </label>
+
+              <input
+                id="confirm-password"
+                type="password"
+                autocomplete="new-password">
+
+            </div>
+
+
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="update-password-btn">
+
+              Update Password
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+</div>
+
+
+<nav class="bottom-nav"></nav>
+
+
+<!-- ===============================================================
+     SCRIPTS
+================================================================ -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/settings.js"></script>
+
+</body>
+</html>

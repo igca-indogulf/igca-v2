@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Complete Your Profile — IGCA</title>
+
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+
+<style>
+
+  body{
+    background:var(--background);
+  }
+
+  .onboard-wrap{
+    width:min(920px,100%);
+    margin:0 auto;
+    padding:42px 24px 100px;
+  }
+
+  .onboard-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    margin-bottom:28px;
+  }
+
+  .onboard-brand{
+    font-size:22px;
+    font-weight:800;
+    color:var(--text);
+    text-decoration:none;
+    letter-spacing:-.04em;
+  }
+
+  .step-counter{
+    font-size:13px;
+    color:var(--text-secondary);
+  }
+
+  .progress-track{
+    width:100%;
+    height:6px;
+    border-radius:999px;
+    background:var(--surface-2);
+    overflow:hidden;
+    margin-bottom:34px;
+  }
+
+  .progress-fill{
+    height:100%;
+    width:33%;
+    border-radius:inherit;
+    background:var(--primary);
+    transition:width .3s ease;
+  }
+
+  .ob-step{
+    animation:obFade .25s ease;
+  }
+
+  @keyframes obFade{
+    from{
+      opacity:0;
+      transform:translateY(6px);
+    }
+    to{
+      opacity:1;
+      transform:translateY(0);
+    }
+  }
+
+  .ob-heading{
+    max-width:680px;
+    margin-bottom:30px;
+  }
+
+  .ob-heading h1{
+    margin-top:10px;
+    font-size:30px;
+    line-height:1.2;
+    letter-spacing:-.03em;
+  }
+
+  .ob-heading p{
+    margin-top:9px;
+    line-height:1.65;
+  }
+
+  .ob-group-title{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--text-tertiary);
+    margin:26px 0 12px;
+  }
+
+  .ob-tiles{
+    margin-bottom:10px;
+  }
+
+  .option-tile{
+    cursor:pointer;
+    min-height:96px;
+    padding:18px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--surface);
+    transition:
+      border-color .2s ease,
+      transform .2s ease,
+      box-shadow .2s ease,
+      background .2s ease;
+  }
+
+  .option-tile:hover{
+    transform:translateY(-2px);
+    border-color:var(--primary);
+    box-shadow:0 8px 24px rgba(0,0,0,.06);
+  }
+
+  .option-tile.selected{
+    border-color:var(--primary);
+    background:var(--primary-tint);
+    box-shadow:0 0 0 2px var(--primary);
+  }
+
+  .option-tile h3{
+    font-size:14.5px;
+    line-height:1.35;
+    margin:0;
+  }
+
+  .option-tile p{
+    font-size:12.5px;
+    color:var(--text-secondary);
+    margin-top:6px;
+    line-height:1.5;
+  }
+
+  .field{
+    margin-bottom:20px;
+  }
+
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:7px;
+  }
+
+  .field-hint{
+    font-size:12px;
+    color:var(--text-tertiary);
+    margin-top:6px;
+  }
+
+  .ob-section{
+    padding:22px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:var(--surface);
+    margin-bottom:20px;
+  }
+
+  .ob-section-title{
+    font-size:15px;
+    font-weight:700;
+    margin-bottom:17px;
+  }
+
+  .ob-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-top:30px;
+  }
+
+  .ob-actions-right{
+    display:flex;
+    gap:10px;
+    margin-left:auto;
+  }
+
+  .profile-preview{
+    display:grid;
+    grid-template-columns:110px 1fr;
+    gap:22px;
+    align-items:start;
+  }
+
+  .preview-avatar{
+    width:92px;
+    height:92px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    font-size:25px;
+    font-weight:700;
+  }
+
+  .preview-name{
+    font-size:23px;
+    font-weight:750;
+  }
+
+  .preview-headline{
+    margin-top:5px;
+    color:var(--text-secondary);
+    font-size:14px;
+  }
+
+  .preview-meta{
+    margin-top:7px;
+    color:var(--text-tertiary);
+    font-size:13px;
+  }
+
+  .preview-about{
+    margin-top:20px;
+    padding-top:18px;
+    border-top:1px solid var(--border);
+    line-height:1.7;
+    color:var(--text-secondary);
+    font-size:14px;
+  }
+
+  .preview-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin-top:12px;
+  }
+
+  .completion-box{
+    text-align:center;
+    padding:26px 10px 10px;
+  }
+
+  .completion-icon{
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    margin:0 auto 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--primary-tint);
+    color:var(--primary);
+    font-size:28px;
+    font-weight:800;
+  }
+
+  .completion-box h2{
+    font-size:24px;
+    margin-bottom:8px;
+  }
+
+  @media(max-width:700px){
+
+    .onboard-wrap{
+      padding:28px 16px 70px;
+    }
+
+    .ob-heading h1{
+      font-size:25px;
+    }
+
+    .ob-tiles{
+      grid-template-columns:1fr 1fr;
+    }
+
+    .profile-preview{
+      grid-template-columns:1fr;
+    }
+
+  }
+
+  @media(max-width:480px){
+
+    .ob-tiles{
+      grid-template-columns:1fr;
+    }
+
+    .ob-actions{
+      flex-direction:column-reverse;
+      align-items:stretch;
+    }
+
+    .ob-actions-right{
+      width:100%;
+      margin-left:0;
+    }
+
+    .ob-actions .btn{
+      width:100%;
+      justify-content:center;
+    }
+
+    .ob-actions-right .btn{
+      flex:1;
+    }
+
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="onboard-wrap">
+
+  <div class="onboard-top">
+
+    <a href="index.html" class="onboard-brand">
+      IGCA
+    </a>
+
+    <span class="step-counter" id="step-counter">
+      Step 1 of 3
+    </span>
+
+  </div>
+
+
+  <div class="progress-track">
+    <div
+      class="progress-fill"
+      id="progress"
+      style="width:33%;">
+    </div>
+  </div>
+
+
+  <!-- =========================================================
+       STEP 1 — ACCOUNT TYPE
+  ========================================================== -->
+
+  <section
+    class="ob-step"
+    id="step-1">
+
+    <div class="ob-heading">
+
+      <span class="eyebrow">
+        Step 1 of 3
+      </span>
+
+      <h1>
+        What brings you to the IGCA network?
+      </h1>
+
+      <p class="text-secondary">
+        Choose the category that best describes your professional
+        role. You can change your profile details later from Settings.
+      </p>
+
+    </div>
+
+
+    <h4 class="ob-group-title">
+      Investors
+    </h4>
+
+    <div
+      class="grid-3 ob-tiles"
+      data-group="investor">
+
+      <div class="option-tile" data-value="investor">
+        <h3>Individual Investor</h3>
+        <p>Investing personal capital</p>
+      </div>
+
+      <div class="option-tile" data-value="investor">
+        <h3>HNI / Wealth Client</h3>
+        <p>High net-worth individual</p>
+      </div>
+
+      <div class="option-tile" data-value="investor">
+        <h3>Family Office</h3>
+        <p>Managing multi-generational wealth</p>
+      </div>
+
+    </div>
+
+
+    <h4 class="ob-group-title">
+      Professionals
+    </h4>
+
+    <div
+      class="grid-3 ob-tiles"
+      data-group="professional">
+
+      <div class="option-tile" data-value="professional">
+        <h3>Wealth Advisor</h3>
+      </div>
+
+      <div class="option-tile" data-value="professional">
+        <h3>Investment Advisor</h3>
+      </div>
+
+      <div class="option-tile" data-value="professional">
+        <h3>Chartered Accountant</h3>
+      </div>
+
+      <div class="option-tile" data-value="professional">
+        <h3>M&amp;A Advisor</h3>
+      </div>
+
+      <div class="option-tile" data-value="professional">
+        <h3>Investment Banker</h3>
+      </div>
+
+      <div class="option-tile" data-value="professional">
+        <h3>Real Estate Professional</h3>
+      </div>
+
+      <div class="option-tile" data-value="professional">
+        <h3>Business Consultant</h3>
+      </div>
+
+    </div>
+
+
+    <h4 class="ob-group-title">
+      Companies &amp; Firms
+    </h4>
+
+    <div
+      class="grid-3 ob-tiles"
+      data-group="company">
+
+      <div class="option-tile" data-value="founder">
+        <h3>Startup / Founder</h3>
+      </div>
+
+      <div class="option-tile" data-value="founder">
+        <h3>Company</h3>
+      </div>
+
+      <div class="option-tile" data-value="investor">
+        <h3>Investment Firm</h3>
+      </div>
+
+      <div class="option-tile" data-value="investor">
+        <h3>Private Equity</h3>
+      </div>
+
+      <div class="option-tile" data-value="investor">
+        <h3>Venture Capital</h3>
+      </div>
+
+      <div class="option-tile" data-value="investor">
+        <h3>Investment Fund</h3>
+      </div>
+
+    </div>
+
+
+    <div class="ob-actions">
+
+      <span></span>
+
+      <button
+        class="btn btn-primary"
+        id="to-step-2"
+        disabled>
+
+        Continue
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================================================
+       STEP 2 — PROFILE DETAILS
+  ========================================================== -->
+
+  <section
+    class="ob-step"
+    id="step-2"
+    style="display:none;">
+
+    <div class="ob-heading">
+
+      <span class="eyebrow">
+        Step 2 of 3
+      </span>
+
+      <h1>
+        Build your professional profile
+      </h1>
+
+      <p class="text-secondary">
+        Add a few details so people in the network can understand
+        who you are and what you do.
+      </p>
+
+    </div>
+
+
+    <!-- BASIC INFORMATION -->
+
+    <div class="ob-section">
+
+      <div class="ob-section-title">
+        Basic Information
+      </div>
+
+      <div class="grid-2">
+
+        <div class="field">
+
+          <label for="ob-full-name">
+            Full Name
+          </label>
+
+          <input
+            type="text"
+            id="ob-full-name"
+            placeholder="e.g. Mayank Uttam"
+            autocomplete="name">
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="ob-username">
+            Username
+          </label>
+
+          <input
+            type="text"
+            id="ob-username"
+            placeholder="e.g. mayankuttam"
+            autocomplete="username">
+
+          <p class="field-hint">
+            Use letters, numbers, dots or underscores.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="ob-headline">
+          Professional Headline
+        </label>
+
+        <input
+          type="text"
+          id="ob-headline"
+          maxlength="120"
+          placeholder="e.g. Investment Analyst at ABC Capital">
+
+      </div>
+
+
+      <div class="grid-2">
+
+        <div class="field">
+
+          <label for="ob-company">
+            Company / Organization
+          </label>
+
+          <input
+            type="text"
+            id="ob-company"
+            placeholder="e.g. ABC Capital">
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="ob-website">
+            Website
+          </label>
+
+          <input
+            type="url"
+            id="ob-website"
+            placeholder="https://example.com">
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- PROFESSIONAL INFORMATION -->
+
+    <div class="ob-section">
+
+      <div class="ob-section-title">
+        Professional Information
+      </div>
+
+      <div class="grid-2">
+
+        <div class="field">
+
+          <label for="ob-industry">
+            Industry
+          </label>
+
+          <select id="ob-industry">
+
+            <option value="">
+              Select industry
+            </option>
+
+            <option value="Private Markets">
+              Private Markets
+            </option>
+
+            <option value="Real Estate">
+              Real Estate
+            </option>
+
+            <option value="Technology">
+              Technology
+            </option>
+
+            <option value="Healthcare">
+              Healthcare
+            </option>
+
+            <option value="Financial Services">
+              Financial Services
+            </option>
+
+            <option value="Consumer">
+              Consumer
+            </option>
+
+            <option value="Manufacturing">
+              Manufacturing
+            </option>
+
+            <option value="Consulting">
+              Consulting
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label for="ob-location">
+            Location
+          </label>
+
+          <input
+            type="text"
+            id="ob-location"
+            placeholder="e.g. Mumbai, India">
+
+        </div>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="ob-expertise">
+          Areas of Expertise
+        </label>
+
+        <input
+          type="text"
+          id="ob-expertise"
+          placeholder="e.g. Private Equity, Growth Capital, Due Diligence">
+
+        <p class="field-hint">
+          Separate multiple areas with commas.
+        </p>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="ob-topics">
+          Topics of Interest
+        </label>
+
+        <input
+          type="text"
+          id="ob-topics"
+          placeholder="e.g. M&A, Venture Capital, Real Estate">
+
+        <p class="field-hint">
+          Separate multiple topics with commas.
+        </p>
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="ob-bio">
+          About You
+        </label>
+
+        <textarea
+          id="ob-bio"
+          rows="5"
+          maxlength="500"
+          placeholder="Write a short professional introduction..."></textarea>
+
+        <p class="field-hint">
+          Keep it professional and concise. Maximum 500 characters.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="ob-actions">
+
+      <button
+        class="btn btn-ghost"
+        id="to-step-1b"
+        type="button">
+
+        Back
+
+      </button>
+
+
+      <button
+        class="btn btn-primary"
+        id="to-step-3"
+        type="button">
+
+        Review Profile
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================================================
+       STEP 3 — PROFILE PREVIEW
+  ========================================================== -->
+
+  <section
+    class="ob-step"
+    id="step-3"
+    style="display:none;">
+
+    <div class="ob-heading">
+
+      <span class="eyebrow">
+        Step 3 of 3
+      </span>
+
+      <h1>
+        Review your profile
+      </h1>
+
+      <p class="text-secondary">
+        Everything looks good? Complete your profile and enter IGCA.
+        You can edit these details anytime from Settings.
+      </p>
+
+    </div>
+
+
+    <div
+      class="card card-pad"
+      id="ob-summary">
+
+    </div>
+
+
+    <div class="ob-actions">
+
+      <button
+        class="btn btn-ghost"
+        id="to-step-2b"
+        type="button">
+
+        Back
+
+      </button>
+
+
+      <div class="ob-actions-right">
+
+        <button
+          class="btn btn-primary"
+          id="complete-profile"
+          type="button">
+
+          Complete Profile
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================================================
+       STEP 4 — COMPLETED
+  ========================================================== -->
+
+  <section
+    class="ob-step"
+    id="step-4"
+    style="display:none;">
+
+    <div class="card card-pad completion-box">
+
+      <div class="completion-icon">
+        ✓
+      </div>
+
+      <h2>
+        Your profile is ready
+      </h2>
+
+      <p class="text-secondary">
+        Your professional profile has been successfully created.
+        You can update any information later from Settings.
+      </p>
+
+      <div style="margin-top:24px;">
+
+        <a
+          class="btn btn-primary"
+          href="profile.html">
+
+          View My Profile
+
+        </a>
+
+        <a
+          class="btn btn-outline"
+          href="dashboard.html"
+          style="margin-left:8px;">
+
+          Enter IGCA
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/onboarding.js"></script>
+
+</body>
+</html>

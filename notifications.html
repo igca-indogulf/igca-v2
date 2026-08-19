@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+>
+
+<title>Notifications — IGCA</title>
+
+<link
+  rel="stylesheet"
+  href="css/main.css"
+>
+
+<link
+  rel="stylesheet"
+  href="css/components.css"
+>
+
+<link
+  rel="stylesheet"
+  href="css/animations.css"
+>
+
+<link
+  rel="stylesheet"
+  href="css/responsive.css"
+>
+
+<link
+  rel="stylesheet"
+  href="css/notifications.css"
+>
+
+</head>
+
+
+<body>
+
+<div class="app-shell">
+
+  <aside class="app-sidebar"></aside>
+
+  <div class="app-main">
+
+    <header class="app-header"></header>
+
+    <main class="app-content">
+
+      <div class="page-head">
+
+        <div>
+
+          <h1>Notifications</h1>
+
+          <p>
+            Stay on top of your network activity.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-outline btn-sm"
+          id="mark-all-read"
+        >
+          Mark all as read
+        </button>
+
+      </div>
+
+
+      <section
+        class="card notifications-card"
+        id="notif-list"
+        aria-live="polite"
+      ></section>
+
+    </main>
+
+  </div>
+
+</div>
+
+
+<nav class="bottom-nav"></nav>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/config.js"></script>
+
+<script src="js/backend.js"></script>
+
+<script src="js/data.js"></script>
+
+<script src="js/app.js"></script>
+
+<script src="js/notifications.js"></script>
+
+</body>
+
+</html>

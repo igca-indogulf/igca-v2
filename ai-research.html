@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Research — IGCA</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar"></aside>
+  <div class="app-main">
+    <header class="app-header"></header>
+    <main class="app-content">
+
+      <div class="ai-panel reveal" style="margin-bottom:24px;">
+        <div class="ai-panel-bg" aria-hidden="true" style="position:absolute;inset:0;overflow:hidden;">
+          <svg viewBox="0 0 900 260" preserveAspectRatio="none" style="width:100%;height:100%;opacity:.45;">
+            <g stroke="rgba(255,255,255,.14)" stroke-width="1">
+              <line x1="60" y1="60" x2="220" y2="140"/><line x1="220" y1="140" x2="420" y2="70"/>
+              <line x1="220" y1="140" x2="380" y2="220"/><line x1="600" y1="90" x2="780" y2="160"/>
+              <line x1="600" y1="90" x2="420" y2="70"/>
+            </g>
+            <g fill="rgba(255,255,255,.5)">
+              <circle class="net-node" cx="60" cy="60" r="3"/><circle class="net-node n2" cx="220" cy="140" r="4"/>
+              <circle class="net-node n3" cx="420" cy="70" r="3"/><circle class="net-node n4" cx="380" cy="220" r="3"/>
+              <circle class="net-node n5" cx="600" cy="90" r="4"/><circle class="net-node" cx="780" cy="160" r="3"/>
+            </g>
+          </svg>
+        </div>
+        <span class="eyebrow" style="color:var(--accent-light);position:relative;">AI Research &amp; Intelligence</span>
+        <h1 style="color:#fff;margin-top:10px;font-size:26px;position:relative;">Research industries, businesses, markets and professional ecosystems.</h1>
+        <div class="ai-input-wrap">
+          <textarea id="ai-input" placeholder="What would you like to research?"></textarea>
+          <button class="btn btn-accent" id="ai-submit" style="align-self:flex-end;margin:6px;">Research</button>
+        </div>
+        <div class="chip-row" style="margin-top:16px;">
+          <span class="prompt-chip" data-q="Give me an overview of the healthcare industry.">Give me an overview of the healthcare industry.</span>
+          <span class="prompt-chip" data-q="Explain how private equity works.">Explain how private equity works.</span>
+          <span class="prompt-chip" data-q="Find professionals working in venture capital.">Find professionals working in venture capital.</span>
+          <span class="prompt-chip" data-q="What should I understand before evaluating a real estate business?">What should I evaluate in a real estate business?</span>
+        </div>
+      </div>
+
+      <div id="ai-thread"></div>
+
+    </main>
+  </div>
+</div>
+<nav class="bottom-nav"></nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/ai-research.js"></script>
+</body>
+</html>

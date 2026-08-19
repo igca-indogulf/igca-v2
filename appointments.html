@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appointments — IGCA</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar"></aside>
+  <div class="app-main">
+    <header class="app-header"></header>
+    <main class="app-content">
+
+      <div class="page-head">
+        <div><h1>Appointments</h1><p>Meetings and consultations across your network.</p></div>
+        <button class="btn btn-primary" id="open-request">Request Meeting</button>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="upcoming">Upcoming</div>
+        <div class="tab" data-tab="pending">Pending</div>
+        <div class="tab" data-tab="completed">Completed</div>
+      </div>
+
+      <div id="pane-upcoming" style="display:flex;flex-direction:column;gap:14px;"></div>
+      <div id="pane-pending" style="display:none;flex-direction:column;gap:14px;"></div>
+      <div id="pane-completed" style="display:none;flex-direction:column;gap:14px;"></div>
+
+    </main>
+  </div>
+</div>
+<nav class="bottom-nav"></nav>
+
+<div class="modal-overlay" id="request-modal" style="display:none;">
+  <div class="modal" style="position:relative;">
+    <button class="btn btn-ghost btn-icon modal-close" id="close-modal">✕</button>
+    <h3 style="font-size:18px;margin-bottom:18px;">Request a Meeting</h3>
+    <div class="field"><label>With</label><input type="text" placeholder="Search a connection..."></div>
+    <div class="field-row" style="gap:12px;">
+      <div class="field" style="flex:1;"><label>Date</label><input type="date"></div>
+      <div class="field" style="flex:1;"><label>Time</label><input type="time"></div>
+    </div>
+    <div class="field"><label>Meeting type</label>
+      <select><option>Video Call</option><option>Phone</option><option>Consultation</option></select>
+    </div>
+    <button class="btn btn-primary btn-block" id="submit-request">Send Request</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/appointments.js"></script>
+</body>
+</html>

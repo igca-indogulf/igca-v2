@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Network — IGCA</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="app-sidebar"></aside>
+  <div class="app-main">
+    <header class="app-header"></header>
+    <main class="app-content">
+
+      <div class="page-head">
+        <div><h1>My Network</h1><p>Your professional ecosystem, at a glance.</p></div>
+      </div>
+
+      <div class="network-viz card" style="padding:32px;margin-bottom:32px;background:linear-gradient(160deg,var(--primary-dark),#132846);border:none;">
+        <svg viewBox="0 0 900 240" style="width:100%;">
+          <g stroke="rgba(255,255,255,.16)" stroke-width="1.2">
+            <line x1="450" y1="120" x2="230" y2="60"/><line x1="450" y1="120" x2="230" y2="180"/>
+            <line x1="450" y1="120" x2="670" y2="60"/><line x1="450" y1="120" x2="670" y2="180"/>
+            <line x1="450" y1="120" x2="450" y2="30"/>
+          </g>
+          <circle class="net-node" cx="450" cy="120" r="20" fill="var(--accent)"/>
+          <text x="450" y="125" text-anchor="middle" fill="#fff" font-size="11" font-family="IBM Plex Mono">YOU</text>
+          <circle class="net-node n2 slow" cx="230" cy="60" r="11" fill="#fff" fill-opacity=".9"/>
+          <text x="230" y="42" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Advisors</text>
+          <circle class="net-node n3 slow" cx="230" cy="180" r="11" fill="#fff" fill-opacity=".9"/>
+          <text x="230" y="205" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Investors</text>
+          <circle class="net-node n4 slow" cx="670" cy="60" r="11" fill="#fff" fill-opacity=".9"/>
+          <text x="670" y="42" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Companies</text>
+          <circle class="net-node n5 slow" cx="670" cy="180" r="11" fill="#fff" fill-opacity=".9"/>
+          <text x="670" y="205" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Professionals</text>
+          <circle class="net-node slow" cx="450" cy="30" r="6" fill="var(--accent-light)"/>
+        </svg>
+      </div>
+
+      <div class="stat-grid" style="margin-bottom:8px;">
+        <div class="stat-card"><div class="num" id="stat-connections">0</div><div class="label">Connections</div></div>
+        <div class="stat-card"><div class="num" id="stat-requests">0</div><div class="label">Requests Received</div></div>
+        <div class="stat-card"><div class="num" id="stat-sent">0</div><div class="label">Requests Sent</div></div>
+        <div class="stat-card"><div class="num" id="stat-suggested">0</div><div class="label">Suggested</div></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="connections">My Connections</div>
+        <div class="tab" data-tab="requests">Connection Requests</div>
+        <div class="tab" data-tab="sent">Sent Requests</div>
+        <div class="tab" data-tab="suggested">Suggested Connections</div>
+      </div>
+
+      <div id="pane-connections" class="grid-people"></div>
+      <div id="pane-requests" class="grid-people" style="display:none;"></div>
+      <div id="pane-sent" class="grid-people" style="display:none;"></div>
+      <div id="pane-suggested" class="grid-people" style="display:none;"></div>
+
+    </main>
+  </div>
+</div>
+<nav class="bottom-nav"></nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/network.js"></script>
+</body>
+</html>

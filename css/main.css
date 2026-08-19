@@ -1,0 +1,116 @@
+/* ==========================================================================
+   IGCA — Core Design Tokens & Base Styles
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root{
+  /* Color system */
+  --primary:#173259;
+  --primary-dark:#0B1D35;
+  --primary-tint:#274A7D;
+  --accent:#AD8A4D;
+  --accent-light:#D8BE8A;
+  --accent-soft:#F3EBDA;
+  --background:#F5F6F9;
+  --surface:#FFFFFF;
+  --surface-secondary:#EEF1F6;
+  --text-primary:#111826;
+  --text-secondary:#5B6577;
+  --text-tertiary:#8B94A6;
+  --border:#E1E6ED;
+  --border-strong:#CBD3E0;
+  --success:#1F8A5F;
+  --success-soft:#E5F3EC;
+  --warning:#B8792E;
+  --warning-soft:#FBF0E1;
+  --danger:#C0392B;
+  --danger-soft:#FBEAE8;
+
+  /* Typography */
+  --font-display:'Fraunces', Georgia, serif;
+  --font-body:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:'IBM Plex Mono', 'Courier New', monospace;
+
+  /* Layout */
+  --sidebar-w:264px;
+  --header-h:76px;
+  --radius-sm:8px;
+  --radius-md:12px;
+  --radius-lg:20px;
+  --shadow-sm:0 1px 2px rgba(11,29,53,0.06);
+  --shadow-md:0 8px 24px rgba(11,29,53,0.08);
+  --shadow-lg:0 20px 48px rgba(11,29,53,0.14);
+  --container:1240px;
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--text-primary);
+  background:var(--background);
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; }
+ul{ margin:0; padding:0; list-style:none; }
+input,select,textarea{ font-family:inherit; font-size:inherit; }
+
+h1,h2,h3,h4{
+  font-family:var(--font-display);
+  color:var(--primary-dark);
+  margin:0;
+  letter-spacing:-0.01em;
+  font-weight:600;
+}
+
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--accent);
+  font-weight:500;
+}
+
+.container{
+  width:100%;
+  max-width:var(--container);
+  margin:0 auto;
+  padding:0 32px;
+}
+
+.text-secondary{ color:var(--text-secondary); }
+
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+  border-radius:4px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+}
+
+/* ---- Signature motif: the constellation rule ---------------------------
+   A thin horizontal divider made of small connected nodes. Used across
+   section breaks, empty states, and the header logo mark. */
+.constellation-rule{
+  display:flex;
+  align-items:center;
+  gap:0;
+  width:100%;
+  height:1px;
+}
+.constellation-rule svg{ width:100%; height:24px; overflow:visible; }
+
+/* Skip link */
+.skip-link{
+  position:absolute; left:-9999px; top:0;
+  background:var(--primary-dark); color:#fff; padding:8px 16px; z-index:999;
+}
+.skip-link:focus{ left:16px; top:16px; }

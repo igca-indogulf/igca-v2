@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Posts — IGCA</title>
+
+  <link rel="stylesheet" href="css/posts.css">
+</head>
+
+<body>
+
+  <main class="posts-page">
+
+    <!-- HEADER -->
+    <header class="posts-header">
+      <div>
+        <h1>Posts</h1>
+        <p>Share ideas, updates and insights with your network.</p>
+      </div>
+
+      <button
+        type="button"
+        class="primary-btn"
+        id="newPostBtn"
+      >
+        + Create Post
+      </button>
+    </header>
+
+
+    <!-- CREATE POST -->
+    <section
+      class="create-post-card"
+      id="createPostCard"
+    >
+
+      <div class="create-post-header">
+        <div class="avatar" id="currentUserAvatar">
+          U
+        </div>
+
+        <div>
+          <strong id="currentUserName">
+            Loading...
+          </strong>
+
+          <span>Share something with your network</span>
+        </div>
+      </div>
+
+
+      <textarea
+        id="postBody"
+        placeholder="What's on your mind?"
+        maxlength="5000"
+      ></textarea>
+
+
+      <div class="create-post-footer">
+
+        <span id="postCharCount">
+          0 / 5000
+        </span>
+
+        <div class="create-actions">
+
+          <button
+            type="button"
+            class="secondary-btn"
+            id="cancelPostBtn"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="primary-btn"
+            id="publishPostBtn"
+          >
+            Publish Post
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FEED -->
+    <section class="feed-section">
+
+      <div class="section-title">
+        <h2>Your Feed</h2>
+
+        <button
+          type="button"
+          class="refresh-btn"
+          id="refreshPostsBtn"
+        >
+          ↻ Refresh
+        </button>
+      </div>
+
+
+      <div
+        id="postsFeed"
+        class="posts-feed"
+      ></div>
+
+
+      <!-- LOADING -->
+      <div
+        id="postsLoading"
+        class="state-box"
+      >
+        Loading posts...
+      </div>
+
+
+      <!-- EMPTY -->
+      <div
+        id="postsEmpty"
+        class="state-box hidden"
+      >
+        <div class="empty-icon">📝</div>
+
+        <h3>No posts yet</h3>
+
+        <p>
+          Be the first person to share something.
+        </p>
+
+        <button
+          type="button"
+          class="primary-btn"
+          id="emptyCreateBtn"
+        >
+          Create First Post
+        </button>
+      </div>
+
+
+      <!-- ERROR -->
+      <div
+        id="postsError"
+        class="state-box error-state hidden"
+      >
+        <h3>Unable to load posts</h3>
+
+        <p id="postsErrorText">
+          Something went wrong.
+        </p>
+
+        <button
+          type="button"
+          class="primary-btn"
+          id="retryPostsBtn"
+        >
+          Try Again
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- EDIT POST MODAL -->
+  <div
+    class="modal hidden"
+    id="editPostModal"
+  >
+
+    <div class="modal-overlay"></div>
+
+    <div class="modal-box">
+
+      <div class="modal-header">
+
+        <div>
+          <h2>Edit Post</h2>
+          <p>Update your post.</p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          id="closeEditModalBtn"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <textarea
+        id="editPostBody"
+        maxlength="5000"
+      ></textarea>
+
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          id="cancelEditBtn"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-btn"
+          id="saveEditBtn"
+        >
+          Save Changes
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- COMMENTS MODAL -->
+  <div
+    class="modal hidden"
+    id="commentsModal"
+  >
+
+    <div class="modal-overlay"></div>
+
+    <div class="modal-box comments-box">
+
+      <div class="modal-header">
+
+        <div>
+          <h2>Comments</h2>
+          <p id="commentsCount">
+            0 comments
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          id="closeCommentsBtn"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <div
+        id="commentsList"
+        class="comments-list"
+      ></div>
+
+
+      <div class="comment-input-row">
+
+        <input
+          type="text"
+          id="commentInput"
+          placeholder="Write a comment..."
+          maxlength="1000"
+        >
+
+        <button
+          type="button"
+          class="primary-btn"
+          id="sendCommentBtn"
+        >
+          Send
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- YOUR CONFIG -->
+  <script src="js/config.js"></script>
+
+  <!-- YOUR BACKEND -->
+  <script src="js/backend.js"></script>
+
+  <!-- POSTS -->
+  <script src="js/posts.js"></script>
+
+</body>
+</html>
