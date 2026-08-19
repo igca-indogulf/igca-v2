@@ -239,3 +239,114 @@
 .slider-track::before{ content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:var(--shadow-sm); }
 .switch input:checked + .slider-track{ background:var(--accent); }
 .switch input:checked + .slider-track::before{ transform:translateX(18px); }
+/* ==========================================================================
+   LEARN & GROW — 5 CARDS PER ROW
+   ========================================================================== */
+
+#learn-industry,
+#learn-country,
+#learn-network,
+#learn-courses,
+#learn-free {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+#learn-industry .learn-card,
+#learn-country .learn-card,
+#learn-network .learn-card,
+#learn-courses .learn-card,
+#learn-free .learn-card {
+  width: 100%;
+  min-width: 0;
+}
+
+
+/* Thumbnail ratio */
+
+.learn-card-media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+
+/* Card content */
+
+.learn-card-body {
+  padding: 12px;
+}
+
+.learn-card-title {
+  font-size: 14px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  min-height: 38px;
+}
+
+.learn-card-channel {
+  font-size: 11px;
+  margin-bottom: 10px;
+}
+
+
+/* Smaller button */
+
+.learn-card-button {
+  width: 100%;
+  min-height: 32px;
+  font-size: 11px;
+}
+
+
+/* ==========================================================================
+   TABLET
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+  #learn-industry,
+  #learn-country,
+  #learn-network,
+  #learn-courses,
+  #learn-free {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media (max-width: 700px) {
+
+  #learn-industry,
+  #learn-country,
+  #learn-network,
+  #learn-courses,
+  #learn-free {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  #learn-industry,
+  #learn-country,
+  #learn-network,
+  #learn-courses,
+  #learn-free {
+    grid-template-columns: 1fr;
+  }
+
+}
