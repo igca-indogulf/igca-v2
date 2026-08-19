@@ -41,10 +41,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("learn-free");
 
 
-  const youtubeSections = [
+  const allSections = [
     industryEl,
     countryEl,
-    networkEl
+    networkEl,
+    coursesEl,
+    freeEl
   ];
 
 
@@ -87,81 +89,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 
-  youtubeSections.forEach(
-    showLoading
-  );
+  allSections.forEach(showLoading);
 
 
   /* ==========================================================================
-     COMING SOON
-     ========================================================================== */
-
-  function renderComingSoon(
-    container,
-    icon,
-    title,
-    message
-  ) {
-
-    if (!container) return;
-
-    container.innerHTML = `
-      <div class="learn-coming-soon">
-
-        <div class="learn-coming-soon-icon">
-          ${icon}
-        </div>
-
-        <h3>
-          ${escapeHTML(title)}
-        </h3>
-
-        <p>
-          ${escapeHTML(message)}
-        </p>
-
-      </div>
-    `;
-
-  }
-
-
-  /* ==========================================================================
-     COURSES & CERTIFICATIONS
-     ========================================================================== */
-
-  renderComingSoon(
-
-    coursesEl,
-
-    "🎓",
-
-    "Coming Soon",
-
-    "Courses & Certifications will be available here soon."
-
-  );
-
-
-  /* ==========================================================================
-     FREE RESOURCES
-     ========================================================================== */
-
-  renderComingSoon(
-
-    freeEl,
-
-    "📚",
-
-    "Coming Soon",
-
-    "Free learning resources will be available here soon."
-
-  );
-
-
-  /* ==========================================================================
-     YOUTUBE SEARCH
+     SEARCH YOUTUBE
      ========================================================================== */
 
   async function searchYouTube(payload) {
@@ -259,7 +191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* ------------------------------------------------------------------------
-       PUBLISHED DATE
+       DATE
        ------------------------------------------------------------------------ */
 
     let published = "";
@@ -331,11 +263,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         <div class="learn-card-body">
 
+
           <div class="learn-card-meta">
 
             <span>
               YouTube
             </span>
+
 
             ${
               published
@@ -358,6 +292,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <p class="learn-card-channel">
             ${escapeHTML(channel)}
           </p>
+
 
         </div>
 
@@ -389,7 +324,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="learn-empty">
 
           <div>
-
             <strong>
               No content found
             </strong>
@@ -397,7 +331,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             <p>
               ${escapeHTML(emptyMessage)}
             </p>
-
           </div>
 
         </div>
@@ -453,19 +386,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   /* ==========================================================================
-     INLINE YOUTUBE VIDEO PLAYER
+     OPEN INLINE VIDEO PLAYER
      ========================================================================== */
 
-  function openVideoPlayer(
-    videoId,
-    title = "YouTube Video"
-  ) {
+  function openVideoPlayer(videoId, title = "YouTube Video") {
 
     if (!videoId) return;
 
 
     /* ------------------------------------------------------------------------
-       Remove old player
+       Remove existing player
        ------------------------------------------------------------------------ */
 
     const existing =
@@ -475,14 +405,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     if (existing) {
-
       existing.remove();
-
     }
 
 
     /* ------------------------------------------------------------------------
-       Create modal
+       Modal
        ------------------------------------------------------------------------ */
 
     const modal =
@@ -512,6 +440,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         aria-label="${escapeHTML(title)}"
       >
 
+
         <button
           type="button"
           class="igca-video-close"
@@ -528,29 +457,31 @@ document.addEventListener("DOMContentLoaded", async () => {
             src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0"
             title="${escapeHTML(title)}"
             frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allow="
+              accelerometer;
+              autoplay;
+              clipboard-write;
+              encrypted-media;
+              gyroscope;
+              picture-in-picture;
+              web-share
+            "
             allowfullscreen
           ></iframe>
 
         </div>
+
 
       </div>
 
     `;
 
 
-    document.body.appendChild(
-      modal
-    );
-
-
-    document.body.classList.add(
-      "igca-video-open"
-    );
+    document.body.appendChild(modal);
 
 
     /* ------------------------------------------------------------------------
-       Close player
+       Close function
        ------------------------------------------------------------------------ */
 
     function closePlayer() {
@@ -562,20 +493,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
       if (current) {
-
         current.remove();
-
       }
 
 
       document.body.classList.remove(
         "igca-video-open"
-      );
-
-
-      document.removeEventListener(
-        "keydown",
-        escapeHandler
       );
 
     }
@@ -602,7 +525,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* ------------------------------------------------------------------------
-       Overlay
+       Overlay click
        ------------------------------------------------------------------------ */
 
     const overlay =
@@ -622,16 +545,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* ------------------------------------------------------------------------
-       ESC key
+       ESC
        ------------------------------------------------------------------------ */
 
     function escapeHandler(event) {
 
-      if (
-        event.key === "Escape"
-      ) {
+      if (event.key === "Escape") {
 
         closePlayer();
+
+
+        document.removeEventListener(
+          "keydown",
+          escapeHandler
+        );
 
       }
 
@@ -643,11 +570,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       escapeHandler
     );
 
+
+    document.body.classList.add(
+      "igca-video-open"
+    );
+
   }
 
 
   /* ==========================================================================
-     VIDEO CLICK HANDLER
+     VIDEO CLICK
      ========================================================================== */
 
   document.addEventListener(
@@ -677,18 +609,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
       const title =
-        card
-          ?.querySelector(
-            ".learn-card-title"
-          )
-          ?.textContent
-          ?.trim() ||
+        card?.querySelector(
+          ".learn-card-title"
+        )?.textContent ||
         "YouTube Video";
 
 
       openVideoPlayer(
         videoId,
-        title
+        title.trim()
       );
 
     }
@@ -696,16 +625,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
   /* ==========================================================================
-     LOAD LEARN CONTENT
+     LOAD ALL LEARN CONTENT
      ========================================================================== */
 
   async function loadLearnContent() {
 
-    /* ========================================================================
-       INDUSTRY
-       ======================================================================== */
-
     try {
+
+
+      /* ======================================================================
+         INDUSTRY
+         ====================================================================== */
 
       const industryVideos =
         await searchYouTube({
@@ -732,27 +662,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       );
 
-    } catch (error) {
 
-      console.error(
-        "IGCA Industry content error:",
-        error
-      );
-
-
-      renderError(
-        industryEl,
-        error?.message
-      );
-
-    }
-
-
-    /* ========================================================================
-       COUNTRY
-       ======================================================================== */
-
-    try {
+      /* ======================================================================
+         COUNTRY
+         ====================================================================== */
 
       const countryVideos =
         await searchYouTube({
@@ -776,27 +689,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       );
 
-    } catch (error) {
 
-      console.error(
-        "IGCA Country content error:",
-        error
-      );
-
-
-      renderError(
-        countryEl,
-        error?.message
-      );
-
-    }
-
-
-    /* ========================================================================
-       NETWORK
-       ======================================================================== */
-
-    try {
+      /* ======================================================================
+         NETWORK
+         ====================================================================== */
 
       const networkVideos =
         await searchYouTube({
@@ -820,63 +716,96 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       );
 
+
+      /* ======================================================================
+         COURSES
+         ====================================================================== */
+
+      const courseVideos =
+        await searchYouTube({
+
+          query:
+            "latest online courses certifications tutorials professional skills",
+
+          country:
+            "India"
+
+        });
+
+
+      renderVideos(
+
+        coursesEl,
+
+        courseVideos,
+
+        "Courses and certifications will appear here."
+
+      );
+
+
+      /* ======================================================================
+         FREE RESOURCES
+         ====================================================================== */
+
+      const freeVideos =
+        await searchYouTube({
+
+          query:
+            "free tutorials learning resources programming technology career",
+
+          country:
+            "India"
+
+        });
+
+
+      renderVideos(
+
+        freeEl,
+
+        freeVideos,
+
+        "Free learning resources will appear here."
+
+      );
+
+
+      /* ----------------------------------------------------------------------
+         SUCCESS
+         ---------------------------------------------------------------------- */
+
+      console.log(
+        "IGCA Learn & Grow loaded successfully."
+      );
+
+
     } catch (error) {
 
+
       console.error(
-        "IGCA Network content error:",
+        "IGCA Learn & Grow Error:",
         error
       );
 
 
-      renderError(
-        networkEl,
-        error?.message
+      const message =
+        error?.message ||
+        "Unable to load learning content.";
+
+
+      allSections.forEach(
+        container => {
+
+          renderError(
+            container,
+            message
+          );
+
+        }
       );
 
     }
-
-
-    /* ========================================================================
-       COURSES & CERTIFICATIONS
-       ======================================================================== */
-
-    renderComingSoon(
-
-      coursesEl,
-
-      "🎓",
-
-      "Coming Soon",
-
-      "Courses & Certifications will be available here soon."
-
-    );
-
-
-    /* ========================================================================
-       FREE RESOURCES
-       ======================================================================== */
-
-    renderComingSoon(
-
-      freeEl,
-
-      "📚",
-
-      "Coming Soon",
-
-      "Free learning resources will be available here soon."
-
-    );
-
-
-    /* ========================================================================
-       COMPLETE
-       ======================================================================== */
-
-    console.log(
-      "IGCA Learn & Grow loaded successfully."
-    );
 
   }
 
