@@ -1,352 +1,890 @@
 /* ==========================================================================
-   IGCA — Component Library
+   IGCA — Learn & Grow
+   Dynamic YouTube Learning Content
+   Supabase Edge Function + Inline YouTube Player
    ========================================================================== */
 
-/* ---------- Buttons ---------- */
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding:12px 22px; border-radius:999px; font-weight:600; font-size:14.5px;
-  border:1px solid transparent; transition:all .18s ease; white-space:nowrap;
-}
-.btn-primary{ background:var(--primary-dark); color:#fff; }
-.btn-primary:hover{ background:var(--primary); transform:translateY(-1px); box-shadow:var(--shadow-md); }
-.btn-accent{ background:var(--accent); color:#fff; }
-.btn-accent:hover{ background:#96773D; transform:translateY(-1px); box-shadow:var(--shadow-md); }
-.btn-outline{ background:transparent; border-color:var(--border-strong); color:var(--primary-dark); }
-.btn-outline:hover{ border-color:var(--primary-dark); background:var(--surface-secondary); }
-.btn-ghost{ background:transparent; color:var(--text-secondary); padding:10px 14px; }
-.btn-ghost:hover{ color:var(--primary-dark); background:var(--surface-secondary); }
-.btn-sm{ padding:8px 16px; font-size:13px; }
-.btn-block{ width:100%; }
-.btn-icon{ padding:10px; border-radius:50%; }
-.btn[disabled]{ opacity:.5; cursor:not-allowed; transform:none !important; }
+document.addEventListener("DOMContentLoaded", async () => {
 
-/* ---------- Top marketing nav ---------- */
-.site-header{
-  position:sticky; top:0; z-index:100; background:rgba(255,255,255,.86);
-  backdrop-filter:blur(10px); border-bottom:1px solid var(--border);
-}
-.site-header .container{ display:flex; align-items:center; justify-content:space-between; height:80px; }
-.brand{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; font-size:20px; color:var(--primary-dark); }
-.brand-mark{ width:30px; height:30px; }
-.site-nav{ display:flex; align-items:center; gap:36px; }
-.site-nav a{ font-size:14.5px; font-weight:500; color:var(--text-secondary); }
-.site-nav a:hover{ color:var(--primary-dark); }
-.header-actions{ display:flex; align-items:center; gap:12px; }
-
-/* ---------- Footer ---------- */
-.site-footer{ background:var(--primary-dark); color:rgba(255,255,255,.7); padding:64px 0 32px; position:relative; overflow:hidden; }
-.footer-grid{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px; }
-.footer-grid h4{ color:#fff; font-family:var(--font-body); font-size:13px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px; font-weight:600; }
-.footer-grid a{ display:block; padding:6px 0; color:rgba(255,255,255,.62); font-size:14px; }
-.footer-grid a:hover{ color:#fff; }
-.footer-bottom{ margin-top:48px; padding-top:24px; border-top:1px solid rgba(255,255,255,.12); display:flex; justify-content:space-between; font-size:13px; color:rgba(255,255,255,.5); }
-.footer-brand p{ max-width:280px; color:rgba(255,255,255,.6); font-size:14.5px; line-height:1.6; }
-
-/* ---------- Cards ---------- */
-.card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); }
-.card-pad{ padding:24px; }
-.surface-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); }
-
-/* ---------- Profile card ---------- */
-.profile-card{
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
-  padding:22px; display:flex; flex-direction:column; gap:14px; transition:.2s ease;
-}
-.profile-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); border-color:var(--border-strong); }
-.profile-card-top{ display:flex; gap:14px; align-items:flex-start; }
-.avatar{
-  width:56px; height:56px; border-radius:50%; flex-shrink:0;
-  background:linear-gradient(135deg,var(--primary-tint),var(--primary-dark));
-  color:#fff; display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-display); font-weight:600; font-size:19px;
-}
-.avatar-sm{ width:38px; height:38px; font-size:14px; }
-.avatar-lg{ width:96px; height:96px; font-size:32px; border:4px solid var(--surface); box-shadow:var(--shadow-md); }
-.profile-name-row{ display:flex; align-items:center; gap:6px; }
-.profile-card h3{ font-size:16.5px; }
-.profile-card .title{ font-size:13.5px; color:var(--text-secondary); margin-top:2px; }
-.profile-card .meta{ font-size:12.5px; color:var(--text-tertiary); margin-top:4px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.chip-row{ display:flex; gap:6px; flex-wrap:wrap; }
-.chip{ font-size:12px; padding:4px 10px; border-radius:999px; background:var(--surface-secondary); color:var(--text-secondary); font-weight:500; }
-.profile-card-actions{ display:flex; gap:8px; margin-top:auto; }
-.profile-card-actions .btn{ flex:1; padding:9px 12px; font-size:13px; }
-
-.verify-badge{
-  display:inline-flex; align-items:center; gap:3px; color:var(--accent); font-size:12px; font-weight:600;
-}
-.verify-badge svg{ width:14px; height:14px; }
-
-/* ---------- Badges / status ---------- */
-.badge{ font-size:11.5px; font-weight:600; padding:3px 10px; border-radius:999px; }
-.badge-success{ background:var(--success-soft); color:var(--success); }
-.badge-warning{ background:var(--warning-soft); color:var(--warning); }
-.badge-danger{ background:var(--danger-soft); color:var(--danger); }
-.badge-neutral{ background:var(--surface-secondary); color:var(--text-secondary); }
-
-/* ---------- Section framing ---------- */
-.section{ padding:96px 0; position:relative; }
-.section-head{ max-width:640px; margin-bottom:48px; }
-.section-head h2{ font-size:clamp(28px,3.4vw,40px); margin-top:12px; line-height:1.15; }
-.section-head p{ margin-top:14px; font-size:16px; color:var(--text-secondary); line-height:1.6; }
-.section-alt{ background:var(--surface); }
-
-/* ---------- Forms ---------- */
-.field{ margin-bottom:20px; }
-.field label{ display:block; font-size:13px; font-weight:600; color:var(--primary-dark); margin-bottom:7px; }
-.field input, .field select, .field textarea{
-  width:100%; padding:13px 14px; border:1px solid var(--border-strong); border-radius:var(--radius-sm);
-  background:var(--surface); color:var(--text-primary); font-size:14.5px; transition:.15s;
-}
-.field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
-.field-hint{ font-size:12.5px; color:var(--text-tertiary); margin-top:6px; }
-.field-row{ display:flex; align-items:center; justify-content:space-between; }
-.checkbox-row{ display:flex; align-items:center; gap:8px; font-size:14px; color:var(--text-secondary); }
-
-/* ---------- Search bar ---------- */
-.search-bar{
-  display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border);
-  border-radius:999px; padding:6px 8px 6px 20px; box-shadow:var(--shadow-sm);
-}
-.search-bar svg{ width:18px; height:18px; color:var(--text-tertiary); flex-shrink:0; }
-.search-bar input{ flex:1; border:none; outline:none; font-size:15px; padding:10px 0; background:transparent; }
-.search-bar .btn{ flex-shrink:0; }
-
-/* ---------- App shell ---------- */
-.app-shell{ display:flex; min-height:100vh; }
-.app-sidebar{
-  width:var(--sidebar-w); background:var(--primary-dark); color:rgba(255,255,255,.82);
-  padding:26px 18px; position:fixed; top:0; left:0; height:100vh; display:flex; flex-direction:column; z-index:60;
-  overflow-y:auto;
-}
-.app-sidebar .brand{ color:#fff; padding:0 10px 26px; }
-.nav-group{ margin-bottom:6px; }
-.nav-label{ font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.35); padding:18px 12px 8px; }
-.nav-link{
-  display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:10px; font-size:14.5px;
-  color:rgba(255,255,255,.78); font-weight:500; transition:.15s;
-}
-.nav-link svg{ width:19px; height:19px; flex-shrink:0; opacity:.85; }
-.nav-link:hover{ background:rgba(255,255,255,.07); color:#fff; }
-.nav-link.active{ background:linear-gradient(90deg, rgba(173,138,77,.28), rgba(173,138,77,.05)); color:#fff; box-shadow:inset 3px 0 0 var(--accent); }
-.sidebar-footer{ margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); }
-.sidebar-profile{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; }
-.sidebar-profile:hover{ background:rgba(255,255,255,.06); }
-.sidebar-profile .name{ color:#fff; font-size:13.5px; font-weight:600; }
-.sidebar-profile .role{ color:rgba(255,255,255,.5); font-size:12px; }
-
-.app-main{ margin-left:var(--sidebar-w); flex:1; min-width:0; display:flex; flex-direction:column; }
-.app-header{
-  height:var(--header-h); background:var(--surface); border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between; padding:0 32px; position:sticky; top:0; z-index:50;
-}
-.app-header .search-bar{ width:400px; box-shadow:none; background:var(--surface-secondary); border-color:transparent; }
-.header-icon-btn{ position:relative; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); }
-.header-icon-btn:hover{ background:var(--surface-secondary); }
-.header-icon-btn svg{ width:20px; height:20px; }
-.dot-flag{ position:absolute; top:8px; right:8px; width:8px; height:8px; border-radius:50%; background:var(--danger); border:2px solid var(--surface); }
-.app-content{ padding:32px; flex:1; }
-.hamburger{ display:none; }
-
-/* ---------- Page heading ---------- */
-.page-head{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; gap:20px; flex-wrap:wrap; }
-.page-head h1{ font-size:26px; }
-.page-head p{ color:var(--text-secondary); margin-top:6px; font-size:14.5px; }
-
-/* ---------- Stat / activity cards ---------- */
-.stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
-.stat-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px; }
-.stat-card .num{ font-family:var(--font-display); font-size:28px; color:var(--primary-dark); font-weight:600; }
-.stat-card .label{ font-size:13px; color:var(--text-secondary); margin-top:4px; }
-.icon-wrap{ width:36px; height:36px; border-radius:9px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; margin-bottom:12px; color:var(--accent); }
-.icon-wrap svg{ width:18px; height:18px; }
-
-/* ---------- Grids ---------- */
-.grid-people{ display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:18px; }
-.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-.grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-.grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-
-/* ---------- Section title row (dashboard blocks) ---------- */
-.block-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; margin-top:36px; }
-.block-head h2{ font-size:18px; }
-.block-head a{ font-size:13.5px; font-weight:600; color:var(--accent); }
-
-/* ---------- Insight / article card ---------- */
-.article-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; transition:.2s; }
-.article-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); }
-.article-thumb{ height:120px; position:relative; overflow:hidden; }
-.article-card .body{ padding:18px; }
-.article-card .cat{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); }
-.article-card h3{ font-size:15.5px; margin-top:8px; line-height:1.4; }
-.article-meta{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-tertiary); margin-top:14px; }
-
-/* ---------- Tabs ---------- */
-.tabs{ display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:24px; }
-.tab{ padding:12px 18px; font-size:14.5px; font-weight:600; color:var(--text-secondary); border-bottom:2px solid transparent; }
-.tab.active{ color:var(--primary-dark); border-color:var(--accent); }
-.tab:hover{ color:var(--primary-dark); }
-
-/* ---------- Filters sidebar ---------- */
-.filters-panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:22px; }
-.filter-group{ margin-bottom:22px; }
-.filter-group h4{ font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-tertiary); margin-bottom:10px; font-weight:600; }
-.filter-option{ display:flex; align-items:center; gap:8px; font-size:14px; color:var(--text-secondary); padding:6px 0; }
-
-/* ---------- AI Research ---------- */
-.ai-panel{ background:linear-gradient(160deg,var(--primary-dark),#132846); border-radius:var(--radius-lg); padding:40px; color:#fff; position:relative; overflow:hidden; }
-.ai-input-wrap{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); border-radius:16px; padding:8px; display:flex; gap:8px; margin-top:24px; backdrop-filter:blur(6px); }
-.ai-input-wrap textarea{ flex:1; background:transparent; border:none; color:#fff; resize:none; padding:12px; font-size:15px; outline:none; min-height:52px; }
-.ai-input-wrap textarea::placeholder{ color:rgba(255,255,255,.5); }
-.prompt-chip{ background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.85); padding:9px 16px; border-radius:999px; font-size:13.5px; }
-.prompt-chip:hover{ background:rgba(255,255,255,.16); }
-.ai-response{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:22px; margin-top:18px; }
-.ai-response .who{ display:flex; gap:10px; align-items:center; margin-bottom:10px; font-weight:600; font-size:13.5px; color:var(--primary-dark); }
-.ai-avatar{ width:28px; height:28px; border-radius:8px; background:var(--primary-dark); display:flex; align-items:center; justify-content:center; }
-.ai-avatar svg{ width:15px; height:15px; color:var(--accent-light); }
-.typing-dots{ display:inline-flex; gap:4px; }
-.typing-dots span{ width:6px; height:6px; border-radius:50%; background:var(--text-tertiary); animation:blink 1.2s infinite ease-in-out; }
-.typing-dots span:nth-child(2){ animation-delay:.15s; } .typing-dots span:nth-child(3){ animation-delay:.3s; }
-@keyframes blink{ 0%,80%,100%{ opacity:.25; } 40%{ opacity:1; } }
-
-/* ---------- Appointments ---------- */
-.appt-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px; display:flex; gap:16px; align-items:center; }
-.appt-date{ width:56px; text-align:center; background:var(--surface-secondary); border-radius:10px; padding:8px 0; flex-shrink:0; }
-.appt-date .day{ font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--primary-dark); }
-.appt-date .mon{ font-size:11px; text-transform:uppercase; color:var(--text-tertiary); }
-
-/* ---------- Modal ---------- */
-.modal-overlay{ position:fixed; inset:0; background:rgba(11,29,53,.5); display:flex; align-items:center; justify-content:center; z-index:200; backdrop-filter:blur(2px); }
-.modal{ background:var(--surface); border-radius:var(--radius-lg); padding:28px; width:440px; max-width:90vw; box-shadow:var(--shadow-lg); }
-.modal-close{ position:absolute; top:16px; right:16px; }
-
-/* ---------- Empty state ---------- */
-.empty-state{ text-align:center; padding:64px 24px; color:var(--text-secondary); }
-.empty-state h3{ margin-top:18px; font-size:17px; color:var(--primary-dark); }
-.empty-state p{ font-size:14px; margin-top:6px; max-width:340px; margin-inline:auto; }
-
-/* ---------- Onboarding ---------- */
-.option-tile{ border:1.5px solid var(--border); border-radius:var(--radius-md); padding:18px; cursor:pointer; transition:.15s; }
-.option-tile:hover{ border-color:var(--accent-light); background:var(--accent-soft); }
-.option-tile.selected{ border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 3px rgba(173,138,77,.15); }
-.progress-track{ height:4px; background:var(--surface-secondary); border-radius:2px; overflow:hidden; margin-bottom:36px; }
-.progress-fill{ height:100%; background:var(--accent); transition:width .3s ease; }
-
-/* ---------- Toggle switch ---------- */
-.switch{ position:relative; width:42px; height:24px; }
-.switch input{ opacity:0; width:0; height:0; }
-.slider-track{ position:absolute; inset:0; background:var(--border-strong); border-radius:999px; transition:.2s; cursor:pointer; }
-.slider-track::before{ content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; box-shadow:var(--shadow-sm); }
-.switch input:checked + .slider-track{ background:var(--accent); }
-.switch input:checked + .slider-track::before{ transform:translateX(18px); }
-/* ==========================================================================
-   LEARN & GROW — 5 CARDS PER ROW
-   ========================================================================== */
-
-#learn-industry,
-#learn-country,
-#learn-network,
-#learn-courses,
-#learn-free {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 16px;
-  width: 100%;
-}
-
-#learn-industry .learn-card,
-#learn-country .learn-card,
-#learn-network .learn-card,
-#learn-courses .learn-card,
-#learn-free .learn-card {
-  width: 100%;
-  min-width: 0;
-}
+  "use strict";
 
 
-/* Thumbnail ratio */
+  /* ==========================================================================
+     SHELL
+     ========================================================================== */
 
-.learn-card-media {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-}
-
-
-/* Card content */
-
-.learn-card-body {
-  padding: 12px;
-}
-
-.learn-card-title {
-  font-size: 14px;
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  min-height: 38px;
-}
-
-.learn-card-channel {
-  font-size: 11px;
-  margin-bottom: 10px;
-}
-
-
-/* Smaller button */
-
-.learn-card-button {
-  width: 100%;
-  min-height: 32px;
-  font-size: 11px;
-}
-
-
-/* ==========================================================================
-   TABLET
-   ========================================================================== */
-
-@media (max-width: 1100px) {
-
-  #learn-industry,
-  #learn-country,
-  #learn-network,
-  #learn-courses,
-  #learn-free {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  if (
+    window.App &&
+    typeof App.mountShell === "function"
+  ) {
+    App.mountShell("learn.html");
   }
 
-}
+
+  /* ==========================================================================
+     DOM
+     ========================================================================== */
+
+  const industryEl =
+    document.getElementById("learn-industry");
+
+  const countryEl =
+    document.getElementById("learn-country");
+
+  const networkEl =
+    document.getElementById("learn-network");
+
+  const coursesEl =
+    document.getElementById("learn-courses");
+
+  const freeEl =
+    document.getElementById("learn-free");
 
 
-/* ==========================================================================
-   MOBILE
-   ========================================================================== */
+  const youtubeSections = [
+    industryEl,
+    countryEl,
+    networkEl
+  ];
 
-@media (max-width: 700px) {
 
-  #learn-industry,
-  #learn-country,
-  #learn-network,
-  #learn-courses,
-  #learn-free {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+  /* ==========================================================================
+     HTML ESCAPE
+     ========================================================================== */
+
+  function escapeHTML(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
   }
 
-}
 
+  /* ==========================================================================
+     LOADING STATE
+     ========================================================================== */
 
-@media (max-width: 480px) {
+  function showLoading(container) {
 
-  #learn-industry,
-  #learn-country,
-  #learn-network,
-  #learn-courses,
-  #learn-free {
-    grid-template-columns: 1fr;
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="learn-loading">
+
+        <div class="learn-loading-spinner"></div>
+
+        <span>
+          Loading latest content...
+        </span>
+
+      </div>
+    `;
+
   }
 
-}
+
+  youtubeSections.forEach(
+    showLoading
+  );
+
+
+  /* ==========================================================================
+     COMING SOON
+     ========================================================================== */
+
+  function renderComingSoon(
+    container,
+    icon,
+    title,
+    message
+  ) {
+
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="learn-coming-soon">
+
+        <div class="learn-coming-soon-icon">
+          ${icon}
+        </div>
+
+        <h3>
+          ${escapeHTML(title)}
+        </h3>
+
+        <p>
+          ${escapeHTML(message)}
+        </p>
+
+      </div>
+    `;
+
+  }
+
+
+  /* ==========================================================================
+     COURSES & CERTIFICATIONS
+     ========================================================================== */
+
+  renderComingSoon(
+
+    coursesEl,
+
+    "🎓",
+
+    "Coming Soon",
+
+    "Courses & Certifications will be available here soon."
+
+  );
+
+
+  /* ==========================================================================
+     FREE RESOURCES
+     ========================================================================== */
+
+  renderComingSoon(
+
+    freeEl,
+
+    "📚",
+
+    "Coming Soon",
+
+    "Free learning resources will be available here soon."
+
+  );
+
+
+  /* ==========================================================================
+     YOUTUBE SEARCH
+     ========================================================================== */
+
+  async function searchYouTube(payload) {
+
+    if (!window.sb) {
+
+      throw new Error(
+        "Supabase client is not available."
+      );
+
+    }
+
+
+    console.log(
+      "IGCA Learn & Grow → learn-search:",
+      payload
+    );
+
+
+    const {
+      data,
+      error
+    } = await sb.functions.invoke(
+      "learn-search",
+      {
+        body: payload
+      }
+    );
+
+
+    if (error) {
+
+      console.error(
+        "IGCA learn-search error:",
+        error
+      );
+
+      throw error;
+
+    }
+
+
+    console.log(
+      "IGCA learn-search response:",
+      data
+    );
+
+
+    if (!data) {
+
+      throw new Error(
+        "No response received from learn-search."
+      );
+
+    }
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        "Unable to load YouTube content."
+      );
+
+    }
+
+
+    return Array.isArray(data.videos)
+      ? data.videos
+      : [];
+
+  }
+
+
+  /* ==========================================================================
+     VIDEO CARD
+     ========================================================================== */
+
+  function videoCard(video) {
+
+    const videoId =
+      video?.id || "";
+
+    const title =
+      video?.title ||
+      "Untitled video";
+
+    const thumbnail =
+      video?.thumbnail ||
+      "";
+
+    const channel =
+      video?.channel ||
+      "YouTube";
+
+
+    /* ------------------------------------------------------------------------
+       PUBLISHED DATE
+       ------------------------------------------------------------------------ */
+
+    let published = "";
+
+
+    if (video?.publishedAt) {
+
+      const date =
+        new Date(video.publishedAt);
+
+
+      if (!Number.isNaN(date.getTime())) {
+
+        published =
+          date.toLocaleDateString(
+            "en-IN",
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric"
+            }
+          );
+
+      }
+
+    }
+
+
+    /* ------------------------------------------------------------------------
+       CARD
+       ------------------------------------------------------------------------ */
+
+    return `
+      <article
+        class="learn-card"
+        data-video-id="${escapeHTML(videoId)}"
+      >
+
+        <button
+          type="button"
+          class="learn-card-media learn-video-trigger"
+          data-video-id="${escapeHTML(videoId)}"
+          aria-label="Play ${escapeHTML(title)}"
+        >
+
+          ${
+            thumbnail
+              ? `
+                <img
+                  src="${escapeHTML(thumbnail)}"
+                  alt="${escapeHTML(title)}"
+                  loading="lazy"
+                >
+              `
+              : `
+                <div class="learn-card-placeholder">
+                  ▶
+                </div>
+              `
+          }
+
+
+          <span class="learn-card-play">
+            ▶
+          </span>
+
+        </button>
+
+
+        <div class="learn-card-body">
+
+          <div class="learn-card-meta">
+
+            <span>
+              YouTube
+            </span>
+
+            ${
+              published
+                ? `
+                  <span>
+                    • ${escapeHTML(published)}
+                  </span>
+                `
+                : ""
+            }
+
+          </div>
+
+
+          <h3 class="learn-card-title">
+            ${escapeHTML(title)}
+          </h3>
+
+
+          <p class="learn-card-channel">
+            ${escapeHTML(channel)}
+          </p>
+
+        </div>
+
+      </article>
+    `;
+
+  }
+
+
+  /* ==========================================================================
+     RENDER VIDEOS
+     ========================================================================== */
+
+  function renderVideos(
+    container,
+    videos,
+    emptyMessage
+  ) {
+
+    if (!container) return;
+
+
+    if (
+      !Array.isArray(videos) ||
+      !videos.length
+    ) {
+
+      container.innerHTML = `
+        <div class="learn-empty">
+
+          <div>
+
+            <strong>
+              No content found
+            </strong>
+
+            <p>
+              ${escapeHTML(emptyMessage)}
+            </p>
+
+          </div>
+
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      videos
+        .map(videoCard)
+        .join("");
+
+  }
+
+
+  /* ==========================================================================
+     ERROR STATE
+     ========================================================================== */
+
+  function renderError(
+    container,
+    message
+  ) {
+
+    if (!container) return;
+
+
+    container.innerHTML = `
+      <div class="learn-error">
+
+        <div>
+
+          <strong>
+            Unable to load content
+          </strong>
+
+          <p>
+            ${escapeHTML(
+              message ||
+              "Please try again later."
+            )}
+          </p>
+
+        </div>
+
+      </div>
+    `;
+
+  }
+
+
+  /* ==========================================================================
+     INLINE YOUTUBE VIDEO PLAYER
+     ========================================================================== */
+
+  function openVideoPlayer(
+    videoId,
+    title = "YouTube Video"
+  ) {
+
+    if (!videoId) return;
+
+
+    /* ------------------------------------------------------------------------
+       Remove old player
+       ------------------------------------------------------------------------ */
+
+    const existing =
+      document.getElementById(
+        "igca-video-modal"
+      );
+
+
+    if (existing) {
+
+      existing.remove();
+
+    }
+
+
+    /* ------------------------------------------------------------------------
+       Create modal
+       ------------------------------------------------------------------------ */
+
+    const modal =
+      document.createElement("div");
+
+
+    modal.id =
+      "igca-video-modal";
+
+
+    modal.className =
+      "igca-video-modal";
+
+
+    modal.innerHTML = `
+
+      <div
+        class="igca-video-overlay"
+        data-close-video="true"
+      ></div>
+
+
+      <div
+        class="igca-video-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="${escapeHTML(title)}"
+      >
+
+        <button
+          type="button"
+          class="igca-video-close"
+          aria-label="Close video"
+          title="Close"
+        >
+          ×
+        </button>
+
+
+        <div class="igca-video-frame">
+
+          <iframe
+            src="https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0"
+            title="${escapeHTML(title)}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    document.body.classList.add(
+      "igca-video-open"
+    );
+
+
+    /* ------------------------------------------------------------------------
+       Close player
+       ------------------------------------------------------------------------ */
+
+    function closePlayer() {
+
+      const current =
+        document.getElementById(
+          "igca-video-modal"
+        );
+
+
+      if (current) {
+
+        current.remove();
+
+      }
+
+
+      document.body.classList.remove(
+        "igca-video-open"
+      );
+
+
+      document.removeEventListener(
+        "keydown",
+        escapeHandler
+      );
+
+    }
+
+
+    /* ------------------------------------------------------------------------
+       Close button
+       ------------------------------------------------------------------------ */
+
+    const closeButton =
+      modal.querySelector(
+        ".igca-video-close"
+      );
+
+
+    if (closeButton) {
+
+      closeButton.addEventListener(
+        "click",
+        closePlayer
+      );
+
+    }
+
+
+    /* ------------------------------------------------------------------------
+       Overlay
+       ------------------------------------------------------------------------ */
+
+    const overlay =
+      modal.querySelector(
+        ".igca-video-overlay"
+      );
+
+
+    if (overlay) {
+
+      overlay.addEventListener(
+        "click",
+        closePlayer
+      );
+
+    }
+
+
+    /* ------------------------------------------------------------------------
+       ESC key
+       ------------------------------------------------------------------------ */
+
+    function escapeHandler(event) {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        closePlayer();
+
+      }
+
+    }
+
+
+    document.addEventListener(
+      "keydown",
+      escapeHandler
+    );
+
+  }
+
+
+  /* ==========================================================================
+     VIDEO CLICK HANDLER
+     ========================================================================== */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      const trigger =
+        event.target.closest(
+          ".learn-video-trigger"
+        );
+
+
+      if (!trigger) return;
+
+
+      const videoId =
+        trigger.dataset.videoId;
+
+
+      if (!videoId) return;
+
+
+      const card =
+        trigger.closest(
+          ".learn-card"
+        );
+
+
+      const title =
+        card
+          ?.querySelector(
+            ".learn-card-title"
+          )
+          ?.textContent
+          ?.trim() ||
+        "YouTube Video";
+
+
+      openVideoPlayer(
+        videoId,
+        title
+      );
+
+    }
+  );
+
+
+  /* ==========================================================================
+     LOAD LEARN CONTENT
+     ========================================================================== */
+
+  async function loadLearnContent() {
+
+    /* ========================================================================
+       INDUSTRY
+       ======================================================================== */
+
+    try {
+
+      const industryVideos =
+        await searchYouTube({
+
+          query:
+            "latest technology business career professional skills",
+
+          industry:
+            "professional development",
+
+          country:
+            "India"
+
+        });
+
+
+      renderVideos(
+
+        industryEl,
+
+        industryVideos,
+
+        "Latest industry learning content will appear here."
+
+      );
+
+    } catch (error) {
+
+      console.error(
+        "IGCA Industry content error:",
+        error
+      );
+
+
+      renderError(
+        industryEl,
+        error?.message
+      );
+
+    }
+
+
+    /* ========================================================================
+       COUNTRY
+       ======================================================================== */
+
+    try {
+
+      const countryVideos =
+        await searchYouTube({
+
+          query:
+            "latest India technology business education career skills",
+
+          country:
+            "India"
+
+        });
+
+
+      renderVideos(
+
+        countryEl,
+
+        countryVideos,
+
+        "Latest learning content from India will appear here."
+
+      );
+
+    } catch (error) {
+
+      console.error(
+        "IGCA Country content error:",
+        error
+      );
+
+
+      renderError(
+        countryEl,
+        error?.message
+      );
+
+    }
+
+
+    /* ========================================================================
+       NETWORK
+       ======================================================================== */
+
+    try {
+
+      const networkVideos =
+        await searchYouTube({
+
+          query:
+            "professional networking career growth leadership skills",
+
+          country:
+            "India"
+
+        });
+
+
+      renderVideos(
+
+        networkEl,
+
+        networkVideos,
+
+        "Professional learning content will appear here."
+
+      );
+
+    } catch (error) {
+
+      console.error(
+        "IGCA Network content error:",
+        error
+      );
+
+
+      renderError(
+        networkEl,
+        error?.message
+      );
+
+    }
+
+
+    /* ========================================================================
+       COURSES & CERTIFICATIONS
+       ======================================================================== */
+
+    renderComingSoon(
+
+      coursesEl,
+
+      "🎓",
+
+      "Coming Soon",
+
+      "Courses & Certifications will be available here soon."
+
+    );
+
+
+    /* ========================================================================
+       FREE RESOURCES
+       ======================================================================== */
+
+    renderComingSoon(
+
+      freeEl,
+
+      "📚",
+
+      "Coming Soon",
+
+      "Free learning resources will be available here soon."
+
+    );
+
+
+    /* ========================================================================
+       COMPLETE
+       ======================================================================== */
+
+    console.log(
+      "IGCA Learn & Grow loaded successfully."
+    );
+
+  }
+
+
+  /* ==========================================================================
+     START
+     ========================================================================== */
+
+  await loadLearnContent();
+
+});
