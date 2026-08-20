@@ -36,25 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  
-// Current User Profile Get Karein
-async function getCurrentProfile() {
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) return null;
 
-    const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-    if (profileError) console.error("Error fetching profile:", profileError);
-    return profile;
-}
-
-// Ensure Global Object Exists
-window.PC = window.PC || {};
-window.PC.auth = { getCurrentProfile };
 
   /* ==========================================
      SIGNUP
