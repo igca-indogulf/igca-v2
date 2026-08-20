@@ -4,648 +4,679 @@
    Supabase JS v2
    ========================================================================== */
 
-document.addEventListener("DOMContentLoaded", async () => {
+"use strict";
 
-  "use strict";
-
-  /* ==========================================================================
-     SHELL
-     ========================================================================== */
-
-  if (
-    window.App &&
-    typeof App.mountShell === "function"
-  ) {
-    App.mountShell("messages.html");
-  }
+document.addEventListener("DOMContentLoaded", initMessages);
 
 
-  /* ==========================================================================
-     DOM
-     ========================================================================== */
+/* ==========================================================================
+   STATE
+   ========================================================================== */
 
-  const convoItems =
-    document.getElementById("convo-items");
+let currentUser = null;
 
-  const chatWindow =
-    document.getElementById("chat-window");
+let conversations = [];
 
-  const messagesShell =
-    document.getElementById("messages-shell");
+let activeConversation = null;
+let activeConversationId = null;
+let activeOtherUser = null;
 
-  const conversationCount =
-    document.getElementById("conversation-count");
+let activeMessageChannel = null;
+let allMessageChannel = null;
+let notificationChannel = null;
 
-  const searchInput =
-    document.getElementById(
-      "conversation-search-input"
-    );
+let loadingConversations = false;
 
 
-  /* ==========================================================================
-     STATE
-     ========================================================================== */
+/* ==========================================================================
+   INIT
+   ========================================================================== */
 
-  let currentUser = null;
+async function initMessages() {
 
-  let conversations = [];
-
-  let activeConversation = null;
-
-  let activeConversationId = null;
-
-  let activeOtherUser = null;
-
-  let activeMessageChannel = null;
-
-  let allMessageChannel = null;
-
-  let notificationChannel = null;
-
-  let loadingConversations = false;
-
-
-  /* ==========================================================================
-     HELPERS
-     ========================================================================== */
-
-  function escapeHTML(value) {
-
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
-  }
-
-
-  function getName(user) {
-
-    return (
-      user?.full_name ||
-      user?.username ||
-      "IGCA Member"
-    );
-
-  }
-
-
-  function getInitials(name) {
+  try {
 
     if (
       window.App &&
-      typeof App.initials === "function"
+      typeof App.mountShell === "function"
     ) {
-      return App.initials(name);
+      App.mountShell("messages.html");
     }
 
-    return String(name || "User")
-      .trim()
-      .split(/\s+/)
-      .map(part => part[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
+    await loadConversations();
+
+    /*
+     * If profile.html redirected here with:
+     *
+     * messages.html?user=UUID
+     *
+     * automatically open that conversation.
+     */
+
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const targetUserId =
+      params.get("user");
+
+    if (targetUserId) {
+
+      const targetConversation =
+        conversations.find(
+          conversation =>
+            String(
+              conversation.otherUser?.id
+            ) === String(targetUserId)
+        );
+
+      if (targetConversation) {
+
+        await openConversation(
+          targetConversation
+        );
+
+      } else {
+
+        console.warn(
+          "Target user is not an accepted connection:",
+          targetUserId
+        );
+
+      }
+    }
+
+  } catch (error) {
+
+    console.error(
+      "IGCA Messages initialization failed:",
+      error
+    );
+
+  }
+}
+
+
+/* ==========================================================================
+   DOM
+   ========================================================================== */
+
+function getDOM() {
+
+  return {
+
+    convoItems:
+      document.getElementById("convo-items"),
+
+    chatWindow:
+      document.getElementById("chat-window"),
+
+    messagesShell:
+      document.getElementById("messages-shell"),
+
+    conversationCount:
+      document.getElementById("conversation-count"),
+
+    searchInput:
+      document.getElementById(
+        "conversation-search-input"
+      )
+
+  };
+
+}
+
+
+/* ==========================================================================
+   HELPERS
+   ========================================================================== */
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+function getName(user) {
+
+  return (
+    user?.full_name ||
+    user?.username ||
+    "IGCA Member"
+  );
+
+}
+
+
+function getInitials(name) {
+
+  if (
+    window.App &&
+    typeof App.initials === "function"
+  ) {
+
+    return App.initials(name);
 
   }
 
+  return String(name || "User")
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
-  function avatar(
-    name,
-    size = "avatar-sm"
-  ) {
+}
+
+
+function avatar(
+  user,
+  size = "avatar-sm"
+) {
+
+  const name =
+    getName(user);
+
+  if (user?.avatar_url) {
 
     return `
       <div class="avatar ${size}">
-        ${escapeHTML(getInitials(name))}
+        <img
+          src="${escapeHTML(user.avatar_url)}"
+          alt="${escapeHTML(name)}"
+          style="
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            border-radius:inherit;
+            display:block;
+          "
+        >
       </div>
     `;
 
   }
 
+  return `
+    <div class="avatar ${size}">
+      ${escapeHTML(getInitials(name))}
+    </div>
+  `;
 
-  function formatTime(value) {
+}
 
-    if (!value) {
-      return "";
-    }
 
-    const date =
-      new Date(value);
+function formatTime(value) {
+
+  if (!value) {
+    return "";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+}
+
+
+function formatListTime(value) {
+
+  if (!value) {
+    return "";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  const now =
+    new Date();
+
+  if (
+    date.toDateString() ===
+    now.toDateString()
+  ) {
+
+    return formatTime(value);
+
+  }
+
+  return date.toLocaleDateString([], {
+    day: "2-digit",
+    month: "short"
+  });
+
+}
+
+
+/* ==========================================================================
+   EMPTY / LOADING
+   ========================================================================== */
+
+function renderEmptyChat() {
+
+  const { chatWindow } =
+    getDOM();
+
+  if (!chatWindow) {
+    return;
+  }
+
+  chatWindow.innerHTML = `
+    <div class="chat-empty">
+
+      <div class="chat-empty-icon">
+        💬
+      </div>
+
+      <h2>
+        Select a conversation
+      </h2>
+
+      <p>
+        Choose a connection to start a professional conversation.
+      </p>
+
+    </div>
+  `;
+
+}
+
+
+function renderChatLoading() {
+
+  const { chatWindow } =
+    getDOM();
+
+  if (!chatWindow) {
+    return;
+  }
+
+  chatWindow.innerHTML = `
+    <div class="chat-empty">
+
+      <div class="loading-spinner"></div>
+
+      <p>
+        Opening conversation...
+      </p>
+
+    </div>
+  `;
+
+}
+
+
+/* ==========================================================================
+   LOAD CONVERSATIONS
+   ========================================================================== */
+
+async function loadConversations() {
+
+  const { convoItems } =
+    getDOM();
+
+  if (
+    !convoItems ||
+    loadingConversations
+  ) {
+    return;
+  }
+
+  loadingConversations = true;
+
+  convoItems.innerHTML = `
+    <div class="messages-loading">
+      <div class="loading-spinner"></div>
+      <span>Loading chats...</span>
+    </div>
+  `;
+
+  try {
 
     if (
-      Number.isNaN(
-        date.getTime()
+      !window.IGCA_API ||
+      typeof IGCA_API.user !== "function"
+    ) {
+      throw new Error(
+        "IGCA API is unavailable."
+      );
+    }
+
+    currentUser =
+      await IGCA_API.user();
+
+    if (!currentUser?.id) {
+
+      window.location.href =
+        "login.html";
+
+      return;
+
+    }
+
+
+    /* ----------------------------------------------------------------------
+       ACCEPTED CONNECTIONS
+       ---------------------------------------------------------------------- */
+
+    const {
+      data: connectionRows,
+      error: connectionError
+    } = await sb
+      .from("connections")
+      .select(`
+        id,
+        requester_id,
+        addressee_id,
+        status
+      `)
+      .or(
+        `requester_id.eq.${currentUser.id},addressee_id.eq.${currentUser.id}`
       )
-    ) {
-      return "";
+      .eq(
+        "status",
+        "accepted"
+      );
+
+    if (connectionError) {
+      throw connectionError;
     }
 
-    return date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-
-  }
+    const acceptedConnections =
+      connectionRows || [];
 
 
-  function formatListTime(value) {
+    /* ----------------------------------------------------------------------
+       OTHER USER IDS
+       ---------------------------------------------------------------------- */
 
-    if (!value) {
-      return "";
-    }
+    const acceptedOtherUserIds = [
+      ...new Set(
+        acceptedConnections
+          .map(connection => {
 
-    const date =
-      new Date(value);
+            const me =
+              String(currentUser.id);
 
-    if (
-      Number.isNaN(
-        date.getTime()
+            return String(
+              connection.requester_id
+            ) === me
+              ? connection.addressee_id
+              : connection.requester_id;
+
+          })
+          .filter(Boolean)
+          .map(String)
       )
-    ) {
-      return "";
-    }
-
-    const now =
-      new Date();
-
-    if (
-      date.toDateString() ===
-      now.toDateString()
-    ) {
-      return formatTime(value);
-    }
-
-    return date.toLocaleDateString([], {
-      day: "2-digit",
-      month: "short"
-    });
-
-  }
+    ];
 
 
-  /* ==========================================================================
-     EMPTY CHAT
-     ========================================================================== */
+    /* ----------------------------------------------------------------------
+       CONNECTION MAP
+       ---------------------------------------------------------------------- */
 
-  function renderEmptyChat() {
+    const connectionMap =
+      new Map();
 
-    if (!chatWindow) {
-      return;
-    }
+    acceptedConnections.forEach(
+      connection => {
 
-    chatWindow.innerHTML = `
-      <div class="chat-empty">
+        const me =
+          String(currentUser.id);
 
-        <div class="chat-empty-icon">
-          💬
-        </div>
+        const otherUserId =
+          String(
+            connection.requester_id
+          ) === me
+            ? connection.addressee_id
+            : connection.requester_id;
 
-        <h2>
-          Select a conversation
-        </h2>
+        if (otherUserId) {
 
-        <p>
-          Choose a connection to start a professional conversation.
-        </p>
+          connectionMap.set(
+            String(otherUserId),
+            connection
+          );
 
-      </div>
-    `;
-
-  }
-
-
-  /* ==========================================================================
-     LOADING CHAT
-     ========================================================================== */
-
-  function renderChatLoading() {
-
-    if (!chatWindow) {
-      return;
-    }
-
-    chatWindow.innerHTML = `
-      <div class="chat-empty">
-
-        <div class="loading-spinner"></div>
-
-        <p>
-          Opening conversation...
-        </p>
-
-      </div>
-    `;
-
-  }
-
-
-  /* ==========================================================================
-     LOAD CONVERSATIONS
-     ========================================================================== */
-
-  async function loadConversations() {
-
-    if (
-      !convoItems ||
-      loadingConversations
-    ) {
-      return;
-    }
-
-    loadingConversations = true;
-
-    convoItems.innerHTML = `
-      <div class="messages-loading">
-        <div class="loading-spinner"></div>
-        <span>Loading chats...</span>
-      </div>
-    `;
-
-    try {
-
-      /* ----------------------------------------------------------------------
-         CURRENT USER
-         ---------------------------------------------------------------------- */
-
-      currentUser =
-        await IGCA_API.user();
-
-      if (!currentUser?.id) {
-
-        location.href =
-          "login.html";
-
-        return;
+        }
 
       }
+    );
 
 
-      /* ----------------------------------------------------------------------
-         STEP 1
-         LOAD ONLY ACCEPTED CONNECTIONS
-         ---------------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       PROFILES
+       ---------------------------------------------------------------------- */
+
+    let acceptedProfiles = [];
+
+    if (
+      acceptedOtherUserIds.length
+    ) {
 
       const {
-        data: connectionRows,
-        error: connectionError
+        data,
+        error
       } = await sb
-        .from("connections")
+        .from("profiles")
         .select(`
           id,
-          requester_id,
-          addressee_id,
-          status
+          full_name,
+          username,
+          headline,
+          account_type,
+          avatar_url,
+          company_name,
+          location,
+          industry
         `)
-        .or(
-          `requester_id.eq.${currentUser.id},addressee_id.eq.${currentUser.id}`
-        )
-        .eq(
-          "status",
-          "accepted"
+        .in(
+          "id",
+          acceptedOtherUserIds
         );
 
-
-      if (connectionError) {
-
-        console.error(
-          "Accepted connections load failed:",
-          connectionError
-        );
-
-        throw connectionError;
-
+      if (error) {
+        throw error;
       }
 
+      acceptedProfiles =
+        data || [];
 
-      const acceptedConnections =
-        connectionRows || [];
+    }
+
+    const profileMap =
+      new Map(
+        acceptedProfiles.map(
+          profile => [
+            String(profile.id),
+            profile
+          ]
+        )
+      );
 
 
-      /* ----------------------------------------------------------------------
-         STEP 2
-         GET OTHER USER IDS
-         ---------------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       MY MEMBERSHIPS
+       ---------------------------------------------------------------------- */
 
-      const acceptedOtherUserIds = [
+    const {
+      data: myMemberships,
+      error: membershipError
+    } = await sb
+      .from("conversation_members")
+      .select(
+        "conversation_id"
+      )
+      .eq(
+        "user_id",
+        currentUser.id
+      );
+
+    if (membershipError) {
+      throw membershipError;
+    }
+
+    const conversationIds =
+      [
         ...new Set(
-          acceptedConnections
-            .map(connection => {
-
-              return String(
-                connection.requester_id
-              ) ===
-                String(currentUser.id)
-
-                ? connection.addressee_id
-
-                : connection.requester_id;
-
-            })
+          (myMemberships || [])
+            .map(
+              row =>
+                row.conversation_id
+            )
             .filter(Boolean)
             .map(String)
         )
       ];
 
 
-      /* ----------------------------------------------------------------------
-         CONNECTION MAP
-         ---------------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       MEMBERS
+       ---------------------------------------------------------------------- */
 
-      const connectionMap =
-        new Map();
+    let allMembers = [];
 
-
-      for (
-        const connection
-        of acceptedConnections
-      ) {
-
-        const otherUserId =
-          String(
-            connection.requester_id
-          ) ===
-            String(currentUser.id)
-
-            ? connection.addressee_id
-
-            : connection.requester_id;
-
-
-        if (!otherUserId) {
-          continue;
-        }
-
-
-        connectionMap.set(
-          String(otherUserId),
-          connection
-        );
-
-      }
-
-
-      /* ----------------------------------------------------------------------
-         STEP 3
-         LOAD ACCEPTED USER PROFILES
-         ---------------------------------------------------------------------- */
-
-      let acceptedProfiles = [];
-
-
-      if (
-        acceptedOtherUserIds.length
-      ) {
-
-        const {
-          data,
-          error
-        } = await sb
-          .from("profiles")
-          .select(`
-            id,
-            full_name,
-            username,
-            headline,
-            account_type,
-            avatar_url
-          `)
-          .in(
-            "id",
-            acceptedOtherUserIds
-          );
-
-
-        if (error) {
-
-          console.error(
-            "Accepted profiles load failed:",
-            error
-          );
-
-          throw error;
-
-        }
-
-
-        acceptedProfiles =
-          data || [];
-
-      }
-
-
-      const profileMap =
-        new Map(
-          acceptedProfiles.map(
-            profile => [
-              String(profile.id),
-              profile
-            ]
-          )
-        );
-
-
-      /* ----------------------------------------------------------------------
-         RESET
-         ---------------------------------------------------------------------- */
-
-      conversations = [];
-
-
-      /* ----------------------------------------------------------------------
-         STEP 4
-         LOAD MY CONVERSATION MEMBERSHIPS
-         ---------------------------------------------------------------------- */
+    if (
+      conversationIds.length
+    ) {
 
       const {
-        data: myMemberships,
-        error: membershipError
+        data,
+        error
       } = await sb
         .from("conversation_members")
-        .select("conversation_id")
-        .eq(
-          "user_id",
-          currentUser.id
+        .select(`
+          conversation_id,
+          user_id
+        `)
+        .in(
+          "conversation_id",
+          conversationIds
         );
 
+      if (error) {
+        throw error;
+      }
 
-      if (membershipError) {
+      allMembers =
+        data || [];
 
-        console.error(
-          "Conversation memberships load failed:",
-          membershipError
+    }
+
+
+    /* ----------------------------------------------------------------------
+       MESSAGES
+       ---------------------------------------------------------------------- */
+
+    let allMessages = [];
+
+    if (
+      conversationIds.length
+    ) {
+
+      const {
+        data,
+        error
+      } = await sb
+        .from("messages")
+        .select(`
+          id,
+          conversation_id,
+          sender_id,
+          body,
+          created_at,
+          read_at
+        `)
+        .in(
+          "conversation_id",
+          conversationIds
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
         );
 
-        throw membershipError;
-
+      if (error) {
+        throw error;
       }
 
+      allMessages =
+        data || [];
 
-      const conversationIds =
-        (myMemberships || [])
-          .map(
-            row =>
-              row.conversation_id
-          )
-          .filter(Boolean);
+    }
 
 
-      /* ----------------------------------------------------------------------
-         STEP 5
-         LOAD CONVERSATION MEMBERS
-         ---------------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       GROUP MESSAGES
+       ---------------------------------------------------------------------- */
 
-      let allMembers = [];
+    const messagesByConversation =
+      new Map();
 
+    allMessages.forEach(
+      message => {
 
-      if (
-        conversationIds.length
-      ) {
-
-        const {
-          data,
-          error
-        } = await sb
-          .from("conversation_members")
-          .select(`
-            conversation_id,
-            user_id
-          `)
-          .in(
-            "conversation_id",
-            conversationIds
-          );
-
-
-        if (error) {
-
-          console.error(
-            "Conversation members load failed:",
-            error
-          );
-
-          throw error;
-
-        }
-
-
-        allMembers =
-          data || [];
-
-      }
-
-
-      /* ----------------------------------------------------------------------
-         STEP 6
-         LOAD MESSAGES
-         ---------------------------------------------------------------------- */
-
-      let allMessages = [];
-
-
-      if (
-        conversationIds.length
-      ) {
-
-        const {
-          data,
-          error
-        } = await sb
-          .from("messages")
-          .select(`
-            id,
-            conversation_id,
-            sender_id,
-            body,
-            created_at,
-            read_at
-          `)
-          .in(
-            "conversation_id",
-            conversationIds
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          );
-
-
-        if (error) {
-
-          console.error(
-            "Messages load failed:",
-            error
-          );
-
-          throw error;
-
-        }
-
-
-        allMessages =
-          data || [];
-
-      }
-
-
-      /* ----------------------------------------------------------------------
-         STEP 7
-         GROUP MESSAGES
-         ---------------------------------------------------------------------- */
-
-      const messagesByConversation =
-        new Map();
-
-
-      for (
-        const message
-        of allMessages
-      ) {
-
-        const conversationId =
+        const id =
           String(
             message.conversation_id
           );
 
-
         if (
-          !messagesByConversation.has(
-            conversationId
-          )
+          !messagesByConversation.has(id)
         ) {
 
           messagesByConversation.set(
-            conversationId,
+            id,
             []
           );
 
         }
 
-
         messagesByConversation
-          .get(conversationId)
+          .get(id)
           .push(message);
 
       }
+    );
 
 
-      /* ----------------------------------------------------------------------
-         STEP 8
-         BUILD EXISTING CONVERSATIONS
-         
-         IMPORTANT:
-         Only show conversations whose
-         connection is still accepted.
-         ---------------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       BUILD CONVERSATIONS
+       ---------------------------------------------------------------------- */
 
-      for (
-        const conversationId
-        of conversationIds
-      ) {
+    conversations = [];
+
+    conversationIds.forEach(
+      conversationId => {
 
         const members =
           allMembers.filter(
@@ -656,7 +687,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               String(conversationId)
           );
 
-
         const otherMember =
           members.find(
             member =>
@@ -666,21 +696,18 @@ document.addEventListener("DOMContentLoaded", async () => {
               String(currentUser.id)
           );
 
-
         if (!otherMember) {
-          continue;
+          return;
         }
-
 
         const otherUserId =
           String(
             otherMember.user_id
           );
 
-
         /*
-         * Connection has been removed?
-         * Do NOT show old conversation.
+         * Conversation is visible only
+         * while connection is accepted.
          */
 
         const connection =
@@ -688,110 +715,82 @@ document.addEventListener("DOMContentLoaded", async () => {
             otherUserId
           );
 
-
         if (!connection) {
-          continue;
+          return;
         }
-
 
         const otherUser =
           profileMap.get(
             otherUserId
           );
 
-
         if (!otherUser) {
-          continue;
+          return;
         }
 
-
-        const conversationMessages =
+        const msgs =
           messagesByConversation.get(
             String(conversationId)
           ) || [];
 
-
         const lastMessage =
-          conversationMessages.length
-            ? conversationMessages[0]
-            : null;
-
+          msgs[0] || null;
 
         const unreadCount =
-          conversationMessages.filter(
+          msgs.filter(
             message =>
               String(
                 message.sender_id
               ) !==
-                String(currentUser.id) &&
+              String(currentUser.id) &&
               !message.read_at
           ).length;
-
 
         conversations.push({
 
           conversationId:
-
-            conversationId,
+            String(conversationId),
 
           connectionId:
-
             connection.id,
 
-          otherUser:
+          otherUser,
 
-            otherUser,
+          lastMessage,
 
-          lastMessage:
-
-            lastMessage,
-
-          unreadCount:
-
-            unreadCount
+          unreadCount
 
         });
 
       }
+    );
 
 
-      /* ----------------------------------------------------------------------
-         STEP 9
-         ADD ACCEPTED CONNECTIONS WITHOUT CHAT
-         ---------------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       ACCEPTED CONNECTIONS WITHOUT CONVERSATION
+       ---------------------------------------------------------------------- */
 
-      for (
-        const connection
-        of acceptedConnections
-      ) {
+    acceptedConnections.forEach(
+      connection => {
 
-        const isRequester =
-          String(
-            connection.requester_id
-          ) ===
+        const me =
           String(currentUser.id);
 
-
         const otherUserId =
-          isRequester
-            ? String(
-                connection.addressee_id
-              )
-            : String(
-                connection.requester_id
-              );
-
+          String(
+            connection.requester_id
+          ) === me
+            ? String(connection.addressee_id)
+            : String(connection.requester_id);
 
         const otherUser =
           profileMap.get(
             otherUserId
           );
 
-
-        if (!otherUser?.id) {
-          continue;
+        if (!otherUser) {
+          return;
         }
-
 
         const exists =
           conversations.some(
@@ -802,1655 +801,1664 @@ document.addEventListener("DOMContentLoaded", async () => {
               otherUserId
           );
 
-
         if (exists) {
-          continue;
+          return;
         }
-
 
         conversations.push({
 
           conversationId:
-
             null,
 
           connectionId:
-
             connection.id,
 
-          otherUser:
-
-            otherUser,
+          otherUser,
 
           lastMessage:
-
             null,
 
           unreadCount:
-
             0
 
         });
 
       }
-
-
-      /* ----------------------------------------------------------------------
-         STEP 10
-         SORT + RENDER
-         ---------------------------------------------------------------------- */
-
-      sortConversations();
-
-      updateConversationCount();
-
-      renderConversationList();
-
-
-      if (
-        !conversations.length
-      ) {
-        renderEmptyChat();
-      }
-
-
-      subscribeToGlobalMessages();
-
-      subscribeToNotifications();
-
-
-    } catch (error) {
-
-      console.error(
-        "IGCA conversations load failed:",
-        error
-      );
-
-
-      convoItems.innerHTML = `
-        <div class="convo-empty">
-
-          <div class="avatar avatar-md">
-            !
-          </div>
-
-          <strong>
-            Unable to load chats
-          </strong>
-
-          <span>
-            ${escapeHTML(
-              error?.message ||
-              "Something went wrong while loading chats."
-            )}
-          </span>
-
-        </div>
-      `;
-
-
-      renderEmptyChat();
-
-    } finally {
-
-      loadingConversations =
-        false;
-
-    }
-
-  }
-
-
-  /* ==========================================================================
-     SORT
-     ========================================================================== */
-
-  function sortConversations() {
-
-    conversations.sort(
-      (a, b) => {
-
-        const aTime =
-          a.lastMessage?.created_at ||
-          "";
-
-        const bTime =
-          b.lastMessage?.created_at ||
-          "";
-
-
-        if (
-          !aTime &&
-          !bTime
-        ) {
-          return 0;
-        }
-
-
-        if (!aTime) {
-          return 1;
-        }
-
-
-        if (!bTime) {
-          return -1;
-        }
-
-
-        return (
-          new Date(bTime) -
-          new Date(aTime)
-        );
-
-      }
     );
 
-  }
 
+    sortConversations();
 
-  /* ==========================================================================
-     COUNT
-     ========================================================================== */
+    updateConversationCount();
 
-  function updateConversationCount() {
+    renderConversationList();
 
-    if (!conversationCount) {
-      return;
+    if (
+      !conversations.length
+    ) {
+      renderEmptyChat();
     }
 
 
-    const count =
-      conversations.length;
+    subscribeToGlobalMessages();
 
+    subscribeToNotifications();
 
-    conversationCount.textContent =
-      `${count} ${
-        count === 1
-          ? "connection"
-          : "connections"
-      }`;
+  } catch (error) {
 
-  }
+    console.error(
+      "IGCA conversations load failed:",
+      error
+    );
 
+    convoItems.innerHTML = `
+      <div class="convo-empty">
 
-  /* ==========================================================================
-     RENDER SIDEBAR
-     ========================================================================== */
-
-  function renderConversationList() {
-
-    if (!convoItems) {
-      return;
-    }
-
-
-    if (!conversations.length) {
-
-      convoItems.innerHTML = `
-        <div class="convo-empty">
-
-          <div class="avatar avatar-md">
-            ?
-          </div>
-
-          <strong>
-            No connections yet
-          </strong>
-
-          <span>
-            Connect with someone to start a conversation.
-          </span>
-
+        <div class="avatar avatar-md">
+          !
         </div>
-      `;
 
-      return;
+        <strong>
+          Unable to load chats
+        </strong>
+
+        <span>
+          ${escapeHTML(
+            error?.message ||
+            "Something went wrong while loading chats."
+          )}
+        </span>
+
+      </div>
+    `;
+
+    renderEmptyChat();
+
+  } finally {
+
+    loadingConversations =
+      false;
+
+  }
+
+}
+
+
+/* ==========================================================================
+   SORT
+   ========================================================================== */
+
+function sortConversations() {
+
+  conversations.sort(
+    (a, b) => {
+
+      const aTime =
+        a.lastMessage?.created_at
+          ? new Date(
+              a.lastMessage.created_at
+            ).getTime()
+          : 0;
+
+      const bTime =
+        b.lastMessage?.created_at
+          ? new Date(
+              b.lastMessage.created_at
+            ).getTime()
+          : 0;
+
+      return bTime - aTime;
 
     }
+  );
+
+}
 
 
-    convoItems.innerHTML =
-      conversations
-        .map(
-          conversation => {
+/* ==========================================================================
+   COUNT
+   ========================================================================== */
 
-            const user =
-              conversation.otherUser;
+function updateConversationCount() {
 
+  const {
+    conversationCount
+  } = getDOM();
 
-            if (!user?.id) {
-              return "";
-            }
+  if (!conversationCount) {
+    return;
+  }
 
+  const count =
+    conversations.length;
 
-            const name =
-              getName(user);
+  conversationCount.textContent =
+    `${count} ${
+      count === 1
+        ? "connection"
+        : "connections"
+    }`;
 
-
-            const preview =
-              conversation.lastMessage
-                ? conversation.lastMessage.body
-                : "You're connected. Start a conversation.";
-
-
-            const time =
-              conversation.lastMessage
-                ? formatListTime(
-                    conversation.lastMessage.created_at
-                  )
-                : "";
+}
 
 
-            const active =
-              conversation ===
-              activeConversation;
+/* ==========================================================================
+   RENDER SIDEBAR
+   ========================================================================== */
 
+function renderConversationList() {
 
-            const unread =
-              Number(
-                conversation.unreadCount || 0
-              );
+  const {
+    convoItems
+  } = getDOM();
 
+  if (!convoItems) {
+    return;
+  }
 
-            return `
-              <div
-                class="convo-item ${
-                  active ? "active" : ""
-                }"
-                data-user-id="${escapeHTML(
-                  user.id
-                )}"
-              >
+  if (!conversations.length) {
 
-                ${avatar(name)}
+    convoItems.innerHTML = `
+      <div class="convo-empty">
 
-                <div class="convo-content">
+        <div class="avatar avatar-md">
+          ?
+        </div>
 
-                  <div class="convo-top">
+        <strong>
+          No connections yet
+        </strong>
 
-                    <span class="convo-name">
-                      ${escapeHTML(name)}
-                    </span>
+        <span>
+          Connect with someone to start a conversation.
+        </span>
 
-                    <span class="convo-time">
-                      ${escapeHTML(time)}
-                    </span>
+      </div>
+    `;
 
-                  </div>
+    return;
 
+  }
 
-                  <div class="convo-preview">
+  convoItems.innerHTML =
+    conversations
+      .map(
+        conversation => {
 
-                    ${escapeHTML(
-                      preview
-                    )}
+          const user =
+            conversation.otherUser;
 
-                  </div>
+          if (!user?.id) {
+            return "";
+          }
+
+          const name =
+            getName(user);
+
+          const preview =
+            conversation.lastMessage
+              ? conversation.lastMessage.body
+              : "You're connected. Start a conversation.";
+
+          const time =
+            conversation.lastMessage
+              ? formatListTime(
+                  conversation.lastMessage.created_at
+                )
+              : "";
+
+          const active =
+            activeConversation ===
+            conversation;
+
+          const unread =
+            Number(
+              conversation.unreadCount || 0
+            );
+
+          return `
+            <div
+              class="convo-item ${
+                active ? "active" : ""
+              }"
+              data-user-id="${escapeHTML(user.id)}"
+            >
+
+              ${avatar(user)}
+
+              <div class="convo-content">
+
+                <div class="convo-top">
+
+                  <span class="convo-name">
+                    ${escapeHTML(name)}
+                  </span>
+
+                  <span class="convo-time">
+                    ${escapeHTML(time)}
+                  </span>
 
                 </div>
 
-
-                <div
-                  class="convo-actions"
-                  style="
-                    display:flex;
-                    align-items:center;
-                    gap:6px;
-                    margin-left:auto;
-                  "
-                >
-
-                  ${
-                    unread > 0
-                      ? `
-                        <span class="convo-unread">
-                          ${
-                            unread > 99
-                              ? "99+"
-                              : unread
-                          }
-                        </span>
-                      `
-                      : ""
-                  }
-
-
-                  <button
-                    type="button"
-                    class="convo-remove-btn"
-                    data-remove-connection="${escapeHTML(
-                      conversation.connectionId || ""
-                    )}"
-                    title="Remove connection"
-                    aria-label="Remove connection"
-                    style="
-                      width:28px;
-                      height:28px;
-                      border:0;
-                      border-radius:8px;
-                      background:transparent;
-                      cursor:pointer;
-                      font-size:18px;
-                      line-height:1;
-                      color:inherit;
-                      opacity:.65;
-                      display:flex;
-                      align-items:center;
-                      justify-content:center;
-                    "
-                  >
-                    ×
-                  </button>
-
+                <div class="convo-preview">
+                  ${escapeHTML(preview)}
                 </div>
 
               </div>
-            `;
 
-          }
-        )
-        .join("");
+              <div
+                class="convo-actions"
+                style="
+                  display:flex;
+                  align-items:center;
+                  gap:6px;
+                  margin-left:auto;
+                "
+              >
 
+                ${
+                  unread > 0
+                    ? `
+                      <span class="convo-unread">
+                        ${
+                          unread > 99
+                            ? "99+"
+                            : unread
+                        }
+                      </span>
+                    `
+                    : ""
+                }
 
-    /* ------------------------------------------------------------------------
-       OPEN CHAT
-       ------------------------------------------------------------------------ */
+                <button
+                  type="button"
+                  class="convo-remove-btn"
+                  data-remove-connection="${escapeHTML(
+                    conversation.connectionId || ""
+                  )}"
+                  title="Remove connection"
+                  aria-label="Remove connection"
+                >
+                  ×
+                </button>
 
-    convoItems
-      .querySelectorAll(
-        ".convo-item"
-      )
-      .forEach(item => {
+              </div>
 
-        item.addEventListener(
-          "click",
-          async event => {
-
-            /*
-             * Don't open chat when
-             * remove button was clicked.
-             */
-
-            if (
-              event.target.closest(
-                ".convo-remove-btn"
-              )
-            ) {
-              return;
-            }
-
-
-            const userId =
-              item.dataset.userId;
-
-
-            const conversation =
-              conversations.find(
-                entry =>
-                  String(
-                    entry.otherUser?.id
-                  ) ===
-                  String(userId)
-              );
-
-
-            if (!conversation) {
-              return;
-            }
-
-
-            await openConversation(
-              conversation
-            );
-
-          }
-        );
-
-      });
-
-
-    /* ------------------------------------------------------------------------
-       REMOVE CONNECTION
-       ------------------------------------------------------------------------ */
-
-    convoItems
-      .querySelectorAll(
-        ".convo-remove-btn"
-      )
-      .forEach(button => {
-
-        button.addEventListener(
-          "click",
-          async event => {
-
-            event.stopPropagation();
-
-
-            const connectionId =
-              button.dataset
-                .removeConnection;
-
-
-            if (!connectionId) {
-
-              alert(
-                "Connection ID is missing."
-              );
-
-              return;
-
-            }
-
-
-            const conversation =
-              conversations.find(
-                item =>
-                  String(
-                    item.connectionId
-                  ) ===
-                  String(connectionId)
-              );
-
-
-            const name =
-              getName(
-                conversation?.otherUser
-              );
-
-
-            const confirmed =
-              window.confirm(
-                `Remove your connection with ${name}?`
-              );
-
-
-            if (!confirmed) {
-              return;
-            }
-
-
-            await removeConnection(
-              connectionId,
-              conversation
-            );
-
-          }
-        );
-
-      });
-
-  }
-
-
-  /* ==========================================================================
-     REMOVE CONNECTION
-     ========================================================================== */
-
-  async function removeConnection(
-    connectionId,
-    conversation
-  ) {
-
-    if (
-      !connectionId ||
-      !currentUser?.id
-    ) {
-      return;
-    }
-
-
-    try {
-
-      const {
-        error
-      } = await sb
-        .from("connections")
-        .delete()
-        .eq(
-          "id",
-          connectionId
-        )
-        .or(
-          `requester_id.eq.${currentUser.id},addressee_id.eq.${currentUser.id}`
-        );
-
-
-      if (error) {
-
-        console.error(
-          "Connection removal failed:",
-          error
-        );
-
-        throw error;
-
-      }
-
-
-      /* ----------------------------------------------------------------------
-         CLOSE ACTIVE CHAT IF SAME PERSON
-         ---------------------------------------------------------------------- */
-
-      if (
-        conversation &&
-        activeConversation ===
-          conversation
-      ) {
-
-        activeConversation =
-          null;
-
-        activeConversationId =
-          null;
-
-        activeOtherUser =
-          null;
-
-
-        if (messagesShell) {
-
-          messagesShell.classList.remove(
-            "chat-open"
-          );
+            </div>
+          `;
 
         }
+      )
+      .join("");
 
 
-        renderEmptyChat();
+  /* ------------------------------------------------------------------------
+     OPEN
+     ------------------------------------------------------------------------ */
 
-      }
+  convoItems
+    .querySelectorAll(".convo-item")
+    .forEach(item => {
 
+      item.addEventListener(
+        "click",
+        async event => {
 
-      /* ----------------------------------------------------------------------
-         REMOVE LOCAL SIDEBAR ITEM
-         ---------------------------------------------------------------------- */
-
-      conversations =
-        conversations.filter(
-          item =>
-            String(
-              item.connectionId
-            ) !==
-            String(connectionId)
-        );
-
-
-      sortConversations();
-
-      updateConversationCount();
-
-      renderConversationList();
-
-
-      console.log(
-        "IGCA connection removed:",
-        connectionId
-      );
-
-
-    } catch (error) {
-
-      alert(
-        error?.message ||
-        "Unable to remove connection."
-      );
-
-    }
-
-  }
-
-
-  /* ==========================================================================
-     GET / CREATE DIRECT CONVERSATION
-     SECURITY DEFINER RPC
-     ========================================================================== */
-
-  async function getOrCreateConversation(
-    otherUserId
-  ) {
-
-    if (!otherUserId) {
-
-      throw new Error(
-        "Other user ID is missing."
-      );
-
-    }
-
-
-    if (!currentUser?.id) {
-
-      currentUser =
-        await IGCA_API.user();
-
-    }
-
-
-    if (!currentUser?.id) {
-
-      throw new Error(
-        "You are not authenticated."
-      );
-
-    }
-
-
-    if (
-      String(
-        currentUser.id
-      ) ===
-      String(otherUserId)
-    ) {
-
-      throw new Error(
-        "You cannot message yourself."
-      );
-
-    }
-
-
-    /* ----------------------------------------------------------------------
-       CACHE
-       ---------------------------------------------------------------------- */
-
-    const cached =
-      conversations.find(
-        conversation =>
-          String(
-            conversation.otherUser?.id
-          ) ===
-            String(otherUserId) &&
-          conversation.conversationId
-      );
-
-
-    if (
-      cached?.conversationId
-    ) {
-
-      return cached.conversationId;
-
-    }
-
-
-    /* ----------------------------------------------------------------------
-       VERIFY ACCEPTED CONNECTION
-       ---------------------------------------------------------------------- */
-
-    const connection =
-      await IGCA_API.connectionStatus(
-        otherUserId
-      );
-
-
-    if (
-      !connection ||
-      connection.status !==
-        "accepted"
-    ) {
-
-      throw new Error(
-        "You can only message an accepted connection."
-      );
-
-    }
-
-
-    /* ----------------------------------------------------------------------
-       SECURE RPC
-       ---------------------------------------------------------------------- */
-
-    const {
-      data: conversationId,
-      error
-    } = await sb.rpc(
-      "create_direct_conversation",
-      {
-        p_other_user_id:
-          otherUserId
-      }
-    );
-
-
-    if (error) {
-
-      console.error(
-        "create_direct_conversation RPC failed:",
-        error
-      );
-
-      throw new Error(
-        error.message ||
-        "Unable to create conversation."
-      );
-
-    }
-
-
-    if (!conversationId) {
-
-      throw new Error(
-        "Conversation ID was not returned."
-      );
-
-    }
-
-
-    /* ----------------------------------------------------------------------
-       UPDATE CACHE
-       ---------------------------------------------------------------------- */
-
-    const localConversation =
-      conversations.find(
-        conversation =>
-          String(
-            conversation.otherUser?.id
-          ) ===
-          String(otherUserId)
-      );
-
-
-    if (localConversation) {
-
-      localConversation.conversationId =
-        conversationId;
-
-    }
-
-
-    return conversationId;
-
-  }
-
-
-  /* ==========================================================================
-     OPEN CONVERSATION
-     ========================================================================== */
-
-  async function openConversation(
-    conversation
-  ) {
-
-    if (
-      !conversation?.otherUser?.id
-    ) {
-      return;
-    }
-
-
-    activeConversation =
-      conversation;
-
-
-    activeOtherUser =
-      conversation.otherUser;
-
-
-    if (messagesShell) {
-
-      messagesShell.classList.add(
-        "chat-open"
-      );
-
-    }
-
-
-    renderChatLoading();
-
-
-    try {
-
-      if (
-        !conversation.conversationId
-      ) {
-
-        conversation.conversationId =
-          await getOrCreateConversation(
-            activeOtherUser.id
-          );
-
-      }
-
-
-      activeConversationId =
-        conversation.conversationId;
-
-
-      await markConversationRead(
-        activeConversationId
-      );
-
-
-      conversation.unreadCount =
-        0;
-
-
-      await renderChat();
-
-
-      subscribeToActiveConversation();
-
-
-      renderConversationList();
-
-
-    } catch (error) {
-
-      console.error(
-        "Open conversation error:",
-        error
-      );
-
-
-      if (chatWindow) {
-
-        chatWindow.innerHTML = `
-          <div class="chat-empty">
-
-            <div class="chat-empty-icon">
-              !
-            </div>
-
-            <h2>
-              Unable to open conversation
-            </h2>
-
-            <p>
-              ${escapeHTML(
-                error?.message ||
-                "Something went wrong."
-              )}
-            </p>
-
-          </div>
-        `;
-
-      }
-
-    }
-
-  }
-
-
-  /* ==========================================================================
-     RENDER CHAT
-     ========================================================================== */
-
-  async function renderChat() {
-
-    if (!activeConversationId) {
-      return;
-    }
-
-
-    const messages =
-      await IGCA_API.messages(
-        activeConversationId
-      );
-
-
-    const user =
-      activeOtherUser;
-
-
-    const name =
-      getName(user);
-
-
-    if (!chatWindow) {
-      return;
-    }
-
-
-    chatWindow.innerHTML = `
-
-      <header class="chat-header">
-
-        <div class="chat-header-main">
-
-          ${avatar(
-            name,
-            "avatar-sm"
-          )}
-
-          <div class="chat-header-info">
-
-            <div class="chat-header-name">
-              ${escapeHTML(name)}
-            </div>
-
-            <div class="chat-header-subtitle">
-              ${escapeHTML(
-                user?.headline ||
-                user?.account_type ||
-                "IGCA Member"
-              )}
-            </div>
-
-          </div>
-
-        </div>
-
-      </header>
-
-
-      <div
-        class="chat-body"
-        id="chat-body"
-      >
-
-        ${
-          messages?.length
-            ? messages
-                .map(renderMessage)
-                .join("")
-            : renderWelcome(name)
-        }
-
-      </div>
-
-
-      <div class="chat-input">
-
-        <input
-          id="chat-input-field"
-          type="text"
-          placeholder="Write a message..."
-          autocomplete="off"
-          maxlength="5000"
-        >
-
-        <button
-          id="send-btn"
-          class="btn btn-primary chat-send-btn"
-          type="button"
-        >
-          Send
-        </button>
-
-      </div>
-
-    `;
-
-
-    scrollChatToBottom();
-
-    attachMessageEvents();
-
-  }
-
-
-  /* ==========================================================================
-     WELCOME
-     ========================================================================== */
-
-  function renderWelcome(name) {
-
-    return `
-      <div
-        class="chat-empty"
-        style="min-height:100%;"
-      >
-
-        <div class="chat-empty-icon">
-          ${escapeHTML(
-            getInitials(name)
-          )}
-        </div>
-
-        <h2>
-          You're connected with
-          ${escapeHTML(name)}
-        </h2>
-
-        <p>
-          Start a professional conversation.
-        </p>
-
-      </div>
-    `;
-
-  }
-
-
-  /* ==========================================================================
-     MESSAGE HTML
-     ========================================================================== */
-
-  function renderMessage(
-    message
-  ) {
-
-    const mine =
-      String(
-        message.sender_id
-      ) ===
-      String(
-        currentUser?.id
-      );
-
-
-    return `
-      <div
-        class="message-row ${
-          mine
-            ? "mine"
-            : "theirs"
-        }"
-        data-message-id="${escapeHTML(
-          message.id || ""
-        )}"
-      >
-
-        <div
-          class="msg-bubble ${
-            mine
-              ? "msg-out"
-              : "msg-in"
-          }"
-        >
-
-          ${escapeHTML(
-            message.body
-          )}
-
-        </div>
-
-
-        <div class="msg-time">
-
-          ${escapeHTML(
-            formatTime(
-              message.created_at
+          if (
+            event.target.closest(
+              ".convo-remove-btn"
             )
-          )}
-
-        </div>
-
-      </div>
-    `;
-
-  }
-
-
-  /* ==========================================================================
-     SEND MESSAGE
-     ========================================================================== */
-
-  function attachMessageEvents() {
-
-    const input =
-      document.getElementById(
-        "chat-input-field"
-      );
-
-
-    const button =
-      document.getElementById(
-        "send-btn"
-      );
-
-
-    if (
-      !input ||
-      !button
-    ) {
-      return;
-    }
-
-
-    async function sendMessage() {
-
-      const text =
-        input.value.trim();
-
-
-      if (!text) {
-        return;
-      }
-
-
-      if (!activeConversationId) {
-
-        alert(
-          "Conversation is not ready yet."
-        );
-
-        return;
-
-      }
-
-
-      button.disabled =
-        true;
-
-      button.textContent =
-        "Sending...";
-
-
-      try {
-
-        const message =
-          await IGCA_API.sendMessage(
-            activeConversationId,
-            text
-          );
-
-
-        appendMessage(
-          message
-        );
-
-
-        if (
-          activeConversation
-        ) {
-
-          activeConversation.lastMessage =
-            message;
-
-        }
-
-
-        sortConversations();
-
-        renderConversationList();
-
-        updateConversationCount();
-
-
-        /* --------------------------------------------------------------------
-           RECEIVER NOTIFICATION
-           -------------------------------------------------------------------- */
-
-        const receiverId =
-          activeOtherUser?.id;
-
-
-        if (receiverId) {
-
-          try {
-
-            await createMessageNotification(
-              receiverId,
-              currentUser?.full_name ||
-              currentUser?.username ||
-              "IGCA Member",
-              text.length > 80
-                ? text.substring(
-                    0,
-                    80
-                  ) + "..."
-                : text
-            );
-
-          } catch (
-            notificationError
           ) {
-
-            console.error(
-              "Message notification failed:",
-              notificationError
-            );
-
+            return;
           }
 
-        }
+          const userId =
+            item.dataset.userId;
 
+          const conversation =
+            conversations.find(
+              entry =>
+                String(
+                  entry.otherUser?.id
+                ) === String(userId)
+            );
 
-        input.value =
-          "";
+          if (!conversation) {
+            return;
+          }
 
-        input.focus();
-
-
-      } catch (error) {
-
-        console.error(
-          "Send message error:",
-          error
-        );
-
-
-        alert(
-          error?.message ||
-          "Unable to send message."
-        );
-
-      } finally {
-
-        button.disabled =
-          false;
-
-        button.textContent =
-          "Send";
-
-      }
-
-    }
-
-
-    button.addEventListener(
-      "click",
-      sendMessage
-    );
-
-
-    input.addEventListener(
-      "keydown",
-      event => {
-
-        if (
-          event.key ===
-            "Enter" &&
-          !event.shiftKey
-        ) {
-
-          event.preventDefault();
-
-          sendMessage();
+          await openConversation(
+            conversation
+          );
 
         }
+      );
 
-      }
-    );
+    });
 
 
-    input.focus();
+  /* ------------------------------------------------------------------------
+     REMOVE
+     ------------------------------------------------------------------------ */
 
+  convoItems
+    .querySelectorAll(
+      ".convo-remove-btn"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        async event => {
+
+          event.stopPropagation();
+
+          const connectionId =
+            button.dataset
+              .removeConnection;
+
+          if (!connectionId) {
+            return;
+          }
+
+          const conversation =
+            conversations.find(
+              item =>
+                String(
+                  item.connectionId
+                ) ===
+                String(connectionId)
+            );
+
+          const name =
+            getName(
+              conversation?.otherUser
+            );
+
+          const confirmed =
+            window.confirm(
+              `Remove your connection with ${name}?`
+            );
+
+          if (!confirmed) {
+            return;
+          }
+
+          await removeConnection(
+            connectionId,
+            conversation
+          );
+
+        }
+      );
+
+    });
+
+}
+
+
+/* ==========================================================================
+   REMOVE CONNECTION
+   ========================================================================== */
+
+async function removeConnection(
+  connectionId,
+  conversation
+) {
+
+  if (
+    !connectionId ||
+    !currentUser?.id
+  ) {
+    return;
   }
 
-
-  /* ==========================================================================
-     MESSAGE NOTIFICATION
-     ========================================================================== */
-
-  async function createMessageNotification(
-    receiverId,
-    senderName,
-    messagePreview
-  ) {
-
-    if (!receiverId) {
-      return;
-    }
-
+  try {
 
     const {
       error
     } = await sb
-      .from("notifications")
-      .insert({
-
-        user_id:
-          receiverId,
-
-        title:
-          "New message",
-
-        message:
-          `${senderName}: ${messagePreview}`,
-
-        type:
-          "message",
-
-        is_read:
-          false,
-
-        created_at:
-          new Date().toISOString()
-
-      });
-
+      .from("connections")
+      .delete()
+      .eq(
+        "id",
+        connectionId
+      )
+      .or(
+        `requester_id.eq.${currentUser.id},addressee_id.eq.${currentUser.id}`
+      );
 
     if (error) {
+      throw error;
+    }
+
+    if (
+      conversation &&
+      activeConversation ===
+        conversation
+    ) {
+
+      activeConversation =
+        null;
+
+      activeConversationId =
+        null;
+
+      activeOtherUser =
+        null;
+
+      closeActiveRealtime();
+
+      const {
+        messagesShell
+      } = getDOM();
+
+      messagesShell?.classList.remove(
+        "chat-open"
+      );
+
+      renderEmptyChat();
+
+    }
+
+    conversations =
+      conversations.filter(
+        item =>
+          String(
+            item.connectionId
+          ) !==
+          String(connectionId)
+      );
+
+    sortConversations();
+
+    updateConversationCount();
+
+    renderConversationList();
+
+  } catch (error) {
+
+    console.error(
+      "Connection removal failed:",
+      error
+    );
+
+    alert(
+      error?.message ||
+      "Unable to remove connection."
+    );
+
+  }
+
+}
+
+
+/* ==========================================================================
+   GET / CREATE CONVERSATION
+   ========================================================================== */
+
+async function getOrCreateConversation(
+  otherUserId
+) {
+
+  if (!otherUserId) {
+    throw new Error(
+      "Other user ID is missing."
+    );
+  }
+
+  if (!currentUser?.id) {
+    currentUser =
+      await IGCA_API.user();
+  }
+
+  if (!currentUser?.id) {
+    throw new Error(
+      "You are not authenticated."
+    );
+  }
+
+  if (
+    String(currentUser.id) ===
+    String(otherUserId)
+  ) {
+    throw new Error(
+      "You cannot message yourself."
+    );
+  }
+
+
+  /* ------------------------------------------------------------------------
+     CACHE
+     ------------------------------------------------------------------------ */
+
+  const cached =
+    conversations.find(
+      conversation =>
+        String(
+          conversation.otherUser?.id
+        ) ===
+        String(otherUserId) &&
+        conversation.conversationId
+    );
+
+  if (
+    cached?.conversationId
+  ) {
+    return cached.conversationId;
+  }
+
+
+  /* ------------------------------------------------------------------------
+     ACCEPTED CONNECTION
+     ------------------------------------------------------------------------ */
+
+  const connection =
+    await IGCA_API.connectionStatus(
+      otherUserId
+    );
+
+  if (
+    !connection ||
+    connection.status !==
+      "accepted"
+  ) {
+
+    throw new Error(
+      "You can only message an accepted connection."
+    );
+
+  }
+
+
+  /* ------------------------------------------------------------------------
+     RPC
+     ------------------------------------------------------------------------ */
+
+  const {
+    data: conversationId,
+    error
+  } = await sb.rpc(
+    "create_direct_conversation",
+    {
+      p_other_user_id:
+        otherUserId
+    }
+  );
+
+  if (error) {
+
+    console.error(
+      "create_direct_conversation RPC failed:",
+      error
+    );
+
+    throw new Error(
+      error.message ||
+      "Unable to create conversation."
+    );
+
+  }
+
+  if (!conversationId) {
+    throw new Error(
+      "Conversation ID was not returned."
+    );
+  }
+
+
+  const local =
+    conversations.find(
+      conversation =>
+        String(
+          conversation.otherUser?.id
+        ) ===
+        String(otherUserId)
+    );
+
+  if (local) {
+    local.conversationId =
+      conversationId;
+  }
+
+  return conversationId;
+
+}
+
+
+/* ==========================================================================
+   OPEN CONVERSATION
+   ========================================================================== */
+
+async function openConversation(
+  conversation
+) {
+
+  if (
+    !conversation?.otherUser?.id
+  ) {
+    return;
+  }
+
+  activeConversation =
+    conversation;
+
+  activeOtherUser =
+    conversation.otherUser;
+
+  const {
+    messagesShell
+  } = getDOM();
+
+  messagesShell?.classList.add(
+    "chat-open"
+  );
+
+  renderChatLoading();
+
+  try {
+
+    if (
+      !conversation.conversationId
+    ) {
+
+      conversation.conversationId =
+        await getOrCreateConversation(
+          activeOtherUser.id
+        );
+
+    }
+
+    activeConversationId =
+      String(
+        conversation.conversationId
+      );
+
+    await markConversationRead(
+      activeConversationId
+    );
+
+    conversation.unreadCount =
+      0;
+
+    await renderChat();
+
+    subscribeToActiveConversation();
+
+    renderConversationList();
+
+  } catch (error) {
+
+    console.error(
+      "Open conversation error:",
+      error
+    );
+
+    const {
+      chatWindow
+    } = getDOM();
+
+    if (chatWindow) {
+
+      chatWindow.innerHTML = `
+        <div class="chat-empty">
+
+          <div class="chat-empty-icon">
+            !
+          </div>
+
+          <h2>
+            Unable to open conversation
+          </h2>
+
+          <p>
+            ${escapeHTML(
+              error?.message ||
+              "Something went wrong."
+            )}
+          </p>
+
+        </div>
+      `;
+
+    }
+
+  }
+
+}
+
+
+/* ==========================================================================
+   RENDER CHAT
+   ========================================================================== */
+
+async function renderChat() {
+
+  if (!activeConversationId) {
+    return;
+  }
+
+  const {
+    chatWindow
+  } = getDOM();
+
+  if (!chatWindow) {
+    return;
+  }
+
+  const messages =
+    await IGCA_API.messages(
+      activeConversationId
+    );
+
+  const user =
+    activeOtherUser;
+
+  const name =
+    getName(user);
+
+  chatWindow.innerHTML = `
+
+    <header
+      class="chat-header"
+      id="chat-header"
+    >
+
+      <div
+        class="chat-header-main"
+        style="cursor:pointer;"
+        id="chat-profile-link"
+      >
+
+        ${avatar(
+          user,
+          "avatar-sm"
+        )}
+
+        <div class="chat-header-info">
+
+          <div class="chat-header-name">
+            ${escapeHTML(name)}
+          </div>
+
+          <div class="chat-header-subtitle">
+            ${escapeHTML(
+              user?.headline ||
+              user?.account_type ||
+              "IGCA Member"
+            )}
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+    <div
+      class="chat-body"
+      id="chat-body"
+    >
+
+      ${
+        messages?.length
+          ? messages
+              .map(renderMessage)
+              .join("")
+          : renderWelcome(name)
+      }
+
+    </div>
+
+    <div class="chat-input">
+
+      <input
+        id="chat-input-field"
+        type="text"
+        placeholder="Write a message..."
+        autocomplete="off"
+        maxlength="5000"
+      >
+
+      <button
+        id="send-btn"
+        class="btn btn-primary chat-send-btn"
+        type="button"
+      >
+        Send
+      </button>
+
+    </div>
+
+  `;
+
+  scrollChatToBottom();
+
+  attachChatHeader();
+
+  attachMessageEvents();
+
+}
+
+
+/* ==========================================================================
+   CHAT HEADER
+   ========================================================================== */
+
+function attachChatHeader() {
+
+  const element =
+    document.getElementById(
+      "chat-profile-link"
+    );
+
+  if (
+    !element ||
+    !activeOtherUser?.id
+  ) {
+    return;
+  }
+
+  element.addEventListener(
+    "click",
+    () => {
+
+      window.location.href =
+        `profile.html?id=${encodeURIComponent(
+          activeOtherUser.id
+        )}`;
+
+    }
+  );
+
+}
+
+
+/* ==========================================================================
+   WELCOME
+   ========================================================================== */
+
+function renderWelcome(name) {
+
+  return `
+    <div
+      class="chat-empty"
+      style="min-height:100%;"
+    >
+
+      <div class="chat-empty-icon">
+        ${escapeHTML(
+          getInitials(name)
+        )}
+      </div>
+
+      <h2>
+        You're connected with
+        ${escapeHTML(name)}
+      </h2>
+
+      <p>
+        Start a professional conversation.
+      </p>
+
+    </div>
+  `;
+
+}
+
+
+/* ==========================================================================
+   MESSAGE HTML
+   ========================================================================== */
+
+function renderMessage(
+  message
+) {
+
+  const mine =
+    String(
+      message.sender_id
+    ) ===
+    String(
+      currentUser?.id
+    );
+
+  const messageId =
+    String(
+      message.id || ""
+    );
+
+  const read =
+    Boolean(
+      message.read_at
+    );
+
+  return `
+    <div
+      class="message-row ${
+        mine
+          ? "mine"
+          : "theirs"
+      }"
+      data-message-id="${escapeHTML(
+        messageId
+      )}"
+    >
+
+      <div
+        class="msg-bubble ${
+          mine
+            ? "msg-out"
+            : "msg-in"
+        }"
+      >
+
+        ${escapeHTML(
+          message.body
+        )}
+
+      </div>
+
+      <div class="msg-time">
+
+        ${escapeHTML(
+          formatTime(
+            message.created_at
+          )
+        )}
+
+        ${
+          mine
+            ? `
+              <span
+                class="message-status"
+                title="${
+                  read
+                    ? "Seen"
+                    : "Sent"
+                }"
+                style="
+                  margin-left:4px;
+                  opacity:.75;
+                "
+              >
+                ${read ? "✓✓" : "✓"}
+              </span>
+            `
+            : ""
+        }
+
+        ${
+          mine && message.id
+            ? `
+              <button
+                type="button"
+                class="delete-message-btn"
+                data-message-id="${escapeHTML(
+                  messageId
+                )}"
+                title="Delete message"
+                style="
+                  border:0;
+                  background:transparent;
+                  cursor:pointer;
+                  margin-left:6px;
+                  opacity:.55;
+                "
+              >
+                🗑
+              </button>
+            `
+            : ""
+        }
+
+      </div>
+
+    </div>
+  `;
+
+}
+
+
+/* ==========================================================================
+   SEND / DELETE EVENTS
+   ========================================================================== */
+
+function attachMessageEvents() {
+
+  const input =
+    document.getElementById(
+      "chat-input-field"
+    );
+
+  const button =
+    document.getElementById(
+      "send-btn"
+    );
+
+  if (
+    !input ||
+    !button
+  ) {
+    return;
+  }
+
+
+  async function sendMessage() {
+
+    const text =
+      input.value.trim();
+
+    if (!text) {
+      return;
+    }
+
+    if (!activeConversationId) {
+
+      alert(
+        "Conversation is not ready yet."
+      );
+
+      return;
+
+    }
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Sending...";
+
+    try {
+
+      const message =
+        await IGCA_API.sendMessage(
+          activeConversationId,
+          text
+        );
+
+      /*
+       * Add immediately.
+       * Realtime duplicate is prevented
+       * by appendMessage().
+       */
+
+      appendMessage(message);
+
+      if (
+        activeConversation
+      ) {
+
+        activeConversation.lastMessage =
+          message;
+
+      }
+
+      input.value =
+        "";
+
+      input.focus();
+
+      sortConversations();
+
+      renderConversationList();
+
+
+      /* --------------------------------------------------------------------
+         NOTIFICATION
+         -------------------------------------------------------------------- */
+
+      const receiverId =
+        activeOtherUser?.id;
+
+      if (receiverId) {
+
+        try {
+
+          await createMessageNotification(
+            receiverId,
+            getName(currentUser),
+            text.length > 80
+              ? text.substring(0, 80) + "..."
+              : text
+          );
+
+        } catch (notificationError) {
+
+          console.error(
+            "Message notification failed:",
+            notificationError
+          );
+
+        }
+
+      }
+
+    } catch (error) {
 
       console.error(
-        "Message notification insert failed:",
+        "Send message error:",
         error
       );
 
-      throw error;
+      alert(
+        error?.message ||
+        "Unable to send message."
+      );
+
+    } finally {
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "Send";
 
     }
 
   }
 
 
-  /* ==========================================================================
-     APPEND MESSAGE
-     ========================================================================== */
-
-  function appendMessage(
-    message
-  ) {
-
-    const body =
-      document.getElementById(
-        "chat-body"
-      );
+  button.addEventListener(
+    "click",
+    sendMessage
+  );
 
 
-    if (!body) {
-      return;
-    }
+  input.addEventListener(
+    "keydown",
+    event => {
 
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
 
-    if (
-      String(
-        message.conversation_id
-      ) !==
-      String(
-        activeConversationId
-      )
-    ) {
-      return;
-    }
+        event.preventDefault();
 
-
-    if (
-      message.id &&
-      body.querySelector(
-        `[data-message-id="${CSS.escape(
-          String(message.id)
-        )}"]`
-      )
-    ) {
-
-      return;
-
-    }
-
-
-    body
-      .querySelectorAll(
-        ".chat-empty"
-      )
-      .forEach(
-        element =>
-          element.remove()
-      );
-
-
-    body.insertAdjacentHTML(
-      "beforeend",
-      renderMessage(message)
-    );
-
-
-    scrollChatToBottom();
-
-  }
-
-
-  /* ==========================================================================
-     SCROLL
-     ========================================================================== */
-
-  function scrollChatToBottom() {
-
-    const body =
-      document.getElementById(
-        "chat-body"
-      );
-
-
-    if (!body) {
-      return;
-    }
-
-
-    requestAnimationFrame(
-      () => {
-
-        body.scrollTop =
-          body.scrollHeight;
+        sendMessage();
 
       }
-    );
 
+    }
+  );
+
+
+  document
+    .querySelectorAll(
+      ".delete-message-btn"
+    )
+    .forEach(button => {
+
+      button.addEventListener(
+        "click",
+        async event => {
+
+          event.stopPropagation();
+
+          const messageId =
+            button.dataset.messageId;
+
+          if (!messageId) {
+            return;
+          }
+
+          await deleteMessage(
+            messageId
+          );
+
+        }
+      );
+
+    });
+
+
+  input.focus();
+
+}
+
+
+/* ==========================================================================
+   DELETE MESSAGE
+   ========================================================================== */
+
+async function deleteMessage(
+  messageId
+) {
+
+  if (
+    !messageId ||
+    !currentUser?.id
+  ) {
+    return;
   }
 
+  const confirmed =
+    window.confirm(
+      "Delete this message?"
+    );
 
-  /* ==========================================================================
-     MARK READ
-     ========================================================================== */
+  if (!confirmed) {
+    return;
+  }
 
-  async function markConversationRead(
-    conversationId
-  ) {
-
-    if (
-      !conversationId ||
-      !currentUser?.id
-    ) {
-      return;
-    }
-
+  try {
 
     const {
       error
     } = await sb
       .from("messages")
-      .update({
-
-        read_at:
-          new Date().toISOString()
-
-      })
+      .delete()
       .eq(
-        "conversation_id",
-        conversationId
+        "id",
+        messageId
       )
-      .neq(
+      .eq(
         "sender_id",
         currentUser.id
-      )
-      .is(
-        "read_at",
-        null
       );
-
 
     if (error) {
+      throw error;
+    }
 
-      console.error(
-        "Mark messages read failed:",
-        error
+    const element =
+      document.querySelector(
+        `[data-message-id="${CSS.escape(
+          String(messageId)
+        )}"]`
       );
 
-    }
+    element?.remove();
+
+  } catch (error) {
+
+    console.error(
+      "Message delete failed:",
+      error
+    );
+
+    alert(
+      error?.message ||
+      "Unable to delete message."
+    );
+
+  }
+
+}
+
+
+/* ==========================================================================
+   NOTIFICATION
+   ========================================================================== */
+
+async function createMessageNotification(
+  receiverId,
+  senderName,
+  messagePreview
+) {
+  if (!receiverId) {
+    return;
+  }
+
+  const { error } = await sb
+    .from("notifications")
+    .insert({
+      user_id: receiverId,
+      title: "New message",
+      body: `${senderName}: ${messagePreview}`,
+      type: "message",
+      read_at: null,
+      created_at: new Date().toISOString()
+    });
+
+  if (error) {
+    throw error;
+  }
+}
+
+/* ==========================================================================
+   APPEND MESSAGE
+   ========================================================================== */
+
+function appendMessage(
+  message
+) {
+
+  if (!message) {
+    return;
+  }
+
+  if (
+    String(
+      message.conversation_id
+    ) !==
+    String(
+      activeConversationId
+    )
+  ) {
+    return;
+  }
+
+  const body =
+    document.getElementById(
+      "chat-body"
+    );
+
+  if (!body) {
+    return;
+  }
+
+
+  /* ------------------------------------------------------------------------
+     DUPLICATE PROTECTION
+     ------------------------------------------------------------------------ */
+
+  if (
+    message.id &&
+    body.querySelector(
+      `[data-message-id="${CSS.escape(
+        String(message.id)
+      )}"]`
+    )
+  ) {
+
+    /*
+     * If realtime delivers a message
+     * already rendered locally, don't
+     * render it again.
+     */
+
+    return;
 
   }
 
 
-  /* ==========================================================================
-     ACTIVE CONVERSATION REALTIME
-     ========================================================================== */
+  body
+    .querySelectorAll(
+      ".chat-empty"
+    )
+    .forEach(
+      element =>
+        element.remove()
+    );
 
-  function subscribeToActiveConversation() {
 
-    if (!activeConversationId) {
-      return;
+  body.insertAdjacentHTML(
+    "beforeend",
+    renderMessage(message)
+  );
+
+
+  /* Attach delete button if needed */
+
+  body
+    .querySelectorAll(
+      `.delete-message-btn[data-message-id="${CSS.escape(
+        String(message.id)
+      )}"]`
+    )
+    .forEach(button => {
+
+      button.onclick =
+        () =>
+          deleteMessage(
+            message.id
+          );
+
+    });
+
+
+  scrollChatToBottom();
+
+}
+
+
+/* ==========================================================================
+   SCROLL
+   ========================================================================== */
+
+function scrollChatToBottom() {
+
+  const body =
+    document.getElementById(
+      "chat-body"
+    );
+
+  if (!body) {
+    return;
+  }
+
+  requestAnimationFrame(
+    () => {
+
+      body.scrollTop =
+        body.scrollHeight;
+
     }
+  );
+
+}
 
 
-    if (
+/* ==========================================================================
+   MARK READ
+   ========================================================================== */
+
+async function markConversationRead(
+  conversationId
+) {
+
+  if (
+    !conversationId ||
+    !currentUser?.id
+  ) {
+    return;
+  }
+
+  const {
+    error
+  } = await sb
+    .from("messages")
+    .update({
+
+      read_at:
+        new Date().toISOString()
+
+    })
+    .eq(
+      "conversation_id",
+      conversationId
+    )
+    .neq(
+      "sender_id",
+      currentUser.id
+    )
+    .is(
+      "read_at",
+      null
+    );
+
+  if (error) {
+
+    console.error(
+      "Mark messages read failed:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ==========================================================================
+   ACTIVE REALTIME
+   ========================================================================== */
+
+function subscribeToActiveConversation() {
+
+  if (!activeConversationId) {
+    return;
+  }
+
+  if (
+    activeMessageChannel
+  ) {
+
+    sb.removeChannel(
       activeMessageChannel
-    ) {
-
-      sb.removeChannel(
-        activeMessageChannel
-      );
-
-      activeMessageChannel =
-        null;
-
-    }
-
-
-    const channelName =
-      "igca-active-message-" +
-      activeConversationId +
-      "-" +
-      Date.now();
-
-
-    activeMessageChannel =
-      sb
-        .channel(
-          channelName
-        )
-        .on(
-          "postgres_changes",
-          {
-            event:
-              "INSERT",
-
-            schema:
-              "public",
-
-            table:
-              "messages",
-
-            filter:
-              `conversation_id=eq.${activeConversationId}`
-
-          },
-          async payload => {
-
-            const message =
-              payload?.new;
-
-
-            if (!message) {
-              return;
-            }
-
-
-            appendMessage(
-              message
-            );
-
-
-            if (
-              String(
-                message.sender_id
-              ) !==
-              String(
-                currentUser?.id
-              )
-            ) {
-
-              await markConversationRead(
-                activeConversationId
-              );
-
-            }
-
-
-            if (
-              activeConversation
-            ) {
-
-              activeConversation.lastMessage =
-                message;
-
-              activeConversation.unreadCount =
-                0;
-
-            }
-
-
-            sortConversations();
-
-            renderConversationList();
-
-          }
-        )
-        .subscribe(
-          status => {
-
-            console.log(
-              "IGCA active message realtime:",
-              status
-            );
-
-          }
-        );
+    );
 
   }
 
+  activeMessageChannel =
+    sb
+      .channel(
+        `igca-active-message-${activeConversationId}-${Date.now()}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter:
+            `conversation_id=eq.${activeConversationId}`
+        },
+        async payload => {
 
-  /* ==========================================================================
-     GLOBAL MESSAGE REALTIME
-     ========================================================================== */
+          const message =
+            payload?.new;
 
-  function subscribeToGlobalMessages() {
+          if (!message) {
+            return;
+          }
 
-    if (
-      allMessageChannel
-    ) {
+          appendMessage(
+            message
+          );
 
-      sb.removeChannel(
-        allMessageChannel
+
+          if (
+            String(
+              message.sender_id
+            ) !==
+            String(currentUser?.id)
+          ) {
+
+            await markConversationRead(
+              activeConversationId
+            );
+
+          }
+
+
+          if (
+            activeConversation
+          ) {
+
+            activeConversation.lastMessage =
+              message;
+
+            activeConversation.unreadCount =
+              0;
+
+          }
+
+          sortConversations();
+
+          renderConversationList();
+
+        }
+      )
+      .subscribe(
+        status => {
+
+          console.log(
+            "IGCA active message realtime:",
+            status
+          );
+
+        }
       );
 
-      allMessageChannel =
-        null;
-
-    }
+}
 
 
-    allMessageChannel =
-      sb
-        .channel(
-          "igca-global-messages-" +
-          Date.now()
-        )
-        .on(
-          "postgres_changes",
-          {
-            event:
-              "INSERT",
+/* ==========================================================================
+   GLOBAL REALTIME
+   ========================================================================== */
 
-            schema:
-              "public",
+function subscribeToGlobalMessages() {
 
-            table:
-              "messages"
+  if (
+    allMessageChannel
+  ) {
 
-          },
-          async payload => {
+    sb.removeChannel(
+      allMessageChannel
+    );
 
-            const message =
-              payload?.new;
+  }
 
+  allMessageChannel =
+    sb
+      .channel(
+        `igca-global-messages-${Date.now()}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages"
+        },
+        async payload => {
 
-            if (!message) {
-              return;
-            }
+          const message =
+            payload?.new;
 
-
-            /*
-             * Own messages are already rendered.
-             */
-
-            if (
-              String(
-                message.sender_id
-              ) ===
-              String(
-                currentUser?.id
-              )
-            ) {
-
-              return;
-
-            }
+          if (!message) {
+            return;
+          }
 
 
-            let conversation =
+          /*
+           * Ignore own message.
+           */
+
+          if (
+            String(
+              message.sender_id
+            ) ===
+            String(currentUser?.id)
+          ) {
+            return;
+          }
+
+
+          let conversation =
+            conversations.find(
+              item =>
+                String(
+                  item.conversationId
+                ) ===
+                String(
+                  message.conversation_id
+                )
+            );
+
+
+          /*
+           * If conversation wasn't loaded,
+           * refresh conversations.
+           */
+
+          if (!conversation) {
+
+            await loadConversations();
+
+            conversation =
               conversations.find(
                 item =>
                   String(
@@ -2461,89 +2469,224 @@ document.addEventListener("DOMContentLoaded", async () => {
                   )
               );
 
-
-            /*
-             * Conversation may have been
-             * created by the other user.
-             */
-
-            if (!conversation) {
-
-              await loadConversations();
-
-              conversation =
-                conversations.find(
-                  item =>
-                    String(
-                      item.conversationId
-                    ) ===
-                    String(
-                      message.conversation_id
-                    )
-                );
-
-            }
+          }
 
 
-            if (!conversation) {
-              return;
-            }
+          if (!conversation) {
+            return;
+          }
 
 
-            conversation.lastMessage =
-              message;
+          conversation.lastMessage =
+            message;
 
 
-            if (
-              String(
-                activeConversationId
-              ) !==
-              String(
-                message.conversation_id
-              )
-            ) {
+          if (
+            String(
+              activeConversationId
+            ) !==
+            String(
+              message.conversation_id
+            )
+          ) {
 
-              conversation.unreadCount =
-                Number(
-                  conversation.unreadCount ||
-                  0
-                ) + 1;
-
-            }
-
-
-            sortConversations();
-
-            renderConversationList();
-
-            updateConversationCount();
+            conversation.unreadCount =
+              Number(
+                conversation.unreadCount || 0
+              ) + 1;
 
           }
-        )
-        .subscribe(
-          status => {
 
-            console.log(
-              "IGCA global message realtime:",
-              status
-            );
 
-          }
-        );
+          sortConversations();
+
+          renderConversationList();
+
+          updateConversationCount();
+
+        }
+      )
+      .subscribe(
+        status => {
+
+          console.log(
+            "IGCA global message realtime:",
+            status
+          );
+
+        }
+      );
+
+}
+
+
+/* ==========================================================================
+   NOTIFICATION REALTIME
+   ========================================================================== */
+
+function subscribeToNotifications() {
+
+  if (!currentUser?.id) {
+    return;
+  }
+
+  if (
+    notificationChannel
+  ) {
+
+    sb.removeChannel(
+      notificationChannel
+    );
 
   }
 
+  notificationChannel =
+    sb
+      .channel(
+        `igca-message-notifications-${Date.now()}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter:
+            `user_id=eq.${currentUser.id}`
+        },
+        payload => {
 
-  /* ==========================================================================
-     NOTIFICATION REALTIME
-     ========================================================================== */
+          const notification =
+            payload?.new;
 
-  function subscribeToNotifications() {
+          if (!notification) {
+            return;
+          }
 
-    if (!currentUser?.id) {
+          if (
+            notification.type !==
+            "message"
+          ) {
+            return;
+          }
+
+          console.log(
+            "New message notification:",
+            notification
+          );
+
+        }
+      )
+      .subscribe(
+        status => {
+
+          console.log(
+            "IGCA notification realtime:",
+            status
+          );
+
+        }
+      );
+
+}
+
+
+/* ==========================================================================
+   CLOSE REALTIME
+   ========================================================================== */
+
+function closeActiveRealtime() {
+
+  if (
+    activeMessageChannel
+  ) {
+
+    sb.removeChannel(
+      activeMessageChannel
+    );
+
+    activeMessageChannel =
+      null;
+
+  }
+
+}
+
+
+/* ==========================================================================
+   SEARCH
+   ========================================================================== */
+
+document.addEventListener(
+  "input",
+  event => {
+
+    if (
+      event.target?.id !==
+      "conversation-search-input"
+    ) {
       return;
     }
 
+    const query =
+      event.target.value
+        .trim()
+        .toLowerCase();
+
+    document
+      .querySelectorAll(
+        ".convo-item"
+      )
+      .forEach(item => {
+
+        const name =
+          item
+            .querySelector(
+              ".convo-name"
+            )
+            ?.textContent
+            ?.toLowerCase() ||
+          "";
+
+        item.style.display =
+          !query ||
+          name.includes(query)
+            ? ""
+            : "none";
+
+      });
+
+  }
+);
+
+
+/* ==========================================================================
+   CLEANUP
+   ========================================================================== */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    if (
+      activeMessageChannel
+    ) {
+
+      sb.removeChannel(
+        activeMessageChannel
+      );
+
+    }
+
+    if (
+      allMessageChannel
+    ) {
+
+      sb.removeChannel(
+        allMessageChannel
+      );
+
+    }
 
     if (
       notificationChannel
@@ -2553,172 +2696,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         notificationChannel
       );
 
-      notificationChannel =
-        null;
-
     }
 
-
-    notificationChannel =
-      sb
-        .channel(
-          "igca-message-notifications-" +
-          Date.now()
-        )
-        .on(
-          "postgres_changes",
-          {
-            event:
-              "INSERT",
-
-            schema:
-              "public",
-
-            table:
-              "notifications",
-
-            filter:
-              `user_id=eq.${currentUser.id}`
-
-          },
-          payload => {
-
-            const notification =
-              payload?.new;
-
-
-            if (!notification) {
-              return;
-            }
-
-
-            if (
-              notification.type !==
-              "message"
-            ) {
-
-              return;
-
-            }
-
-
-            console.log(
-              "New message notification:",
-              notification
-            );
-
-          }
-        )
-        .subscribe(
-          status => {
-
-            console.log(
-              "IGCA notification realtime:",
-              status
-            );
-
-          }
-        );
-
   }
-
-
-  /* ==========================================================================
-     SEARCH
-     ========================================================================== */
-
-  if (searchInput) {
-
-    searchInput.addEventListener(
-      "input",
-      () => {
-
-        const query =
-          searchInput.value
-            .trim()
-            .toLowerCase();
-
-
-        document
-          .querySelectorAll(
-            ".convo-item"
-          )
-          .forEach(
-            item => {
-
-              const name =
-                item
-                  .querySelector(
-                    ".convo-name"
-                  )
-                  ?.textContent
-                  ?.toLowerCase() ||
-                "";
-
-
-              item.style.display =
-                !query ||
-                name.includes(query)
-                  ? ""
-                  : "none";
-
-            }
-          );
-
-      }
-    );
-
-  }
-
-
-  /* ==========================================================================
-     CLEANUP
-     ========================================================================== */
-
-  window.addEventListener(
-    "beforeunload",
-    () => {
-
-      if (
-        activeMessageChannel
-      ) {
-
-        sb.removeChannel(
-          activeMessageChannel
-        );
-
-      }
-
-
-      if (
-        allMessageChannel
-      ) {
-
-        sb.removeChannel(
-          allMessageChannel
-        );
-
-      }
-
-
-      if (
-        notificationChannel
-      ) {
-
-        sb.removeChannel(
-          notificationChannel
-        );
-
-      }
-
-    }
-  );
-
-
-  /* ==========================================================================
-     START
-     ========================================================================== */
-
-  await loadConversations();
-
-});
+);
