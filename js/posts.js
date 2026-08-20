@@ -1775,6 +1775,34 @@
     return escapeHTML(value);
   }
 
+// Feed ke Saare Posts Fetch Karein
+async function loadAllPosts() {
+    const { data: posts, error } = await supabase
+        .from('posts')
+        .select(`
+            *,
+            profiles:user_id (full_name, avatar_url)
+        `)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Posts load nahi hue:", error);
+        return;
+    }
+    renderPosts(posts, 'feed-container');
+}
+
+// User Profile ke Specific Posts Fetch Karein
+async function loadUserPosts(userId) {
+    const { data: posts, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) return;
+    renderPosts(posts, 'profile-posts-container');
+}
 
   /* ========================================================================
      CLEANUP
