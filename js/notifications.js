@@ -1,17 +1,20 @@
 /* ==========================================================================
    IGCA — Notifications
-   Live Supabase Notifications
+   Realtime Supabase Notifications
    ========================================================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
-
   "use strict";
 
-  App.mountShell("notifications.html");
+  /* ========================================================================
+     SHELL
+     ======================================================================== */
 
-  const list =
-    document.getElementById("notif-list");
+  if (typeof App !== "undefined" && App.mountShell) {
+    App.mountShell("notifications.html");
+  }
 
+  const list = document.getElementById("notif-list");
   const markAllButton =
     document.getElementById("mark-all-read");
 
@@ -19,112 +22,86 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error(
       "IGCA Notifications: #notif-list not found."
     );
-
     return;
   }
-
 
   /* ========================================================================
      ICONS
      ======================================================================== */
 
   const icons = {
-
     connection: `
-      <svg viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
         <circle cx="12" cy="8" r="4"></circle>
         <path d="M4 21v-1a8 8 0 0 1 16 0v1"></path>
       </svg>
     `,
 
-    message: `
-      <svg viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
+    follow: `
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <circle cx="9" cy="8" r="3"></circle>
+        <path d="M3 21v-1a6 6 0 0 1 12 0v1"></path>
+        <path d="M16 11h5"></path>
+        <path d="M18.5 8.5v5"></path>
+      </svg>
+    `,
+
+    like: `
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M20.8 8.7c0 5.5-8.8 10.3-8.8 10.3S3.2 14.2 3.2 8.7
+        A4.7 4.7 0 0 1 12 6.2a4.7 4.7 0 0 1 8.8 2.5z"></path>
+      </svg>
+    `,
+
+    comment: `
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
       </svg>
     `,
 
-    opportunity: `
-      <svg viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 14.3l-4.8 2.6.9-5.4-3.9-3.8 5.4-.8z"></path>
-      </svg>
-    `,
-
-    appointment: `
-      <svg viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
-        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-        <path d="M16 3v4"></path>
-        <path d="M8 3v4"></path>
-        <path d="M3 10h18"></path>
+    message: `
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
       </svg>
     `,
 
     activity: `
-      <svg viewBox="0 0 24 24"
-           fill="none"
-           stroke="currentColor"
-           stroke-width="2"
-           stroke-linecap="round"
-           stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round">
         <circle cx="12" cy="12" r="9"></circle>
         <path d="M12 8v4l3 2"></path>
       </svg>
-    `,
-
-    
-system: `
-  <svg viewBox="0 0 24 24"
-       fill="none"
-       stroke="currentColor"
-       stroke-width="2"
-       stroke-linecap="round"
-       stroke-linejoin="round">
-    <circle cx="12" cy="12" r="9"></circle>
-    <path d="M12 8v4l3 2"></path>
-  </svg>
-`,
-
-follow: `
-  <svg viewBox="0 0 24 24"
-       fill="none"
-       stroke="currentColor"
-       stroke-width="2"
-       stroke-linecap="round"
-       stroke-linejoin="round">
-    <circle cx="9" cy="8" r="3"></circle>
-    <path d="M3 21v-1a6 6 0 0 1 12 0v1"></path>
-    <path d="M16 11h5"></path>
-    <path d="M18.5 8.5v5"></path>
-  </svg>
-`
+    `
   };
-
 
   /* ========================================================================
      HELPERS
      ======================================================================== */
 
   function escapeHTML(value) {
-
     return String(value ?? "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -133,12 +110,8 @@ follow: `
       .replace(/'/g, "&#039;");
   }
 
-
   function formatTime(value) {
-
-    if (!value) {
-      return "";
-    }
+    if (!value) return "";
 
     const date = new Date(value);
 
@@ -155,158 +128,61 @@ follow: `
     });
   }
 
-
   function getIcon(type) {
-
     return icons[type] || icons.activity;
   }
 
-
   /* ========================================================================
-     RENDER
+     BELL COUNT
      ======================================================================== */
 
-  function renderNotifications(notifications) {
+  function updateBellCount(count) {
+    count = Number(count) || 0;
 
-    if (!Array.isArray(notifications)) {
-      notifications = [];
-    }
+    const selectors = [
+      "#notification-count",
+      "#notification-badge",
+      ".notification-count",
+      ".notification-badge",
+      "[data-notification-count]"
+    ];
 
+    const elements = document.querySelectorAll(
+      selectors.join(",")
+    );
 
-    if (!notifications.length) {
+    elements.forEach(element => {
+      element.textContent =
+        count > 99 ? "99+" : String(count);
 
-      list.innerHTML = `
-        <div class="notifications-empty">
-          <div class="notifications-empty-icon">
-            ${getIcon("activity")}
-          </div>
+      element.hidden = count <= 0;
 
-          <h3>No notifications yet</h3>
+      element.classList.toggle(
+        "has-notifications",
+        count > 0
+      );
+    });
 
-          <p>
-            You're all caught up. New activity will appear here.
-          </p>
-        </div>
-      `;
+    window.IGCA_NOTIFICATION_COUNT = count;
 
-      updateMarkAllButton(0);
-
-      return;
-    }
-
-
-    const unreadCount =
-      notifications.filter(
-        item => !item.read_at
-      ).length;
-
-
-    list.innerHTML =
-      notifications.map(notification => {
-
-        const unread =
-          !notification.read_at;
-
-        return `
-          <article
-            class="notif-item ${unread ? "notif-unread" : ""}"
-            data-id="${escapeHTML(notification.id)}"
-          >
-
-            <div class="notif-icon">
-              ${getIcon(notification.type)}
-            </div>
-
-
-            <div class="notif-content">
-
-              <div class="notif-top">
-
-                <h3 class="notif-title">
-                  ${escapeHTML(
-                    notification.title ||
-                    "Notification"
-                  )}
-                </h3>
-
-                ${
-                  unread
-                    ? `
-                      <span
-                        class="notif-unread-dot"
-                        aria-label="Unread"
-                      ></span>
-                    `
-                    : ""
-                }
-
-              </div>
-
-
-              ${
-                notification.body
-                  ? `
-                    <p class="notif-body">
-                      ${escapeHTML(
-                        notification.body
-                      )}
-                    </p>
-                  `
-                  : ""
-              }
-
-
-              <div class="notif-bottom">
-
-                <time class="notif-time">
-                  ${escapeHTML(
-                    formatTime(
-                      notification.created_at
-                    )
-                  )}
-                </time>
-
-
-                ${
-                  notification.link
-                    ? `
-                      <a
-                        href="${escapeHTML(
-                          notification.link
-                        )}"
-                        class="notif-view"
-                      >
-                        View
-                      </a>
-                    `
-                    : ""
-                }
-
-              </div>
-
-            </div>
-
-          </article>
-        `;
-
-      }).join("");
-
-
-    updateMarkAllButton(unreadCount);
-
-    attachNotificationClicks();
+    window.dispatchEvent(
+      new CustomEvent(
+        "igca:notification-count",
+        {
+          detail: { count }
+        }
+      )
+    );
   }
-
 
   /* ========================================================================
      MARK ALL BUTTON
      ======================================================================== */
 
   function updateMarkAllButton(unreadCount) {
+    if (!markAllButton) return;
 
-    if (!markAllButton) {
-      return;
-    }
+    unreadCount = Number(unreadCount) || 0;
 
     markAllButton.disabled =
       unreadCount === 0;
@@ -317,36 +193,209 @@ follow: `
         : "All notifications read";
   }
 
+  /* ========================================================================
+     RENDER
+     ======================================================================== */
+
+  function renderNotifications(
+    notifications
+  ) {
+    if (!Array.isArray(notifications)) {
+      notifications = [];
+    }
+
+    console.log(
+      "IGCA rendering notifications:",
+      notifications.length
+    );
+
+    if (!notifications.length) {
+      list.innerHTML = `
+        <div class="notifications-empty">
+          <div class="notifications-empty-icon">
+            ${getIcon("activity")}
+          </div>
+
+          <h3>No notifications yet</h3>
+
+          <p>
+            You're all caught up.
+            New activity will appear here.
+          </p>
+        </div>
+      `;
+
+      updateMarkAllButton(0);
+      updateBellCount(0);
+
+      return;
+    }
+
+    const unreadCount =
+      notifications.filter(
+        notification =>
+          !notification.read_at
+      ).length;
+
+    list.innerHTML =
+      notifications
+        .map(notification => {
+          const unread =
+            !notification.read_at;
+
+          return `
+            <article
+              class="notif-item ${
+                unread
+                  ? "notif-unread"
+                  : ""
+              }"
+              data-id="${escapeHTML(
+                notification.id
+              )}"
+            >
+
+              <div class="notif-icon">
+                ${getIcon(
+                  notification.type
+                )}
+              </div>
+
+              <div class="notif-content">
+
+                <div class="notif-top">
+
+                  <h3 class="notif-title">
+                    ${escapeHTML(
+                      notification.title ||
+                      "Notification"
+                    )}
+                  </h3>
+
+                  ${
+                    unread
+                      ? `
+                        <span
+                          class="notif-unread-dot"
+                          aria-label="Unread"
+                        ></span>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+                ${
+                  notification.body
+                    ? `
+                      <p class="notif-body">
+                        ${escapeHTML(
+                          notification.body
+                        )}
+                      </p>
+                    `
+                    : ""
+                }
+
+                <div class="notif-bottom">
+
+                  <time class="notif-time">
+                    ${escapeHTML(
+                      formatTime(
+                        notification.created_at
+                      )
+                    )}
+                  </time>
+
+                  ${
+                    notification.link
+                      ? `
+                        <a
+                          href="${escapeHTML(
+                            notification.link
+                          )}"
+                          class="notif-view"
+                        >
+                          View
+                        </a>
+                      `
+                      : ""
+                  }
+
+                </div>
+
+              </div>
+
+            </article>
+          `;
+        })
+        .join("");
+
+    updateMarkAllButton(
+      unreadCount
+    );
+
+    updateBellCount(
+      unreadCount
+    );
+
+    attachNotificationClicks();
+  }
 
   /* ========================================================================
-     LOAD
+     LOAD NOTIFICATIONS
      ======================================================================== */
 
   async function loadNotifications() {
-
     list.innerHTML = `
       <div class="notifications-loading">
         <div class="loading-spinner"></div>
-
         <p>Loading notifications...</p>
       </div>
     `;
 
     try {
+      if (
+        typeof IGCA_API === "undefined"
+      ) {
+        throw new Error(
+          "IGCA_API is not available."
+        );
+      }
+
+      if (
+        typeof IGCA_API.notifications !==
+        "function"
+      ) {
+        throw new Error(
+          "IGCA_API.notifications() is not available."
+        );
+      }
+
+      console.log(
+        "IGCA notifications: loading..."
+      );
 
       const notifications =
         await IGCA_API.notifications();
+
+      console.log(
+        "IGCA notifications loaded:",
+        notifications
+      );
 
       renderNotifications(
         notifications
       );
 
     } catch (error) {
-
       console.error(
         "IGCA Notifications Load Error:",
         error
       );
+
+      updateMarkAllButton(0);
+      updateBellCount(0);
 
       list.innerHTML = `
         <div class="notifications-error">
@@ -377,9 +426,10 @@ follow: `
         </div>
       `;
 
-
       document
-        .getElementById("retry-notifications")
+        .getElementById(
+          "retry-notifications"
+        )
         ?.addEventListener(
           "click",
           loadNotifications
@@ -387,15 +437,15 @@ follow: `
     }
   }
 
-
   /* ========================================================================
-     CLICK → MARK READ
+     MARK ONE READ
      ======================================================================== */
 
   function attachNotificationClicks() {
-
     document
-      .querySelectorAll(".notif-item")
+      .querySelectorAll(
+        ".notif-item"
+      )
       .forEach(item => {
 
         item.addEventListener(
@@ -409,7 +459,6 @@ follow: `
               return;
             }
 
-
             if (
               !item.classList.contains(
                 "notif-unread"
@@ -418,44 +467,34 @@ follow: `
               return;
             }
 
-
             const id =
               item.dataset.id;
 
-            if (!id) {
-              return;
-            }
-
+            if (!id) return;
 
             try {
+              if (
+                !IGCA_API.markNotificationRead
+              ) {
+                throw new Error(
+                  "markNotificationRead() is not available."
+                );
+              }
 
-              await IGCA_API.markNotificationRead(
-                id
-              );
+              await
+                IGCA_API.markNotificationRead(
+                  id
+                );
 
               item.classList.remove(
                 "notif-unread"
               );
 
-
-              const dot =
-                item.querySelector(
+              item
+                .querySelector(
                   ".notif-unread-dot"
-                );
-
-              dot?.remove();
-
-
-              const title =
-                item.querySelector(
-                  ".notif-title"
-                );
-
-              if (title) {
-                title.style.fontWeight =
-                  "500";
-              }
-
+                )
+                ?.remove();
 
               const unreadItems =
                 document.querySelectorAll(
@@ -466,8 +505,11 @@ follow: `
                 unreadItems
               );
 
-            } catch (error) {
+              updateBellCount(
+                unreadItems
+              );
 
+            } catch (error) {
               console.error(
                 "Mark notification read error:",
                 error
@@ -478,120 +520,135 @@ follow: `
       });
   }
 
-
   /* ========================================================================
-     MARK ALL
+     MARK ALL READ
      ======================================================================== */
 
-if (markAllButton) {
+  if (markAllButton) {
+    markAllButton.addEventListener(
+      "click",
+      async () => {
 
-  markAllButton.addEventListener(
-    "click",
-    async () => {
+        try {
+          markAllButton.disabled =
+            true;
 
-      markAllButton.disabled = true;
-      markAllButton.textContent = "Marking...";
+          markAllButton.textContent =
+            "Marking...";
 
-      try {
+          if (
+            !IGCA_API.markAllNotificationsRead
+          ) {
+            throw new Error(
+              "markAllNotificationsRead() is not available."
+            );
+          }
 
-        await IGCA_API.markAllNotificationsRead();
+          await
+            IGCA_API.markAllNotificationsRead();
 
-        await loadNotifications();
+          await loadNotifications();
 
-      } catch (error) {
+        } catch (error) {
+          console.error(
+            "Mark all notifications error:",
+            error
+          );
 
-        console.error(
-          "Mark all notifications error:",
-          error
-        );
+          alert(
+            error?.message ||
+            "Unable to mark all notifications as read."
+          );
 
-        alert(
-          error.message ||
-          "Unable to mark all notifications as read."
-        );
-
-      } finally {
-
-        markAllButton.disabled = false;
-        markAllButton.textContent =
-          "Mark all as read";
+          markAllButton.disabled =
+            false;
+        }
       }
-    }
-  );
-}
-
-  /* ========================================================================
-     INITIAL LOAD
-     ======================================================================== */
-
-  await loadNotifications();
-
+    );
+  }
 
   /* ========================================================================
      REALTIME
      ======================================================================== */
 
-  let notificationChannel = null;
+  let notificationChannel =
+    null;
 
-  try {
+  async function startRealtime() {
+    try {
+      if (
+        typeof IGCA_API
+          ?.subscribeNotifications !==
+        "function"
+      ) {
+        console.warn(
+          "IGCA subscribeNotifications() is not available."
+        );
 
-    notificationChannel =
-      await IGCA_API.subscribeNotifications(
-        async payload => {
+        return;
+      }
 
-          console.log(
-            "IGCA new notification:",
-            payload
-          );
-
-
-          /*
-           * Reload from database instead of
-           * blindly inserting payload into UI.
-           * This keeps sorting and unread state correct.
-           */
-
-          await loadNotifications();
-
-
-          /*
-           * Optional browser notification.
-           */
-
-          if (
-            document.hidden &&
-            "Notification" in window &&
-            Notification.permission === "granted"
-          ) {
-
-            const notification =
-              payload?.new;
-
-            if (notification) {
-
-              new Notification(
-                notification.title ||
-                "IGCA Notification",
-                {
-                  body:
-                    notification.body ||
-                    ""
-                }
-              );
-            }
-          }
-
-        }
+      console.log(
+        "IGCA notifications: starting realtime..."
       );
 
-  } catch (error) {
+      notificationChannel =
+        await
+          IGCA_API.subscribeNotifications(
+            async payload => {
 
-    console.error(
-      "IGCA notification realtime error:",
-      error
-    );
+              console.log(
+                "IGCA NEW NOTIFICATION:",
+                payload
+              );
+
+              /*
+               * Reload from database so that
+               * the page always shows the
+               * latest notification state.
+               */
+              await loadNotifications();
+
+              /*
+               * Optional browser notification
+               * when the page is hidden.
+               */
+              if (
+                document.hidden &&
+                "Notification" in window &&
+                Notification.permission ===
+                  "granted"
+              ) {
+                const notification =
+                  payload?.new;
+
+                if (notification) {
+                  new Notification(
+                    notification.title ||
+                      "IGCA Notification",
+                    {
+                      body:
+                        notification.body ||
+                        ""
+                    }
+                  );
+                }
+              }
+            }
+          );
+
+      console.log(
+        "IGCA notifications realtime started:",
+        notificationChannel
+      );
+
+    } catch (error) {
+      console.error(
+        "IGCA notification realtime error:",
+        error
+      );
+    }
   }
-
 
   /* ========================================================================
      CLEANUP
@@ -601,16 +658,30 @@ if (markAllButton) {
     "beforeunload",
     () => {
 
-      if (notificationChannel) {
-
-        IGCA_API
-          .unsubscribeNotifications(
-            notificationChannel
-          );
-
+      if (
+        notificationChannel &&
+        typeof IGCA_API
+          ?.unsubscribeNotifications ===
+          "function"
+      ) {
+        IGCA_API.unsubscribeNotifications(
+          notificationChannel
+        );
       }
 
     }
   );
+
+  /* ========================================================================
+     INITIAL LOAD
+     ======================================================================== */
+
+  await loadNotifications();
+
+  /* ========================================================================
+     START REALTIME
+     ======================================================================== */
+
+  await startRealtime();
 
 });
