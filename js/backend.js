@@ -1,6 +1,7 @@
 /* ==========================================================================
    IGCA — Backend Client
    Supabase JS v2
+   Notifications + Realtime
    ========================================================================== */
 
 (function () {
@@ -45,6 +46,23 @@
   );
 
   /* ------------------------------------------------------------------------
+     AUTH STATE DEBUG
+     ------------------------------------------------------------------------ */
+
+  sb.auth.onAuthStateChange((event, session) => {
+    console.log(
+      "IGCA auth state:",
+      event,
+      session?.user
+        ? {
+            id: session.user.id,
+            email: session.user.email
+          }
+        : null
+    );
+  });
+
+  /* ------------------------------------------------------------------------
      API
      ------------------------------------------------------------------------ */
 
@@ -55,17 +73,79 @@
        ====================================================================== */
 
     async user() {
-      const {
-        data: { user },
-        error
-      } = await sb.auth.getUser();
 
-      if (error) throw error;
+      try {
 
-      return user || null;
+        /*
+         * First check the persisted browser session.
+         */
+        const {
+          data: sessionData,
+          error: sessionError
+        } = await sb.auth.getSession();
+
+        if (sessionError) {
+          console.error(
+            "IGCA auth session error:",
+            sessionError
+          );
+
+          throw sessionError;
+        }
+
+        let user =
+          sessionData?.session?.user || null;
+
+        /*
+         * If session did not provide the user,
+         * verify directly with Supabase.
+         */
+        if (!user) {
+
+          const {
+            data,
+            error
+          } = await sb.auth.getUser();
+
+          if (error) {
+            console.error(
+              "IGCA auth user error:",
+              error
+            );
+
+            throw error;
+          }
+
+          user =
+            data?.user || null;
+        }
+
+        console.log(
+          "IGCA current user:",
+          user
+            ? {
+                id: user.id,
+                email: user.email
+              }
+            : null
+        );
+
+        return user;
+
+      } catch (error) {
+
+        console.error(
+          "IGCA user() error:",
+          error
+        );
+
+        throw error;
+      }
     },
 
+
     async profile() {
+
       const user = await this.user();
 
       if (!user) return null;
@@ -83,49 +163,50 @@
 
       return data;
     },
-    
-async getProfileById(profileId) {
 
-  if (!profileId) {
-    throw new Error("Profile ID is required.");
-  }
 
-  const {
-    data,
-    error
-  } = await sb
-    .from("profiles")
-    .select(`
-      id,
-      full_name,
-      username,
-      account_type,
-      headline,
-      bio,
-      avatar_url,
-      location,
-      industry,
-      expertise,
-      interests,
-      company_name,
-      website,
-      is_verified,
-      created_at,
-      updated_at,
-      phone,
-      country
-    `)
-    .eq("id", profileId)
-    .maybeSingle();
+    async getProfileById(profileId) {
 
-  if (error) {
-    throw error;
-  }
+      if (!profileId) {
+        throw new Error("Profile ID is required.");
+      }
 
-  return data || null;
-},
+      const {
+        data,
+        error
+      } = await sb
+        .from("profiles")
+        .select(`
+          id,
+          full_name,
+          username,
+          account_type,
+          headline,
+          bio,
+          avatar_url,
+          location,
+          industry,
+          expertise,
+          interests,
+          company_name,
+          website,
+          is_verified,
+          created_at,
+          updated_at,
+          phone,
+          country
+        `)
+        .eq("id", profileId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return data || null;
+    },
+
 
     async updateProfile(profileData) {
+
       const user = await this.user();
 
       if (!user) {
@@ -147,11 +228,13 @@ async getProfileById(profileId) {
       return data;
     },
 
+
     /* ======================================================================
        PROFILE SEARCH
        ====================================================================== */
 
     async searchProfiles(q = "") {
+
       const user = await this.user();
 
       let request = sb
@@ -179,6 +262,7 @@ async getProfileById(profileId) {
       }
 
       if (q.trim()) {
+
         const safeQ = q
           .trim()
           .replace(/[%_]/g, "\\$&");
@@ -203,11 +287,13 @@ async getProfileById(profileId) {
       return data || [];
     },
 
+
     /* ======================================================================
        CONNECTION STATUS
        ====================================================================== */
 
     async connectionStatus(otherId) {
+
       const user = await this.user();
 
       if (!user) {
@@ -239,11 +325,102 @@ async getProfileById(profileId) {
       return data || null;
     },
 
+
+    /* ======================================================================
+       GENERIC NOTIFICATION CREATOR
+       ====================================================================== */
+
+    async createNotification({
+      userId,
+      type,
+      title,
+      body = "",
+      link = null
+    }) {
+
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error("Not authenticated.");
+      }
+
+      if (!userId) {
+        throw new Error(
+          "Notification recipient is required."
+        );
+      }
+
+      /*
+       * Never notify yourself.
+       */
+      if (user.id === userId) {
+
+        console.log(
+          "IGCA notification skipped: sender and recipient are same user."
+        );
+
+        return null;
+      }
+
+      console.log(
+        "IGCA creating notification:",
+        {
+          senderId: user.id,
+          recipientId: userId,
+          type,
+          title
+        }
+      );
+
+      const {
+        data,
+        error
+      } = await sb
+        .from("notifications")
+        .insert({
+          user_id: userId,
+          type,
+          title,
+          body,
+          link
+        })
+        .select(`
+          id,
+          user_id,
+          type,
+          title,
+          body,
+          link,
+          read_at,
+          created_at
+        `)
+        .single();
+
+      if (error) {
+
+        console.error(
+          "IGCA create notification error:",
+          error
+        );
+
+        throw error;
+      }
+
+      console.log(
+        "🔔 IGCA notification created successfully:",
+        data
+      );
+
+      return data;
+    },
+
+
     /* ======================================================================
        SEND CONNECTION
        ====================================================================== */
 
     async sendConnection(to) {
+
       const user = await this.user();
 
       if (!user) {
@@ -251,7 +428,9 @@ async getProfileById(profileId) {
       }
 
       if (!to || user.id === to) {
-        throw new Error("Invalid connection target.");
+        throw new Error(
+          "Invalid connection target."
+        );
       }
 
       const existing =
@@ -268,13 +447,16 @@ async getProfileById(profileId) {
         existing &&
         existing.status === "accepted"
       ) {
-        throw new Error("Already connected.");
+        throw new Error(
+          "Already connected."
+        );
       }
 
       if (
         existing &&
         existing.status === "rejected"
       ) {
+
         const {
           data,
           error
@@ -293,7 +475,9 @@ async getProfileById(profileId) {
 
         if (error) throw error;
 
-        await this.createConnectionNotification(to);
+        await this.createConnectionNotification(
+          to
+        );
 
         return data;
       }
@@ -313,42 +497,51 @@ async getProfileById(profileId) {
 
       if (error) throw error;
 
-      await this.createConnectionNotification(to);
+      await this.createConnectionNotification(
+        to
+      );
 
       return data;
     },
 
+
     /* ======================================================================
-       CONNECTION NOTIFICATION
+       CONNECTION REQUEST NOTIFICATION
        ====================================================================== */
 
     async createConnectionNotification(to) {
+
       const user = await this.user();
 
       if (!user) {
         throw new Error("Not authenticated.");
       }
 
-      const {
-        error
-      } = await sb
-        .from("notifications")
-        .insert({
-          user_id: to,
-          type: "connection",
-          title: "New connection request",
-          body: "Someone wants to connect with you.",
-          link: "network.html"
-        });
+      const profile =
+        await this.getProfileById(user.id);
 
-      if (error) throw error;
+      const name =
+        profile?.full_name ||
+        profile?.username ||
+        "Someone";
+
+      return this.createNotification({
+        userId: to,
+        type: "connection",
+        title: "New connection request",
+        body:
+          `${name} sent you a connection request.`,
+        link: "network.html"
+      });
     },
+
 
     /* ======================================================================
        ACCEPT CONNECTION
        ====================================================================== */
 
     async acceptConnection(connectionId) {
+
       const user = await this.user();
 
       if (!user) {
@@ -382,24 +575,25 @@ async getProfileById(profileId) {
 
       if (error) throw error;
 
-      await sb
-        .from("notifications")
-        .insert({
-          user_id: connection.requester_id,
-          type: "connection",
-          title: "Connection accepted",
-          body: "Your connection request was accepted.",
-          link: "network.html"
-        });
+      await this.createNotification({
+        userId: connection.requester_id,
+        type: "connection",
+        title: "Connection accepted",
+        body:
+          "Your connection request was accepted.",
+        link: "network.html"
+      });
 
       return data;
     },
+
 
     /* ======================================================================
        REJECT CONNECTION
        ====================================================================== */
 
     async rejectConnection(connectionId) {
+
       const user = await this.user();
 
       if (!user) {
@@ -433,24 +627,25 @@ async getProfileById(profileId) {
 
       if (error) throw error;
 
-      await sb
-        .from("notifications")
-        .insert({
-          user_id: connection.requester_id,
-          type: "connection",
-          title: "Connection request declined",
-          body: "Your connection request was declined.",
-          link: "network.html"
-        });
+      await this.createNotification({
+        userId: connection.requester_id,
+        type: "connection",
+        title: "Connection request declined",
+        body:
+          "Your connection request was declined.",
+        link: "network.html"
+      });
 
       return data;
     },
+
 
     /* ======================================================================
        ALL CONNECTIONS
        ====================================================================== */
 
     async connections() {
+
       const user = await this.user();
 
       if (!user) return [];
@@ -491,18 +686,16 @@ async getProfileById(profileId) {
       return data || [];
     },
 
+
     /* ======================================================================
        CONVERSATIONS
        ====================================================================== */
 
     async conversations() {
+
       const user = await this.user();
 
       if (!user) return [];
-
-      /*
-       * Find conversations where current user is a member.
-       */
 
       const {
         data: memberships,
@@ -524,10 +717,6 @@ async getProfileById(profileId) {
         memberships.map(
           item => item.conversation_id
         );
-
-      /*
-       * Get members.
-       */
 
       const {
         data: members,
@@ -554,10 +743,6 @@ async getProfileById(profileId) {
       if (membersError) {
         throw membersError;
       }
-
-      /*
-       * Get messages.
-       */
 
       const {
         data: messages,
@@ -651,54 +836,62 @@ async getProfileById(profileId) {
       return result;
     },
 
-/* ======================================================================
-   CREATE OR GET DIRECT CONVERSATION
-   ====================================================================== */
 
-async createConversation(otherUserId) {
+    /* ======================================================================
+       CREATE / GET DIRECT CONVERSATION
+       ====================================================================== */
 
-  const user = await this.user();
+    async createConversation(otherUserId) {
 
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
+      const user = await this.user();
 
-  if (!otherUserId) {
-    throw new Error("Other user is required.");
-  }
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
 
-  if (user.id === otherUserId) {
-    throw new Error("You cannot message yourself.");
-  }
+      if (!otherUserId) {
+        throw new Error(
+          "Other user is required."
+        );
+      }
 
-  const {
-    data,
-    error
-  } = await sb.rpc(
-    "create_direct_conversation",
-    {
-      p_other_user_id: otherUserId
-    }
-  );
+      if (user.id === otherUserId) {
+        throw new Error(
+          "You cannot message yourself."
+        );
+      }
 
-  if (error) {
+      const {
+        data,
+        error
+      } = await sb.rpc(
+        "create_direct_conversation",
+        {
+          p_other_user_id:
+            otherUserId
+        }
+      );
 
-    console.error(
-      "IGCA create conversation RPC error:",
-      error
-    );
+      if (error) {
+        console.error(
+          "IGCA create conversation RPC error:",
+          error
+        );
 
-    throw error;
-  }
+        throw error;
+      }
 
-  if (!data) {
-    throw new Error(
-      "Unable to create conversation."
-    );
-  }
+      if (!data) {
+        throw new Error(
+          "Unable to create conversation."
+        );
+      }
 
-  return data;
-},
+      return data;
+    },
+
 
     /* ======================================================================
        MESSAGES
@@ -713,12 +906,10 @@ async createConversation(otherUserId) {
       const user = await this.user();
 
       if (!user) {
-        throw new Error("Not authenticated.");
+        throw new Error(
+          "Not authenticated."
+        );
       }
-
-      /*
-       * Verify membership.
-       */
 
       const {
         data: membership,
@@ -780,8 +971,9 @@ async createConversation(otherUserId) {
       return data || [];
     },
 
+
     /* ======================================================================
-       SEND MESSAGE
+       SEND MESSAGE + NOTIFICATION
        ====================================================================== */
 
     async sendMessage(
@@ -812,10 +1004,6 @@ async createConversation(otherUserId) {
         );
       }
 
-      /*
-       * Verify membership.
-       */
-
       const {
         data: membership,
         error: membershipError
@@ -842,9 +1030,26 @@ async createConversation(otherUserId) {
         );
       }
 
-      /*
-       * Insert message.
-       */
+      const {
+        data: otherMember,
+        error: otherMemberError
+      } = await sb
+        .from("conversation_members")
+        .select("user_id")
+        .eq(
+          "conversation_id",
+          conversationId
+        )
+        .neq(
+          "user_id",
+          user.id
+        )
+        .limit(1)
+        .maybeSingle();
+
+      if (otherMemberError) {
+        throw otherMemberError;
+      }
 
       const {
         data,
@@ -873,10 +1078,6 @@ async createConversation(otherUserId) {
         throw error;
       }
 
-      /*
-       * Update conversation activity.
-       */
-
       await sb
         .from("conversations")
         .update({
@@ -888,8 +1089,33 @@ async createConversation(otherUserId) {
           conversationId
         );
 
+      if (otherMember?.user_id) {
+
+        const profile =
+          await this.getProfileById(
+            user.id
+          );
+
+        const name =
+          profile?.full_name ||
+          profile?.username ||
+          "Someone";
+
+        await this.createNotification({
+          userId:
+            otherMember.user_id,
+          type: "message",
+          title: "New message",
+          body:
+            `${name}: ${text}`,
+          link:
+            `messages.html?conversation=${encodeURIComponent(conversationId)}`
+        });
+      }
+
       return data;
     },
+
 
     /* ======================================================================
        MARK MESSAGES READ
@@ -939,8 +1165,9 @@ async createConversation(otherUserId) {
       return true;
     },
 
+
     /* ======================================================================
-       UNREAD COUNT
+       MESSAGE UNREAD COUNT
        ====================================================================== */
 
     async unreadCount(
@@ -991,6 +1218,7 @@ async createConversation(otherUserId) {
       return count || 0;
     },
 
+
     /* ======================================================================
        REALTIME — MESSAGES
        ====================================================================== */
@@ -1024,235 +1252,338 @@ async createConversation(otherUserId) {
         )
         .subscribe(
           status => {
+
             console.log(
               "IGCA realtime messages:",
               conversationId,
               status
             );
+
           }
         );
     },
-/* ======================================================================
-   NOTIFICATIONS
-   ====================================================================== */
-
-async notifications() {
-
-  const user = await this.user();
-
-  if (!user) {
-    return [];
-  }
-
-  const {
-    data,
-    error
-  } = await sb
-    .from("notifications")
-    .select(`
-      id,
-      user_id,
-      type,
-      title,
-      body,
-      link,
-      read_at,
-      created_at
-    `)
-    .eq("user_id", user.id)
-    .order("created_at", {
-      ascending: false
-    })
-    .limit(100);
-
-  if (error) {
-    console.error(
-      "IGCA notifications fetch error:",
-      error
-    );
-
-    throw error;
-  }
-
-  return data || [];
-},
 
 
-/* ======================================================================
-   NOTIFICATION — UNREAD COUNT
-   ====================================================================== */
+    /* ======================================================================
+       NOTIFICATIONS — GET
+       ====================================================================== */
 
-async unreadNotificationCount() {
-
-  const user = await this.user();
-
-  if (!user) {
-    return 0;
-  }
-
-  const {
-    count,
-    error
-  } = await sb
-    .from("notifications")
-    .select("id", {
-      count: "exact",
-      head: true
-    })
-    .eq("user_id", user.id)
-    .is("read_at", null);
-
-  if (error) {
-    throw error;
-  }
-
-  return count || 0;
-},
-
-
-/* ======================================================================
-   NOTIFICATION — MARK ONE READ
-   ====================================================================== */
-
-async markNotificationRead(id) {
-
-  const user = await this.user();
-
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
-
-  if (!id) {
-    throw new Error("Notification ID is required.");
-  }
-
-  const {
-    error
-  } = await sb
-    .from("notifications")
-    .update({
-      read_at: new Date().toISOString()
-    })
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .is("read_at", null);
-
-  if (error) {
-    throw error;
-  }
-
-  return true;
-},
-
-
-/* ======================================================================
-   NOTIFICATION — MARK ALL READ
-   ====================================================================== */
-
-async markAllNotificationsRead() {
-
-  const user = await this.user();
-
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
-
-  const {
-    error
-  } = await sb
-    .from("notifications")
-    .update({
-      read_at: new Date().toISOString()
-    })
-    .eq("user_id", user.id)
-    .is("read_at", null);
-
-  if (error) {
-    throw error;
-  }
-
-  return true;
-},
-
-
-/* ======================================================================
-   NOTIFICATION — REALTIME
-   ====================================================================== */
-
-   subscribeNotifications(callback) {
-
-  const channelName =
-    "igca-notifications-" + Date.now();
-
-  return sb
-    .channel(channelName)
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "notifications"
-      },
-      async payload => {
-
-        try {
-
-          const user = await this.user();
-
-          if (!user) return;
-
-          if (
-            payload?.new?.user_id !== user.id
-          ) {
-            return;
-          }
-
-          callback(payload);
-
-        } catch (error) {
-
-          console.error(
-            "Notification realtime callback error:",
-            error
-          );
-
-        }
-
-      }
-    )
-    .subscribe(status => {
+    async notifications() {
 
       console.log(
-        "IGCA notification realtime:",
-        status
+        "IGCA notifications: starting fetch..."
       );
 
-    });
-},
+      const user = await this.user();
 
-/* ======================================================================
-   NOTIFICATION — REMOVE REALTIME CHANNEL
-   ====================================================================== */
+      /*
+       * IMPORTANT:
+       * Do not silently return [].
+       * This makes authentication problems visible.
+       */
+      if (!user) {
+        throw new Error(
+          "No authenticated user found. Please login again."
+        );
+      }
 
-async unsubscribeNotifications(channel) {
+      console.log(
+        "IGCA notifications: fetching for user:",
+        user.id
+      );
 
-  if (!channel) {
-    return;
-  }
+      const {
+        data,
+        error
+      } = await sb
+        .from("notifications")
+        .select(`
+          id,
+          user_id,
+          type,
+          title,
+          body,
+          link,
+          read_at,
+          created_at
+        `)
+        .eq(
+          "user_id",
+          user.id
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        )
+        .limit(100);
 
-  try {
+      if (error) {
 
-    await sb.removeChannel(channel);
+        console.error(
+          "IGCA notifications fetch error:",
+          error
+        );
 
-  } catch (error) {
+        throw error;
+      }
 
-    console.error(
-      "IGCA notification channel cleanup error:",
-      error
-    );
+      console.log(
+        "IGCA notifications fetched:",
+        {
+          userId: user.id,
+          count: data?.length || 0,
+          rows: data || []
+        }
+      );
 
-  }
-},
+      return data || [];
+    },
+
+
+    /* ======================================================================
+       NOTIFICATIONS — UNREAD COUNT
+       ====================================================================== */
+
+    async unreadNotificationCount() {
+
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
+
+      const {
+        count,
+        error
+      } = await sb
+        .from("notifications")
+        .select(
+          "id",
+          {
+            count: "exact",
+            head: true
+          }
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .is(
+          "read_at",
+          null
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      return count || 0;
+    },
+
+
+    /* ======================================================================
+       NOTIFICATION — MARK ONE READ
+       ====================================================================== */
+
+    async markNotificationRead(id) {
+
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
+
+      if (!id) {
+        throw new Error(
+          "Notification ID is required."
+        );
+      }
+
+      const {
+        error
+      } = await sb
+        .from("notifications")
+        .update({
+          read_at:
+            new Date().toISOString()
+        })
+        .eq(
+          "id",
+          id
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .is(
+          "read_at",
+          null
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      return true;
+    },
+
+
+    /* ======================================================================
+       NOTIFICATION — MARK ALL READ
+       ====================================================================== */
+
+    async markAllNotificationsRead() {
+
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
+
+      const {
+        error
+      } = await sb
+        .from("notifications")
+        .update({
+          read_at:
+            new Date().toISOString()
+        })
+        .eq(
+          "user_id",
+          user.id
+        )
+        .is(
+          "read_at",
+          null
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      return true;
+    },
+
+
+    /* ======================================================================
+       NOTIFICATION — REALTIME
+       ====================================================================== */
+
+    async subscribeNotifications(callback) {
+
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error(
+          "Cannot subscribe to notifications without an authenticated user."
+        );
+      }
+
+      const channelName =
+        "igca-notifications-" +
+        user.id +
+        "-" +
+        Date.now();
+
+      console.log(
+        "IGCA notifications: subscribing for user:",
+        user.id
+      );
+
+      const channel =
+        sb
+          .channel(channelName)
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "notifications",
+              filter:
+                `user_id=eq.${user.id}`
+            },
+            payload => {
+
+              console.log(
+                "🔔 IGCA NEW NOTIFICATION:",
+                payload
+              );
+
+              /*
+               * Extra safety check.
+               */
+              if (
+                payload?.new?.user_id !==
+                user.id
+              ) {
+
+                console.log(
+                  "IGCA notification ignored:",
+                  payload?.new?.user_id
+                );
+
+                return;
+              }
+
+              if (
+                typeof callback ===
+                "function"
+              ) {
+                callback(payload);
+              }
+            }
+          )
+          .subscribe(
+            status => {
+
+              console.log(
+                "IGCA notification realtime status:",
+                status
+              );
+
+            }
+          );
+
+      return channel;
+    },
+
+
+    /* ======================================================================
+       NOTIFICATION — REMOVE REALTIME CHANNEL
+       ====================================================================== */
+
+    async unsubscribeNotifications(
+      channel
+    ) {
+
+      if (!channel) {
+        return;
+      }
+
+      try {
+
+        await sb.removeChannel(
+          channel
+        );
+
+      } catch (error) {
+
+        console.error(
+          "IGCA notification channel cleanup error:",
+          error
+        );
+
+      }
+    },
+
 
     /* ======================================================================
        APPOINTMENTS
@@ -1281,6 +1612,7 @@ async unsubscribeNotifications(channel) {
 
       return data || [];
     },
+
 
     async requestAppointment(
       recipientId,
@@ -1323,6 +1655,7 @@ async unsubscribeNotifications(channel) {
       return data;
     },
 
+
     /* ======================================================================
        POSTS
        ====================================================================== */
@@ -1364,369 +1697,552 @@ async unsubscribeNotifications(channel) {
 
       return data;
     },
+
+
     /* ======================================================================
-   POSTS — GET FEED
-   ====================================================================== */
+       POSTS — GET FEED
+       ====================================================================== */
 
-async posts() {
+    async posts() {
 
-  const {
-    data,
-    error
-  } = await sb
-    .from("posts")
-    .select(`
-      id,
-      author_id,
-      body,
-      created_at,
-      updated_at,
-      author:author_id(
-        id,
-        full_name,
-        username,
-        headline,
-        avatar_url,
-        account_type,
-        is_verified
-      )
-    `)
-    .order("created_at", {
-      ascending: false
-    });
+      const {
+        data,
+        error
+      } = await sb
+        .from("posts")
+        .select(`
+          id,
+          author_id,
+          body,
+          created_at,
+          updated_at,
+          author:author_id(
+            id,
+            full_name,
+            username,
+            headline,
+            avatar_url,
+            account_type,
+            is_verified
+          )
+        `)
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
 
-  if (error) throw error;
+      if (error) throw error;
 
-  return data || [];
-},
-
-
-/* ======================================================================
-   POSTS — UPDATE OWN POST
-   ====================================================================== */
-
-async updatePost(postId, body) {
-
-  const user = await this.user();
-
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
-
-  if (!postId) {
-    throw new Error("Post ID is required.");
-  }
-
-  const text =
-    String(body || "").trim();
-
-  if (!text) {
-    throw new Error("Post cannot be empty.");
-  }
-
-  const {
-    data,
-    error
-  } = await sb
-    .from("posts")
-    .update({
-      body: text,
-      updated_at:
-        new Date().toISOString()
-    })
-    .eq("id", postId)
-    .eq("author_id", user.id)
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  return data;
-},
+      return data || [];
+    },
 
 
-/* ======================================================================
-   POSTS — DELETE OWN POST
-   ====================================================================== */
+    /* ======================================================================
+       POSTS — UPDATE
+       ====================================================================== */
 
-async deletePost(postId) {
+    async updatePost(
+      postId,
+      body
+    ) {
 
-  const user = await this.user();
+      const user = await this.user();
 
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
-
-  if (!postId) {
-    throw new Error("Post ID is required.");
-  }
-
-  const {
-    error
-  } = await sb
-    .from("posts")
-    .delete()
-    .eq("id", postId)
-    .eq("author_id", user.id);
-
-  if (error) throw error;
-
-  return true;
-},
-
-
-/* ======================================================================
-   POSTS — LIKE
-   ====================================================================== */
-
-async likePost(postId) {
-
-  const user = await this.user();
-
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
-
-  if (!postId) {
-    throw new Error("Post ID is required.");
-  }
-
-  const {
-    data: existing,
-    error: existingError
-  } = await sb
-    .from("post_likes")
-    .select("post_id, user_id")
-    .eq("post_id", postId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (existingError) {
-    throw existingError;
-  }
-
-  if (existing) {
-    return existing;
-  }
-
-  const {
-    data,
-    error
-  } = await sb
-    .from("post_likes")
-    .insert({
-      post_id: postId,
-      user_id: user.id
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  return data;
-},
-
-
-/* ======================================================================
-   POSTS — UNLIKE
-   ====================================================================== */
-
-async unlikePost(postId) {
-
-  const user = await this.user();
-
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
-
-  const {
-    error
-  } = await sb
-    .from("post_likes")
-    .delete()
-    .eq("post_id", postId)
-    .eq("user_id", user.id);
-
-  if (error) throw error;
-
-  return true;
-},
-
-
-/* ======================================================================
-   POSTS — CHECK LIKE
-   ====================================================================== */
-
-async hasLikedPost(postId) {
-
-  const user = await this.user();
-
-  if (!user || !postId) {
-    return false;
-  }
-
-  const {
-    data,
-    error
-  } = await sb
-    .from("post_likes")
-    .select("post_id")
-    .eq("post_id", postId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (error) throw error;
-
-  return !!data;
-},
-
-
-/* ======================================================================
-   POSTS — LIKE COUNT
-   ====================================================================== */
-
-async postLikeCount(postId) {
-
-  if (!postId) {
-    return 0;
-  }
-
-  const {
-    count,
-    error
-  } = await sb
-    .from("post_likes")
-    .select(
-      "post_id",
-      {
-        count: "exact",
-        head: true
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
       }
-    )
-    .eq("post_id", postId);
 
-  if (error) throw error;
+      if (!postId) {
+        throw new Error(
+          "Post ID is required."
+        );
+      }
 
-  return count || 0;
-},
+      const text =
+        String(body || "").trim();
 
+      if (!text) {
+        throw new Error(
+          "Post cannot be empty."
+        );
+      }
 
-/* ======================================================================
-   COMMENTS — GET
-   ====================================================================== */
+      const {
+        data,
+        error
+      } = await sb
+        .from("posts")
+        .update({
+          body: text,
+          updated_at:
+            new Date().toISOString()
+        })
+        .eq(
+          "id",
+          postId
+        )
+        .eq(
+          "author_id",
+          user.id
+        )
+        .select()
+        .single();
 
-async comments(postId) {
+      if (error) throw error;
 
-  if (!postId) {
-    return [];
-  }
-
-  const {
-    data,
-    error
-  } = await sb
-    .from("comments")
-    .select(`
-      id,
-      post_id,
-      author_id,
-      body,
-      created_at,
-      author:author_id(
-        id,
-        full_name,
-        username,
-        avatar_url
-      )
-    `)
-    .eq("post_id", postId)
-    .order("created_at", {
-      ascending: true
-    });
-
-  if (error) throw error;
-
-  return data || [];
-},
+      return data;
+    },
 
 
-/* ======================================================================
-   COMMENTS — CREATE
-   ====================================================================== */
+    /* ======================================================================
+       POSTS — DELETE
+       ====================================================================== */
 
-async createComment(postId, body) {
+    async deletePost(postId) {
 
-  const user = await this.user();
+      const user = await this.user();
 
-  if (!user) {
-    throw new Error("Not authenticated.");
-  }
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
 
-  if (!postId) {
-    throw new Error("Post ID is required.");
-  }
+      if (!postId) {
+        throw new Error(
+          "Post ID is required."
+        );
+      }
 
-  const text =
-    String(body || "").trim();
+      const {
+        error
+      } = await sb
+        .from("posts")
+        .delete()
+        .eq(
+          "id",
+          postId
+        )
+        .eq(
+          "author_id",
+          user.id
+        );
 
-  if (!text) {
-    throw new Error("Comment cannot be empty.");
-  }
+      if (error) throw error;
 
-  const {
-    data,
-    error
-  } = await sb
-    .from("comments")
-    .insert({
-      post_id: postId,
-      author_id: user.id,
-      body: text
-    })
-    .select(`
-      id,
-      post_id,
-      author_id,
-      body,
-      created_at,
-      author:author_id(
-        id,
-        full_name,
-        username,
-        avatar_url
-      )
-    `)
-    .single();
-
-  if (error) throw error;
-
-  return data;
-},
+      return true;
+    },
 
 
-/* ======================================================================
-   POSTS — REALTIME
-   ====================================================================== */
+    /* ======================================================================
+       POSTS — LIKE + NOTIFICATION
+       ====================================================================== */
 
-subscribePosts(callback) {
+    async likePost(postId) {
 
-  return sb
-    .channel(
-      "igca-posts-" +
-      Date.now()
-    )
-    .on(
-      "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "posts"
-      },
-      callback
-    )
-    .subscribe();
-}
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
+
+      if (!postId) {
+        throw new Error(
+          "Post ID is required."
+        );
+      }
+
+      const {
+        data: post,
+        error: postError
+      } = await sb
+        .from("posts")
+        .select(
+          "id, author_id"
+        )
+        .eq(
+          "id",
+          postId
+        )
+        .single();
+
+      if (postError) {
+        throw postError;
+      }
+
+      const {
+        data: existing,
+        error: existingError
+      } = await sb
+        .from("post_likes")
+        .select(
+          "post_id, user_id"
+        )
+        .eq(
+          "post_id",
+          postId
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+      if (existingError) {
+        throw existingError;
+      }
+
+      if (existing) {
+        return existing;
+      }
+
+      const {
+        data,
+        error
+      } = await sb
+        .from("post_likes")
+        .insert({
+          post_id:
+            postId,
+          user_id:
+            user.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (
+        post.author_id !==
+        user.id
+      ) {
+
+        const profile =
+          await this.getProfileById(
+            user.id
+          );
+
+        const name =
+          profile?.full_name ||
+          profile?.username ||
+          "Someone";
+
+        await this.createNotification({
+          userId:
+            post.author_id,
+          type:
+            "activity",
+          title:
+            "New like",
+          body:
+            `${name} liked your post.`,
+          link:
+            "index.html"
+        });
+      }
+
+      return data;
+    },
+
+
+    /* ======================================================================
+       POSTS — UNLIKE
+       ====================================================================== */
+
+    async unlikePost(postId) {
+
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
+
+      const {
+        error
+      } = await sb
+        .from("post_likes")
+        .delete()
+        .eq(
+          "post_id",
+          postId
+        )
+        .eq(
+          "user_id",
+          user.id
+        );
+
+      if (error) throw error;
+
+      return true;
+    },
+
+
+    /* ======================================================================
+       POSTS — CHECK LIKE
+       ====================================================================== */
+
+    async hasLikedPost(postId) {
+
+      const user = await this.user();
+
+      if (!user || !postId) {
+        return false;
+      }
+
+      const {
+        data,
+        error
+      } = await sb
+        .from("post_likes")
+        .select(
+          "post_id"
+        )
+        .eq(
+          "post_id",
+          postId
+        )
+        .eq(
+          "user_id",
+          user.id
+        )
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return !!data;
+    },
+
+
+    /* ======================================================================
+       POSTS — LIKE COUNT
+       ====================================================================== */
+
+    async postLikeCount(postId) {
+
+      if (!postId) {
+        return 0;
+      }
+
+      const {
+        count,
+        error
+      } = await sb
+        .from("post_likes")
+        .select(
+          "post_id",
+          {
+            count:
+              "exact",
+            head:
+              true
+          }
+        )
+        .eq(
+          "post_id",
+          postId
+        );
+
+      if (error) throw error;
+
+      return count || 0;
+    },
+
+
+    /* ======================================================================
+       COMMENTS — GET
+       ====================================================================== */
+
+    async comments(postId) {
+
+      if (!postId) {
+        return [];
+      }
+
+      const {
+        data,
+        error
+      } = await sb
+        .from("comments")
+        .select(`
+          id,
+          post_id,
+          author_id,
+          body,
+          created_at,
+          author:author_id(
+            id,
+            full_name,
+            username,
+            avatar_url
+          )
+        `)
+        .eq(
+          "post_id",
+          postId
+        )
+        .order(
+          "created_at",
+          {
+            ascending: true
+          }
+        );
+
+      if (error) throw error;
+
+      return data || [];
+    },
+
+
+    /* ======================================================================
+       COMMENTS — CREATE + NOTIFICATION
+       ====================================================================== */
+
+    async createComment(
+      postId,
+      body
+    ) {
+
+      const user = await this.user();
+
+      if (!user) {
+        throw new Error(
+          "Not authenticated."
+        );
+      }
+
+      if (!postId) {
+        throw new Error(
+          "Post ID is required."
+        );
+      }
+
+      const text =
+        String(body || "").trim();
+
+      if (!text) {
+        throw new Error(
+          "Comment cannot be empty."
+        );
+      }
+
+      const {
+        data: post,
+        error: postError
+      } = await sb
+        .from("posts")
+        .select(
+          "id, author_id"
+        )
+        .eq(
+          "id",
+          postId
+        )
+        .single();
+
+      if (postError) {
+        throw postError;
+      }
+
+      const {
+        data,
+        error
+      } = await sb
+        .from("comments")
+        .insert({
+          post_id:
+            postId,
+          author_id:
+            user.id,
+          body:
+            text
+        })
+        .select(`
+          id,
+          post_id,
+          author_id,
+          body,
+          created_at,
+          author:author_id(
+            id,
+            full_name,
+            username,
+            avatar_url
+          )
+        `)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      if (
+        post.author_id !==
+        user.id
+      ) {
+
+        const profile =
+          await this.getProfileById(
+            user.id
+          );
+
+        const name =
+          profile?.full_name ||
+          profile?.username ||
+          "Someone";
+
+        await this.createNotification({
+          userId:
+            post.author_id,
+          type:
+            "activity",
+          title:
+            "New comment",
+          body:
+            `${name} commented on your post.`,
+          link:
+            "index.html"
+        });
+      }
+
+      return data;
+    },
+
+
+    /* ======================================================================
+       POSTS — REALTIME
+       ====================================================================== */
+
+    subscribePosts(callback) {
+
+      return sb
+        .channel(
+          "igca-posts-" +
+          Date.now()
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "posts"
+          },
+          callback
+        )
+        .subscribe();
+    }
+
   };
+
 
   console.log(
     "IGCA Backend API loaded successfully."
