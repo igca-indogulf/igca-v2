@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/animations.css">
 <link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/network.css">
 </head>
 <body>
 <div class="app-shell">
@@ -15,32 +16,13 @@
   <div class="app-main">
     <header class="app-header"></header>
     <main class="app-content">
-
-      <div class="page-head">
-        <div><h1>My Network</h1><p>Your professional ecosystem, at a glance.</p></div>
-      </div>
-
-      <div class="network-viz card" style="padding:32px;margin-bottom:32px;background:linear-gradient(160deg,var(--primary-dark),#132846);border:none;">
-        <svg viewBox="0 0 900 240" style="width:100%;">
-          <g stroke="rgba(255,255,255,.16)" stroke-width="1.2">
-            <line x1="450" y1="120" x2="230" y2="60"/><line x1="450" y1="120" x2="230" y2="180"/>
-            <line x1="450" y1="120" x2="670" y2="60"/><line x1="450" y1="120" x2="670" y2="180"/>
-            <line x1="450" y1="120" x2="450" y2="30"/>
-          </g>
-          <circle class="net-node" cx="450" cy="120" r="20" fill="var(--accent)"/>
-          <text x="450" y="125" text-anchor="middle" fill="#fff" font-size="11" font-family="IBM Plex Mono">YOU</text>
-          <circle class="net-node n2 slow" cx="230" cy="60" r="11" fill="#fff" fill-opacity=".9"/>
-          <text x="230" y="42" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Advisors</text>
-          <circle class="net-node n3 slow" cx="230" cy="180" r="11" fill="#fff" fill-opacity=".9"/>
-          <text x="230" y="205" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Investors</text>
-          <circle class="net-node n4 slow" cx="670" cy="60" r="11" fill="#fff" fill-opacity=".9"/>
-          <text x="670" y="42" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Companies</text>
-          <circle class="net-node n5 slow" cx="670" cy="180" r="11" fill="#fff" fill-opacity=".9"/>
-          <text x="670" y="205" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="11" font-family="IBM Plex Mono">Professionals</text>
-          <circle class="net-node slow" cx="450" cy="30" r="6" fill="var(--accent-light)"/>
-        </svg>
-      </div>
-
+<div class="page-head">
+  <div>
+    <h1>My Network</h1>
+    <p>Build and manage your professional network.</p>
+  </div>
+</div>
+     
       <div class="stat-grid" style="margin-bottom:8px;">
         <div class="stat-card"><div class="num" id="stat-connections">0</div><div class="label">Connections</div></div>
         <div class="stat-card"><div class="num" id="stat-requests">0</div><div class="label">Requests Received</div></div>
