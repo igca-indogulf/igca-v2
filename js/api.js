@@ -441,52 +441,56 @@
        CREATE CONNECTION NOTIFICATION
        ======================================================================== */
 
-    async createConnectionNotification(
-      to
-    ) {
+async createConnectionNotification(to) {
 
-      const user =
-        await this.user();
+  const user =
+    await this.user();
 
+  if (!user) {
+    throw new Error(
+      "Not authenticated."
+    );
+  }
 
-      if (!user) {
-
-        throw new Error(
-          "Not authenticated."
-        );
-      }
-
-
-      const {
-        error
-      } = await sb
-        .from("notifications")
-        .insert({
-          user_id:
-            to,
-
-          type:
-            "connection",
-
-          title:
-            "New connection request",
-
-          message:
-            "Someone wants to connect with you.",
-
-          is_read:
-            false
-        });
+  if (!to) {
+    throw new Error(
+      "Notification recipient is required."
+    );
+  }
 
 
-      if (error) {
-        throw error;
-      }
+  const {
+    data,
+    error
+  } = await sb.rpc(
+    "create_notification",
+    {
+      p_user_id: to,
+
+      p_type:
+        "connection",
+
+      p_title:
+        "New connection request",
+
+      p_message:
+        "Someone wants to connect with you."
+    }
+  );
 
 
-      return true;
-    },
+  if (error) {
+    console.error(
+      "Connection notification error:",
+      error
+    );
 
+    throw error;
+  }
+
+
+  return data;
+},
 
     /* ========================================================================
        ACCEPT CONNECTION
@@ -556,25 +560,22 @@
       }
 
 
-      await sb
-        .from("notifications")
-        .insert({
-          user_id:
-            connection.requester_id,
+     await sb.rpc(
+  "create_notification",
+  {
+    p_user_id:
+      connection.requester_id,
 
-          type:
-            "connection",
+    p_type:
+      "connection",
 
-          title:
-            "Connection accepted",
+    p_title:
+      "Connection accepted",
 
-          message:
-            "Your connection request was accepted.",
-
-          is_read:
-            false
-        });
-
+    p_message:
+      "Your connection request was accepted."
+  }
+);
 
       return data;
     },
@@ -647,28 +648,24 @@
         throw error;
       }
 
+await sb.rpc(
+  "create_notification",
+  {
+    p_user_id:
+      connection.requester_id,
 
-      await sb
-        .from("notifications")
-        .insert({
-          user_id:
-            connection.requester_id,
+    p_type:
+      "connection",
 
-          type:
-            "connection",
+    p_title:
+      "Connection request declined",
 
-          title:
-            "Connection request declined",
+    p_message:
+      "Your connection request was declined."
+  }
+);
 
-          message:
-            "Your connection request was declined.",
-
-          is_read:
-            false
-        });
-
-
-      return data;
+return data;
     },
 
 
@@ -946,208 +943,63 @@
     /* ========================================================================
        CREATE / GET CONVERSATION
        ======================================================================== */
+async createConversation(otherUserId) {
 
-    async createConversation(
-      otherUserId
-    ) {
+  const user =
+    await this.user();
 
-      const user =
-        await this.user();
+  if (!user) {
+    throw new Error(
+      "Not authenticated."
+    );
+  }
 
+  if (!otherUserId) {
+    throw new Error(
+      "Other user is required."
+    );
+  }
 
-      if (!user) {
-
-        throw new Error(
-          "Not authenticated."
-        );
-      }
-
-
-      if (!otherUserId) {
-
-        throw new Error(
-          "Other user is required."
-        );
-      }
+  if (user.id === otherUserId) {
+    throw new Error(
+      "You cannot message yourself."
+    );
+  }
 
 
-      if (
-        user.id ===
+  const {
+    data,
+    error
+  } = await sb.rpc(
+    "create_direct_conversation",
+    {
+      p_other_user_id:
         otherUserId
-      ) {
-
-        throw new Error(
-          "You cannot message yourself."
-        );
-      }
+    }
+  );
 
 
-      /*
-       * Only accepted connections
-       * can start messaging.
-       */
+  if (error) {
+    console.error(
+      "create_direct_conversation error:",
+      error
+    );
 
-      const connection =
-        await this.connectionStatus(
-          otherUserId
-        );
-
-
-      if (
-        !connection ||
-        connection.status !==
-          "accepted"
-      ) {
-
-        throw new Error(
-          "You can only message an accepted connection."
-        );
-      }
+    throw error;
+  }
 
 
-      /*
-       * Check existing conversation.
-       */
-
-      const {
-        data: myMemberships,
-        error: myError
-      } = await sb
-        .from("conversation_members")
-        .select(
-          "conversation_id"
-        )
-        .eq(
-          "user_id",
-          user.id
-        );
+  if (!data) {
+    throw new Error(
+      "Conversation ID was not returned."
+    );
+  }
 
 
-      if (myError) {
-        throw myError;
-      }
+  return data;
+},
 
-
-      const myIds =
-        (myMemberships || [])
-          .map(
-            item =>
-              item.conversation_id
-          )
-          .filter(Boolean);
-
-
-      if (myIds.length) {
-
-        const {
-          data: otherMemberships,
-          error: otherError
-        } = await sb
-          .from("conversation_members")
-          .select(
-            "conversation_id"
-          )
-          .eq(
-            "user_id",
-            otherUserId
-          )
-          .in(
-            "conversation_id",
-            myIds
-          );
-
-
-        if (otherError) {
-          throw otherError;
-        }
-
-
-        if (
-          otherMemberships?.length
-        ) {
-
-          return (
-            otherMemberships[0]
-              .conversation_id
-          );
-        }
-      }
-
-
-      /*
-       * Create conversation.
-       */
-
-      const {
-        data: conversation,
-        error: conversationError
-      } = await sb
-        .from("conversations")
-        .insert({})
-        .select("id")
-        .single();
-
-
-      if (conversationError) {
-        throw conversationError;
-      }
-
-
-      if (!conversation?.id) {
-
-        throw new Error(
-          "Conversation ID was not returned."
-        );
-      }
-
-
-      /*
-       * Add both members.
-       */
-
-      const {
-        error: memberError
-      } = await sb
-        .from("conversation_members")
-        .insert([
-          {
-            conversation_id:
-              conversation.id,
-
-            user_id:
-              user.id
-          },
-
-          {
-            conversation_id:
-              conversation.id,
-
-            user_id:
-              otherUserId
-          }
-        ]);
-
-
-      if (memberError) {
-
-        await sb
-          .from("conversations")
-          .delete()
-          .eq(
-            "id",
-            conversation.id
-          );
-
-
-        throw memberError;
-      }
-
-
-      return conversation.id;
-    },
-
-
-    /* ========================================================================
+/* ========================================================================
        MESSAGES
        ======================================================================== */
 
@@ -1400,73 +1252,79 @@
 
       try {
 
-        const {
-          data: otherMembers
-        } = await sb
-          .from("conversation_members")
-          .select("user_id")
-          .eq(
-            "conversation_id",
-            conversationId
-          )
-          .neq(
-            "user_id",
-            user.id
-          );
+  const {
+    data: otherMembers,
+    error: otherMembersError
+  } = await sb
+    .from("conversation_members")
+    .select("user_id")
+    .eq(
+      "conversation_id",
+      conversationId
+    )
+    .neq(
+      "user_id",
+      user.id
+    );
 
 
-        if (
-          otherMembers?.length
-        ) {
-
-          const notifications =
-            otherMembers.map(
-              member => ({
-                user_id:
-                  member.user_id,
-
-                type:
-                  "message",
-
-                title:
-                  "New message",
-
-                message:
-                  text,
-
-                is_read:
-                  false
-              })
-            );
+  if (otherMembersError) {
+    console.warn(
+      "Could not find notification recipients:",
+      otherMembersError
+    );
+  }
 
 
-          const {
-            error:
-              notificationError
-          } = await sb
-            .from("notifications")
-            .insert(
-              notifications
-            );
+  if (otherMembers?.length) {
 
+    for (
+      const member
+      of otherMembers
+    ) {
 
-          if (notificationError) {
+      const {
+        error:
+          notificationError
+      } = await sb.rpc(
+        "create_notification",
+        {
+          p_user_id:
+            member.user_id,
 
-            console.warn(
-              "Message notification failed:",
-              notificationError
-            );
-          }
+          p_type:
+            "message",
+
+          p_title:
+            "New message",
+
+          p_message:
+            text
         }
+      );
 
-      } catch (notificationError) {
+
+      if (notificationError) {
 
         console.warn(
-          "Message notification error:",
+          "Message notification failed:",
           notificationError
         );
+
       }
 
+    }
+
+  }
+
+} catch (notificationError) {
+
+  console.warn(
+    "Message notification error:",
+    notificationError
+  );
+
+}
 
       return data;
     },
