@@ -241,9 +241,7 @@ async function loadOtherProfile(profileId) {
 async function setupOtherProfileActions(profile) {
 
   const connectButton =
-    document.querySelector(
-      "#other-profile-actions .btn-primary"
-    );
+  document.getElementById("profile-connect-btn");
 
   const buttons =
     document.querySelectorAll(
@@ -263,15 +261,14 @@ async function setupOtherProfileActions(profile) {
    * 3 = Follow
    */
 
-  const messageButton =
-    buttons[1];
+const messageButton =
+  document.getElementById("profile-message-btn");
 
-  const meetingButton =
-    buttons[2];
+const meetingButton =
+  document.getElementById("profile-meeting-btn");
 
-  const followButton =
-    buttons[3];
-
+const followButton =
+  document.getElementById("profile-follow-btn");
 
   /* ------------------------------------------------------------------------
      CURRENT USER
@@ -675,14 +672,13 @@ async function handleConnect(
           throw acceptError;
         }
 
-
-        await createNotification(
-          connection.requester_id,
-          "Connection accepted",
-          `${getProfileName(profile)} accepted your connection request.`,
-          "connection_accepted"
-        );
-
+await IGCA_API.createNotification({
+  userId: connection.requester_id,
+  type: "connection",
+  title: "Connection accepted",
+  body: `${getProfileName(profile)} accepted your connection request.`,
+  link: "network.html"
+});
 
         button.textContent =
           "Connected";
@@ -741,12 +737,13 @@ const senderName =
   senderProfile?.username ||
   "An IGCA member";
 
-await createNotification(
-  targetUserId,
-  "New connection request",
-  `${senderName} sent you a connection request.`,
-  "connection_request"
-);
+await IGCA_API.createNotification({
+  userId: targetUserId,
+  type: "connection",
+  title: "New connection request",
+  body: `${senderName} sent you a connection request.`,
+  link: "network.html"
+});
 
     button.textContent =
       "Request Sent";
@@ -786,69 +783,6 @@ await createNotification(
       "Unable to send connection request."
     );
   }
-}
-
-
-/* ==========================================================================
-   CREATE NOTIFICATION
-   ========================================================================== */
-
-async function createNotification(
-  userId,
-  title,
-  message,
-  type
-) {
-
-  if (!userId) {
-    return;
-  }
-
-
-  const {
-    error
-  } = await sb
-    .from("notifications")
-    .insert({
-      user_id:
-        userId,
-
-      title:
-        title,
-
-      message:
-        message,
-
-      type:
-        type,
-
-      is_read:
-        false,
-
-      created_at:
-        new Date().toISOString()
-    });
-
-
-  if (error) {
-
-    console.error(
-      "Notification creation failed:",
-      error
-    );
-
-    /*
-     * Don't break connection creation
-     * only because notification failed.
-     */
-
-    return;
-  }
-
-
-  console.log(
-    "Notification created successfully."
-  );
 }
 
 
@@ -898,9 +832,9 @@ async function handleMeetingRequest(
 
 
   const button =
-    document.querySelector(
-      "#other-profile-actions button:nth-child(3)"
-    );
+  document.getElementById(
+    "profile-meeting-btn"
+  );
 
 
   if (button) {
@@ -922,12 +856,13 @@ async function handleMeetingRequest(
      * without changing the profile UI.
      */
 
-    await createNotification(
-      targetUserId,
-      "Meeting request",
-      `${getCurrentUserName()} requested a meeting with you.`,
-      "meeting_request"
-    );
+    await IGCA_API.createNotification({
+  userId: targetUserId,
+  type: "appointment",
+  title: "Meeting request",
+  body: `${getCurrentUserName()} requested a meeting with you.`,
+  link: "appointments.html"
+});
 
 
     if (button) {
