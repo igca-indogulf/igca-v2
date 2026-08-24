@@ -1,6 +1,7 @@
 /* ==========================================================================
    IGCA — Shared App Utilities
    ==========================================================================
+
    Global:
    - NetGraphics
    - App
@@ -10,7 +11,10 @@
    - Bottom Navigation
    - Live User Profile
    - Logout
+
    ========================================================================== */
+
+"use strict";
 
 
 /* ==========================================================================
@@ -19,110 +23,154 @@
 
 const NetGraphics = {
 
-  nodesThumb(){
+  nodesThumb() {
 
     return `
-      <svg viewBox="0 0 300 120"
-           preserveAspectRatio="xMidYMid slice"
-           style="
-             width:100%;
-             height:100%;
-             background:var(--surface-secondary);
-           ">
+      <svg
+        viewBox="0 0 300 120"
+        preserveAspectRatio="xMidYMid slice"
+        style="
+          width:100%;
+          height:100%;
+          background:var(--surface-secondary);
+        "
+        aria-hidden="true"
+      >
 
-        <line x1="40" y1="70"
-              x2="120" y2="30"
-              stroke="var(--border-strong)"
-              stroke-width="1"/>
+        <line
+          x1="40"
+          y1="70"
+          x2="120"
+          y2="30"
+          stroke="var(--border-strong)"
+          stroke-width="1"
+        />
 
-        <line x1="120" y1="30"
-              x2="210" y2="60"
-              stroke="var(--border-strong)"
-              stroke-width="1"/>
+        <line
+          x1="120"
+          y1="30"
+          x2="210"
+          y2="60"
+          stroke="var(--border-strong)"
+          stroke-width="1"
+        />
 
-        <line x1="120" y1="30"
-              x2="150" y2="95"
-              stroke="var(--border-strong)"
-              stroke-width="1"/>
+        <line
+          x1="120"
+          y1="30"
+          x2="150"
+          y2="95"
+          stroke="var(--border-strong)"
+          stroke-width="1"
+        />
 
-        <line x1="210" y1="60"
-              x2="270" y2="25"
-              stroke="var(--border-strong)"
-              stroke-width="1"/>
+        <line
+          x1="210"
+          y1="60"
+          x2="270"
+          y2="25"
+          stroke="var(--border-strong)"
+          stroke-width="1"
+        />
 
-        <circle class="net-node"
-                cx="40"
-                cy="70"
-                r="4"
-                fill="var(--accent)"/>
+        <circle
+          class="net-node"
+          cx="40"
+          cy="70"
+          r="4"
+          fill="var(--accent)"
+        />
 
-        <circle class="net-node n2"
-                cx="120"
-                cy="30"
-                r="5"
-                fill="var(--primary)"/>
+        <circle
+          class="net-node n2"
+          cx="120"
+          cy="30"
+          r="5"
+          fill="var(--primary)"
+        />
 
-        <circle class="net-node n3"
-                cx="210"
-                cy="60"
-                r="4"
-                fill="var(--accent)"/>
+        <circle
+          class="net-node n3"
+          cx="210"
+          cy="60"
+          r="4"
+          fill="var(--accent)"
+        />
 
-        <circle class="net-node n4 slow"
-                cx="150"
-                cy="95"
-                r="3.5"
-                fill="var(--primary-tint)"/>
+        <circle
+          class="net-node n4 slow"
+          cx="150"
+          cy="95"
+          r="3.5"
+          fill="var(--primary-tint)"
+        />
 
-        <circle class="net-node n5 slow"
-                cx="270"
-                cy="25"
-                r="3.5"
-                fill="var(--accent)"/>
+        <circle
+          class="net-node n5 slow"
+          cx="270"
+          cy="25"
+          r="3.5"
+          fill="var(--accent)"
+        />
 
       </svg>
     `;
   },
 
 
-  constellationRule(){
+  constellationRule() {
 
     return `
-      <svg viewBox="0 0 600 24"
-           preserveAspectRatio="none"
-           style="width:100%;height:24px;">
+      <svg
+        viewBox="0 0 600 24"
+        preserveAspectRatio="none"
+        style="width:100%;height:24px;"
+        aria-hidden="true"
+      >
 
-        <line x1="0"
-              y1="12"
-              x2="600"
-              y2="12"
-              stroke="var(--border)"
-              stroke-width="1"/>
+        <line
+          x1="0"
+          y1="12"
+          x2="600"
+          y2="12"
+          stroke="var(--border)"
+          stroke-width="1"
+        />
 
-        <circle cx="30"
-                cy="12"
-                r="3"
-                fill="var(--accent)"/>
+        <circle
+          cx="30"
+          cy="12"
+          r="3"
+          fill="var(--accent)"
+        />
 
-        <circle cx="180"
-                cy="12"
-                r="3"
-                fill="var(--border-strong)"/>
+        <circle
+          cx="180"
+          cy="12"
+          r="3"
+          fill="var(--border-strong)"
+        />
 
-        <circle cx="330"
-                cy="12"
-                r="3"
-                fill="var(--accent)"/>
+        <circle
+          cx="330"
+          cy="12"
+          r="3"
+          fill="var(--accent)"
+        />
 
-        <circle cx="480"
-                cy="12"
-                r="3"
-                fill="var(--border-strong)"/>
+        <circle
+          cx="480"
+          cy="12"
+          r="3"
+          fill="var(--border-strong)"
+        />
 
-        <circle cx="570"
-                cy="12"
-                r="3"
-                fill="var(--accent)"/>
+        <circle
+          cx="570"
+          cy="12"
+          r="3"
+          fill="var(--accent)"
+        />
 
       </svg>
     `;
@@ -138,17 +186,32 @@ const NetGraphics = {
 const App = {
 
 
-  /* ------------------------------------------------------------------------
+  /* ==========================================================================
      HELPERS
-  ------------------------------------------------------------------------ */
+     ========================================================================== */
 
-  initials(name){
+  escapeHTML(value) {
 
-    const value =
-      String(name || "IG")
-        .trim();
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  },
 
-    if(!value){
+
+  escapeAttribute(value) {
+
+    return this.escapeHTML(value);
+  },
+
+
+  initials(name) {
+
+    const value = String(name || "IG").trim();
+
+    if (!value) {
       return "IG";
     }
 
@@ -162,88 +225,102 @@ const App = {
   },
 
 
-  avatarHTML(name, size = ""){
+  avatarHTML(name, size = "") {
 
     return `
-      <div class="avatar ${size}">
-        ${App.initials(name)}
+      <div class="avatar ${this.escapeHTML(size)}">
+        ${this.escapeHTML(this.initials(name))}
       </div>
     `;
   },
 
 
-  emptyState(title, body){
+  emptyState(title, body) {
 
     return `
       <div class="empty-state">
 
-        <svg width="44"
-             height="44"
-             viewBox="0 0 24 24"
-             fill="none"
-             stroke="currentColor"
-             stroke-width="1.5"
-             style="
-               color:var(--border-strong);
-               margin:0 auto;
-             ">
+        <svg
+          width="44"
+          height="44"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          style="
+            color:var(--border-strong);
+            margin:0 auto;
+          "
+          aria-hidden="true"
+        >
 
-          <circle cx="12"
-                  cy="8"
-                  r="4"/>
+          <circle
+            cx="12"
+            cy="8"
+            r="4"
+          />
 
-          <path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>
+          <path
+            d="M4 21c0-4 4-6 8-6s8 2 8 6"
+          />
 
         </svg>
 
-        <h3>${title || ""}</h3>
+        <h3>${this.escapeHTML(title || "")}</h3>
 
-        <p>${body || ""}</p>
+        <p>${this.escapeHTML(body || "")}</p>
 
       </div>
     `;
   },
 
 
-  verifyBadgeHTML(){
+  verifyBadgeHTML() {
 
     return `
-      <span class="verify-badge"
-            title="Verified professional">
+      <span
+        class="verify-badge"
+        title="Verified professional"
+      >
 
-        <svg viewBox="0 0 24 24"
-             fill="none"
-             stroke="currentColor"
-             stroke-width="2">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
-          <path d="
-            M12 2
-            l2.2 2.2
-            3-.4
-            .9 2.9
-            2.9.9
-            -.4 3
-            2.4 2.2
-            -2.4 2.2
-            .4 3
-            -2.9.9
-            -.9 2.9
-            -3-.4
-            L12 23
-            l-2.2-2.4
-            -3 .4
-            -.9-2.9
-            -2.9-.9
-            .4-3
-            L1 12
-            l2.4-2.2
-            -.4-3
-            2.9-.9
-            .9-2.9
-            3 .4z
-          "/>
+          <path
+            d="
+              M12 2
+              l2.2 2.2
+              3-.4
+              .9 2.9
+              2.9.9
+              -.4 3
+              2.4 2.2
+              -2.4 2.2
+              .4 3
+              -2.9.9
+              -.9 2.9
+              -3-.4
+              L12 23
+              l-2.2-2.4
+              -3 .4
+              -.9-2.9
+              -2.9-.9
+              .4-3
+              L1 12
+              l2.4-2.2
+              -.4-3
+              2.9-.9
+              .9-2.9
+              3 .4z
+            "
+          />
 
-          <path d="M9 12l2 2 4-4"/>
+          <path d="M9 12l2 2 4-4" />
 
         </svg>
 
@@ -254,9 +331,9 @@ const App = {
   },
 
 
-  chipRow(items = []){
+  chipRow(items = []) {
 
-    if(!Array.isArray(items) || !items.length){
+    if (!Array.isArray(items) || !items.length) {
       return "";
     }
 
@@ -267,7 +344,7 @@ const App = {
           .filter(Boolean)
           .map(item => `
             <span class="chip">
-              ${item}
+              ${this.escapeHTML(item)}
             </span>
           `)
           .join("")}
@@ -277,46 +354,54 @@ const App = {
   },
 
 
-  /* ------------------------------------------------------------------------
+  /* ==========================================================================
      CARDS
-  ------------------------------------------------------------------------ */
+     ========================================================================== */
 
-  personCardHTML(p = {}){
+  personCardHTML(p = {}) {
+
+    const name = this.escapeHTML(p.name || "");
+    const title = this.escapeHTML(p.title || "");
+    const company = this.escapeHTML(p.company || "");
+    const location = this.escapeHTML(p.location || "");
+    const id = this.escapeAttribute(p.id || "");
 
     return `
       <div class="profile-card reveal">
 
         <div class="profile-card-top">
 
-          ${App.avatarHTML(p.name)}
+          ${this.avatarHTML(p.name)}
 
           <div>
 
             <div class="profile-name-row">
-              <h3>${p.name || ""}</h3>
+
+              <h3>${name}</h3>
+
             </div>
 
             <div class="title">
-              ${p.title || ""}
+              ${title}
             </div>
 
             <div class="meta">
 
               ${
-                p.company
-                  ? `<span>${p.company}</span>`
+                company
+                  ? `<span>${company}</span>`
                   : ""
               }
 
               ${
-                p.location
-                  ? ` · <span>${p.location}</span>`
+                location
+                  ? ` · <span>${location}</span>`
                   : ""
               }
 
               ${
                 p.verified
-                  ? App.verifyBadgeHTML()
+                  ? this.verifyBadgeHTML()
                   : ""
               }
 
@@ -326,26 +411,32 @@ const App = {
 
         </div>
 
-        ${App.chipRow(
+        ${this.chipRow(
           Array.isArray(p.expertise)
             ? p.expertise.slice(0, 3)
             : []
         )}
 
         <div class="meta">
-          ${p.mutual || 0} mutual connections
+          ${this.escapeHTML(p.mutual || 0)}
+          mutual connections
         </div>
 
         <div class="profile-card-actions">
 
-          <a class="btn btn-outline"
-             href="profile.html?id=${encodeURIComponent(p.id || "")}">
+          <a
+            class="btn btn-outline"
+            href="profile.html?id=${encodeURIComponent(
+              p.id || ""
+            )}"
+          >
             View Profile
           </a>
 
           <button
             class="btn btn-primary"
-            type="button">
+            type="button"
+          >
             Connect
           </button>
 
@@ -356,7 +447,7 @@ const App = {
   },
 
 
-  companyCardHTML(c = {}){
+  companyCardHTML(c = {}) {
 
     return `
       <div class="profile-card reveal">
@@ -372,31 +463,32 @@ const App = {
                 var(--accent-light),
                 var(--accent)
               );
-            ">
-
-            ${App.initials(c.name)}
-
+            "
+          >
+            ${this.escapeHTML(this.initials(c.name))}
           </div>
 
           <div>
 
-            <h3>${c.name || ""}</h3>
+            <h3>
+              ${this.escapeHTML(c.name || "")}
+            </h3>
 
             <div class="title">
-              ${c.type || ""}
+              ${this.escapeHTML(c.type || "")}
             </div>
 
             <div class="meta">
 
               ${
                 c.location
-                  ? `<span>${c.location}</span>`
+                  ? `<span>${this.escapeHTML(c.location)}</span>`
                   : ""
               }
 
               ${
                 c.aum
-                  ? ` · <span>${c.aum}</span>`
+                  ? ` · <span>${this.escapeHTML(c.aum)}</span>`
                   : ""
               }
 
@@ -406,19 +498,23 @@ const App = {
 
         </div>
 
-        ${App.chipRow(c.focus || [])}
+        ${this.chipRow(c.focus || [])}
 
         <div class="profile-card-actions">
 
           <a
             class="btn btn-outline"
-            href="company.html?id=${encodeURIComponent(c.id || "")}">
+            href="company.html?id=${encodeURIComponent(
+              c.id || ""
+            )}"
+          >
             View Company
           </a>
 
           <button
             class="btn btn-primary"
-            type="button">
+            type="button"
+          >
             Follow
           </button>
 
@@ -429,7 +525,7 @@ const App = {
   },
 
 
-  opportunityCardHTML(o = {}){
+  opportunityCardHTML(o = {}) {
 
     return `
       <div class="card card-pad reveal">
@@ -438,17 +534,19 @@ const App = {
           o.sector
             ? `
               <span class="badge badge-neutral">
-                ${o.sector}
+                ${this.escapeHTML(o.sector)}
               </span>
             `
             : ""
         }
 
-        <h3 style="
-          margin-top:10px;
-          font-size:15.5px;
-        ">
-          ${o.title || ""}
+        <h3
+          style="
+            margin-top:10px;
+            font-size:15.5px;
+          "
+        >
+          ${this.escapeHTML(o.title || "")}
         </h3>
 
         <p
@@ -456,8 +554,9 @@ const App = {
           style="
             font-size:13.5px;
             margin-top:6px;
-          ">
-          ${o.detail || ""}
+          "
+        >
+          ${this.escapeHTML(o.detail || "")}
         </p>
 
         ${
@@ -465,8 +564,9 @@ const App = {
             ? `
               <div
                 class="meta"
-                style="margin-top:12px;">
-                ${o.stage}
+                style="margin-top:12px;"
+              >
+                ${this.escapeHTML(o.stage)}
               </div>
             `
             : ""
@@ -477,7 +577,7 @@ const App = {
   },
 
 
-  articleCardHTML(a = {}){
+  articleCardHTML(a = {}) {
 
     return `
       <div class="article-card reveal">
@@ -489,21 +589,21 @@ const App = {
         <div class="body">
 
           <div class="cat">
-            ${a.cat || ""}
+            ${this.escapeHTML(a.cat || "")}
           </div>
 
           <h3>
-            ${a.title || ""}
+            ${this.escapeHTML(a.title || "")}
           </h3>
 
           <div class="article-meta">
 
             <span>
-              ${a.author || ""}
+              ${this.escapeHTML(a.author || "")}
             </span>
 
             <span>
-              ${a.read || ""}
+              ${this.escapeHTML(a.read || "")}
             </span>
 
           </div>
@@ -515,7 +615,7 @@ const App = {
   },
 
 
-  learnCardHTML(a = {}){
+  learnCardHTML(a = {}) {
 
     return `
       <div
@@ -524,7 +624,8 @@ const App = {
           display:flex;
           flex-direction:column;
           gap:8px;
-        ">
+        "
+      >
 
         <div
           class="cat"
@@ -534,30 +635,28 @@ const App = {
             text-transform:uppercase;
             color:var(--accent);
             letter-spacing:.06em;
-          ">
-
-          ${a.cat || ""}
-
+          "
+        >
+          ${this.escapeHTML(a.cat || "")}
         </div>
 
         <h3
           style="
             font-size:15px;
             line-height:1.4;
-          ">
-
-          ${a.title || ""}
-
+          "
+        >
+          ${this.escapeHTML(a.title || "")}
         </h3>
 
         <div class="article-meta">
 
           <span>
-            ${a.author || ""}
+            ${this.escapeHTML(a.author || "")}
           </span>
 
           <span>
-            ${a.read || ""}
+            ${this.escapeHTML(a.read || "")}
           </span>
 
         </div>
@@ -568,10 +667,9 @@ const App = {
           style="
             align-self:flex-start;
             padding-left:0;
-          ">
-
+          "
+        >
           Save for later
-
         </button>
 
       </div>
@@ -583,12 +681,12 @@ const App = {
      MOBILE NAV
      ========================================================================== */
 
-  toggleMobileNav(){
+  toggleMobileNav() {
 
     const sidebar =
       document.querySelector(".app-sidebar");
 
-    if(!sidebar){
+    if (!sidebar) {
       return;
     }
 
@@ -596,12 +694,12 @@ const App = {
   },
 
 
-  closeMobileNav(){
+  closeMobileNav() {
 
     const sidebar =
       document.querySelector(".app-sidebar");
 
-    if(sidebar){
+    if (sidebar) {
       sidebar.classList.remove("open");
     }
   },
@@ -611,13 +709,10 @@ const App = {
      ACTIVE NAV
      ========================================================================== */
 
-  setActiveNav(){
+  setActiveNav() {
 
     const currentPage =
-      location.pathname
-        .split("/")
-        .pop()
-        .toLowerCase() || "index.html";
+      getCurrentPage();
 
     document
       .querySelectorAll(
@@ -628,7 +723,7 @@ const App = {
         const href =
           link.getAttribute("href");
 
-        if(!href){
+        if (!href) {
           return;
         }
 
@@ -644,7 +739,6 @@ const App = {
           "active",
           cleanHref === currentPage
         );
-
       });
   },
 
@@ -653,9 +747,189 @@ const App = {
      HEADER
      ========================================================================== */
 
-  initHeader(){
+  initHeader() {
 
     return true;
+  },
+
+
+  headerHTML() {
+
+    return `
+      <!-- MOBILE MENU -->
+
+      <button
+        class="hamburger btn-ghost btn-icon"
+        type="button"
+        onclick="App.toggleMobileNav()"
+        aria-label="Open menu"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+
+          <path d="M4 7h16" />
+          <path d="M4 12h16" />
+          <path d="M4 17h16" />
+
+        </svg>
+
+      </button>
+
+
+      <!-- IGCA BRAND TITLE -->
+
+      <div class="header-brand-title">
+        INDO GULF CAPITAL ALLIANCE
+      </div>
+
+
+      <!-- HEADER ACTIONS -->
+
+      <div
+        class="header-actions"
+        style="
+          display:flex;
+          gap:6px;
+          align-items:center;
+        "
+      >
+
+        <!-- Notifications -->
+
+        <a
+          class="header-icon-btn"
+          href="notifications.html"
+          aria-label="Notifications"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+
+            <path
+              d="
+                M18 8
+                a6 6 0 10-12 0
+                c0 4-2 5-2 6
+                h16
+                c0-1-2-2-2-6z
+              "
+            />
+
+            <path d="M10 20a2 2 0 004 0" />
+
+          </svg>
+
+          <span class="dot-flag"></span>
+
+        </a>
+
+
+        <!-- Messages -->
+
+        <a
+          class="header-icon-btn"
+          href="messages.html"
+          aria-label="Messages"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+
+            <path
+              d="
+                M21 15
+                a2 2 0 01-2 2
+                H7
+                l-4 4
+                V5
+                a2 2 0 012-2
+                h14
+                a2 2 0 012 2z
+              "
+            />
+
+          </svg>
+
+        </a>
+
+
+        <!-- Profile -->
+
+        <a
+          class="sidebar-profile"
+          href="profile.html"
+          style="padding:4px;"
+          data-user-chrome
+        >
+
+          <div
+            class="avatar avatar-sm"
+            data-user-avatar
+          >
+            ••
+          </div>
+
+        </a>
+
+
+        <!-- Logout -->
+
+        <button
+          class="header-icon-btn"
+          type="button"
+          onclick="App.logout()"
+          aria-label="Log out"
+          title="Log out"
+        >
+
+          <svg
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+
+            <path
+              d="
+                M9 21H5
+                a2 2 0 01-2-2
+                V5
+                a2 2 0 012-2
+                h4
+              "
+            />
+
+            <path d="M16 17l5-5-5-5" />
+
+            <path d="M21 12H9" />
+
+          </svg>
+
+        </button>
+
+      </div>
+    `;
   },
 
 
@@ -663,7 +937,7 @@ const App = {
      SIDEBAR
      ========================================================================== */
 
-  sidebarHTML(active){
+  sidebarHTML(active) {
 
     const link = (
       href,
@@ -672,10 +946,7 @@ const App = {
     ) => {
 
       const currentPage =
-        location.pathname
-          .split("/")
-          .pop()
-          .toLowerCase();
+        getCurrentPage();
 
       const isActive =
         active === href ||
@@ -687,7 +958,8 @@ const App = {
       return `
         <a
           class="nav-link${isActive ? " active" : ""}"
-          href="${href}">
+          href="${href}"
+        >
 
           ${icon}
 
@@ -702,41 +974,46 @@ const App = {
 
     const ic = {
 
-
       dashboard: `
         <svg
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <rect
             x="3"
             y="3"
             width="7"
             height="9"
-            rx="1.5"/>
+            rx="1.5"
+          />
 
           <rect
             x="14"
             y="3"
             width="7"
             height="5"
-            rx="1.5"/>
+            rx="1.5"
+          />
 
           <rect
             x="14"
             y="12"
             width="7"
             height="9"
-            rx="1.5"/>
+            rx="1.5"
+          />
 
           <rect
             x="3"
             y="16"
             width="7"
             height="5"
-            rx="1.5"/>
+            rx="1.5"
+          />
 
         </svg>
       `,
@@ -747,15 +1024,17 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <circle
             cx="11"
             cy="11"
-            r="7"/>
+            r="7"
+          />
 
-          <path
-            d="M21 21l-4.3-4.3"/>
+          <path d="M21 21l-4.3-4.3" />
 
         </svg>
       `,
@@ -766,26 +1045,31 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <circle
             cx="12"
             cy="5"
-            r="2.5"/>
+            r="2.5"
+          />
 
           <circle
             cx="5"
             cy="19"
-            r="2.5"/>
+            r="2.5"
+          />
 
           <circle
             cx="19"
             cy="19"
-            r="2.5"/>
+            r="2.5"
+          />
 
-          <path d="M12 7.5V14"/>
-          <path d="M12 14L6.5 17"/>
-          <path d="M12 14l5.5 3"/>
+          <path d="M12 7.5V14" />
+          <path d="M12 14L6.5 17" />
+          <path d="M12 14l5.5 3" />
 
         </svg>
       `,
@@ -796,7 +1080,9 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <path
             d="
@@ -808,7 +1094,8 @@ const App = {
               a2 2 0 012-2
               h14
               a2 2 0 012 2z
-            "/>
+            "
+          />
 
         </svg>
       `,
@@ -819,18 +1106,21 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <rect
             x="3"
             y="5"
             width="18"
             height="16"
-            rx="2"/>
+            rx="2"
+          />
 
-          <path d="M16 3v4"/>
-          <path d="M8 3v4"/>
-          <path d="M3 10h18"/>
+          <path d="M16 3v4" />
+          <path d="M8 3v4" />
+          <path d="M3 10h18" />
 
         </svg>
       `,
@@ -841,17 +1131,19 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
-          <path
-            d="M2 6l10-4 10 4-10 4-10-4z"/>
+          <path d="M2 6l10-4 10 4-10 4-10-4z" />
 
           <path
             d="
               M6 10v6
               c0 1.5 2.5 3 6 3
               s6-1.5 6-3v-6
-            "/>
+            "
+          />
 
         </svg>
       `,
@@ -862,19 +1154,23 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <rect
             x="4"
             y="7"
             width="16"
             height="12"
-            rx="2"/>
+            rx="2"
+          />
 
-          <path d="M9 3v4"/>
-          <path d="M15 3v4"/>
-          <path d="M9 13h.01"/>
-          <path d="M15 13h.01"/>
+          <path d="M9 3v4" />
+          <path d="M15 3v4" />
+
+          <path d="M9 13h.01" />
+          <path d="M15 13h.01" />
 
         </svg>
       `,
@@ -885,7 +1181,9 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <path
             d="
@@ -894,9 +1192,10 @@ const App = {
               c0 4-2 5-2 6
               h16
               c0-1-2-2-2-6z
-            "/>
+            "
+          />
 
-          <path d="M10 20a2 2 0 004 0"/>
+          <path d="M10 20a2 2 0 004 0" />
 
         </svg>
       `,
@@ -907,12 +1206,15 @@ const App = {
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2">
+          stroke-width="2"
+          aria-hidden="true"
+        >
 
           <circle
             cx="12"
             cy="12"
-            r="3"/>
+            r="3"
+          />
 
           <path
             d="
@@ -952,12 +1254,12 @@ const App = {
               a2 2 0 112.8 2.8
               l-.1.1
               a1.7 1.7 0 00-.3 1.9
-              v0
-              a1.7 1.7 0 001.5 1H21
+              1.7 1.7 0 001.5 1H21
               a2 2 0 110 4
               h-.2
               a1.7 1.7 0 00-1.4.9z
-            "/>
+            "
+          />
 
         </svg>
       `
@@ -973,31 +1275,37 @@ const App = {
         <svg
           class="brand-mark"
           viewBox="0 0 30 30"
-          fill="none">
+          fill="none"
+          aria-hidden="true"
+        >
 
           <circle
             cx="15"
             cy="6"
             r="3"
-            fill="#AD8A4D"/>
+            fill="#AD8A4D"
+          />
 
           <circle
             cx="6"
             cy="20"
             r="3"
-            fill="#fff"/>
+            fill="#fff"
+          />
 
           <circle
             cx="24"
             cy="20"
             r="3"
-            fill="#fff"/>
+            fill="#fff"
+          />
 
           <circle
             cx="15"
             cy="27"
             r="2.4"
-            fill="#AD8A4D"/>
+            fill="#AD8A4D"
+          />
 
           <path
             d="
@@ -1007,7 +1315,8 @@ const App = {
               M24 20L15 27
             "
             stroke="rgba(255,255,255,.3)"
-            stroke-width="1.2"/>
+            stroke-width="1.2"
+          />
 
         </svg>
 
@@ -1112,76 +1421,44 @@ const App = {
         <a
           class="sidebar-profile"
           href="profile.html"
-          data-user-chrome>
+          data-user-chrome
+        >
 
           <div
             class="avatar avatar-sm"
-            data-user-avatar>
+            data-user-avatar
+          >
             ••
           </div>
 
-          <div>
+          <div class="sidebar-profile-info">
 
             <div
               class="name"
-              data-user-name>
+              data-user-name
+            >
               Loading…
             </div>
 
             <div
               class="role"
-              data-user-role>
-            </div>
+              data-user-role
+            ></div>
 
           </div>
 
         </a>
 
-
-        <button
-          class="btn-ghost btn-icon"
-          type="button"
-          onclick="App.logout()"
-          aria-label="Log out"
-          title="Log out"
-          style="margin-left:6px;">
-
-          <svg
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2">
-
-            <path
-              d="
-                M9 21H5
-                a2 2 0 01-2-2
-                V5
-                a2 2 0 012-2
-                h4
-              "/>
-
-            <path d="M16 17l5-5-5-5"/>
-
-            <path d="M21 12H9"/>
-
-          </svg>
-
-        </button>
-
       </div>
-
     `;
   },
 
 
   /* ==========================================================================
-     BOTTOM NAV
+     BOTTOM NAVIGATION
      ========================================================================== */
 
-  bottomNavHTML(active){
+  bottomNavHTML(active) {
 
     const link = (
       href,
@@ -1190,10 +1467,7 @@ const App = {
     ) => {
 
       const currentPage =
-        location.pathname
-          .split("/")
-          .pop()
-          .toLowerCase();
+        getCurrentPage();
 
       const isActive =
         active === href ||
@@ -1202,7 +1476,8 @@ const App = {
       return `
         <a
           class="${isActive ? "active" : ""}"
-          href="${href}">
+          href="${href}"
+        >
 
           ${icon}
 
@@ -1225,10 +1500,15 @@ const App = {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2">
+            stroke-width="2"
+            aria-hidden="true"
+          >
 
-            <path d="M3 11l9-7 9 7"/>
-            <path d="M5 10v10h14V10"/>
+            <path d="M3 11l9-7 9 7" />
+
+            <path
+              d="M5 10v10h14V10"
+            />
 
           </svg>
         `
@@ -1243,15 +1523,19 @@ const App = {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2">
+            stroke-width="2"
+            aria-hidden="true"
+          >
 
             <circle
               cx="11"
               cy="11"
-              r="7"/>
+              r="7"
+            />
 
             <path
-              d="M21 21l-4.3-4.3"/>
+              d="M21 21l-4.3-4.3"
+            />
 
           </svg>
         `
@@ -1266,26 +1550,31 @@ const App = {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2">
+            stroke-width="2"
+            aria-hidden="true"
+          >
 
             <circle
               cx="12"
               cy="5"
-              r="2.5"/>
+              r="2.5"
+            />
 
             <circle
               cx="5"
               cy="19"
-              r="2.5"/>
+              r="2.5"
+            />
 
             <circle
               cx="19"
               cy="19"
-              r="2.5"/>
+              r="2.5"
+            />
 
-            <path d="M12 7.5V14"/>
-            <path d="M12 14L6.5 17"/>
-            <path d="M12 14l5.5 3"/>
+            <path d="M12 7.5V14" />
+            <path d="M12 14L6.5 17" />
+            <path d="M12 14l5.5 3" />
 
           </svg>
         `
@@ -1300,7 +1589,9 @@ const App = {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2">
+            stroke-width="2"
+            aria-hidden="true"
+          >
 
             <path
               d="
@@ -1312,7 +1603,8 @@ const App = {
                 a2 2 0 012-2
                 h14
                 a2 2 0 012 2z
-              "/>
+              "
+            />
 
           </svg>
         `
@@ -1327,12 +1619,15 @@ const App = {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2">
+            stroke-width="2"
+            aria-hidden="true"
+          >
 
             <circle
               cx="12"
               cy="8"
-              r="4"/>
+              r="4"
+            />
 
             <path
               d="
@@ -1340,7 +1635,8 @@ const App = {
                 v-1
                 a8 8 0 0116 0
                 v1
-              "/>
+              "
+            />
 
           </svg>
         `
@@ -1351,228 +1647,34 @@ const App = {
 
 
   /* ==========================================================================
-     HEADER
-     ========================================================================== */
-
-  headerHTML(){
-
-    return `
-
-      <!-- MOBILE MENU -->
-
-      <button
-        class="hamburger btn-ghost btn-icon"
-        type="button"
-        onclick="App.toggleMobileNav()"
-        aria-label="Open menu">
-
-        <svg
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2">
-
-          <path d="M4 7h16"/>
-          <path d="M4 12h16"/>
-          <path d="M4 17h16"/>
-
-        </svg>
-
-      </button>
-
-
-      <!-- SEARCH -->
-
-      <div class="search-bar">
-
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2">
-
-          <circle
-            cx="11"
-            cy="11"
-            r="7"/>
-
-          <path
-            d="M21 21l-4.3-4.3"/>
-
-        </svg>
-
-
-        <input
-          type="text"
-          placeholder="Search people, companies, industries, opportunities..."
-          autocomplete="off">
-
-      </div>
-
-
-      <!-- HEADER ACTIONS -->
-
-      <div
-        class="header-actions"
-        style="
-          display:flex;
-          gap:6px;
-          align-items:center;
-        ">
-
-
-        <!-- Notifications -->
-
-        <a
-          class="header-icon-btn"
-          href="notifications.html"
-          aria-label="Notifications">
-
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2">
-
-            <path
-              d="
-                M18 8
-                a6 6 0 10-12 0
-                c0 4-2 5-2 6
-                h16
-                c0-1-2-2-2-6z
-              "/>
-
-            <path
-              d="M10 20a2 2 0 004 0"/>
-
-          </svg>
-
-          <span class="dot-flag"></span>
-
-        </a>
-
-
-        <!-- Messages -->
-
-        <a
-          class="header-icon-btn"
-          href="messages.html"
-          aria-label="Messages">
-
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2">
-
-            <path
-              d="
-                M21 15
-                a2 2 0 01-2 2
-                H7
-                l-4 4
-                V5
-                a2 2 0 012-2
-                h14
-                a2 2 0 012 2z
-              "/>
-
-          </svg>
-
-        </a>
-
-
-        <!-- Profile -->
-
-        <a
-          class="sidebar-profile"
-          href="profile.html"
-          style="padding:4px;"
-          data-user-chrome>
-
-          <div
-            class="avatar avatar-sm"
-            data-user-avatar>
-            ••
-          </div>
-
-        </a>
-
-
-        <!-- Logout -->
-
-        <button
-          class="header-icon-btn"
-          type="button"
-          onclick="App.logout()"
-          aria-label="Log out"
-          title="Log out">
-
-          <svg
-            viewBox="0 0 24 24"
-            width="18"
-            height="18"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2">
-
-            <path
-              d="
-                M9 21H5
-                a2 2 0 01-2-2
-                V5
-                a2 2 0 012-2
-                h4
-              "/>
-
-            <path d="M16 17l5-5-5-5"/>
-
-            <path d="M21 12H9"/>
-
-          </svg>
-
-        </button>
-
-      </div>
-
-    `;
-  },
-
-
-  /* ==========================================================================
      LOGOUT
      ========================================================================== */
 
-  async logout(){
+  async logout() {
 
-    try{
+    try {
 
-      if(
+      if (
         window.sb &&
-        sb.auth &&
-        typeof sb.auth.signOut === "function"
-      ){
+        window.sb.auth &&
+        typeof window.sb.auth.signOut === "function"
+      ) {
 
-        await sb.auth.signOut();
-
+        await window.sb.auth.signOut();
       }
 
-    }catch(error){
+    } catch (error) {
 
       console.warn(
         "IGCA: Logout error:",
         error
       );
 
-    }finally{
+    } finally {
 
       window.location.replace(
         "login.html"
       );
-
     }
   },
 
@@ -1581,14 +1683,14 @@ const App = {
      LIVE USER CHROME
      ========================================================================== */
 
-  async hydrateUserChrome(){
+  async hydrateUserChrome() {
 
-    try{
+    try {
 
-      if(
+      if (
         !window.IGCA_API ||
         typeof window.IGCA_API.profile !== "function"
-      ){
+      ) {
 
         console.warn(
           "IGCA: IGCA_API.profile() unavailable."
@@ -1602,7 +1704,7 @@ const App = {
         await window.IGCA_API.profile();
 
 
-      if(!profile){
+      if (!profile) {
         return null;
       }
 
@@ -1627,7 +1729,6 @@ const App = {
 
           element.textContent =
             name;
-
         });
 
 
@@ -1639,7 +1740,6 @@ const App = {
 
           element.textContent =
             role;
-
         });
 
 
@@ -1653,20 +1753,16 @@ const App = {
             profile.avatar_url;
 
 
-          if(avatar){
+          if (avatar) {
 
             const safeAvatar =
-              String(avatar)
-                .replace(/"/g, "&quot;");
-
+              this.escapeAttribute(avatar);
 
             const safeName =
-              String(name)
-                .replace(/"/g, "&quot;");
+              this.escapeAttribute(name);
 
 
             element.innerHTML = `
-
               <img
                 src="${safeAvatar}"
                 alt="${safeName}"
@@ -1678,7 +1774,6 @@ const App = {
                   display:block;
                 "
               >
-
             `;
 
 
@@ -1686,36 +1781,35 @@ const App = {
               element.querySelector("img");
 
 
-            if(image){
+            if (image) {
 
               image.addEventListener(
                 "error",
                 () => {
 
                   element.innerHTML =
-                    App.initials(name);
+                    this.escapeHTML(
+                      this.initials(name)
+                    );
 
                 },
                 {
-                  once:true
+                  once: true
                 }
               );
-
             }
 
-          }else{
+          } else {
 
             element.textContent =
-              App.initials(name);
-
+              this.initials(name);
           }
-
         });
 
 
       return profile;
 
-    }catch(error){
+    } catch (error) {
 
       console.warn(
         "IGCA: Could not load live profile:",
@@ -1729,55 +1823,86 @@ const App = {
 
   /* ==========================================================================
      SHELL MOUNT
-  ========================================================================== */
+     ========================================================================== */
 
-  mountShell(active){
+  mountShell(active) {
 
-    const sidebar =
-      document.querySelector(
-        ".app-sidebar"
+    try {
+
+      const sidebar =
+        document.querySelector(
+          ".app-sidebar"
+        );
+
+
+      const header =
+        document.querySelector(
+          ".app-header"
+        );
+
+
+      const bottomNav =
+        document.querySelector(
+          ".bottom-nav"
+        );
+
+
+      if (sidebar) {
+
+        sidebar.innerHTML =
+          this.sidebarHTML(active);
+      }
+
+
+      if (header) {
+
+        header.innerHTML =
+          this.headerHTML();
+      }
+
+
+      if (bottomNav) {
+
+        bottomNav.innerHTML =
+          this.bottomNavHTML(active);
+      }
+
+
+      this.setActiveNav();
+
+      this.initHeader();
+
+
+      /* Close mobile menu when navigating */
+
+      document
+        .querySelectorAll(
+          ".app-sidebar a"
+        )
+        .forEach(link => {
+
+          link.addEventListener(
+            "click",
+            () => {
+
+              this.closeMobileNav();
+            }
+          );
+
+        });
+
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+        "IGCA: Shell mount failed:",
+        error
       );
 
-    const header =
-      document.querySelector(
-        ".app-header"
-      );
-
-    const bottomNav =
-      document.querySelector(
-        ".bottom-nav"
-      );
-
-
-    if(sidebar){
-
-      sidebar.innerHTML =
-        App.sidebarHTML(active);
-
+      return false;
     }
-
-
-    if(header){
-
-      header.innerHTML =
-        App.headerHTML();
-
-    }
-
-
-    if(bottomNav){
-
-      bottomNav.innerHTML =
-        App.bottomNavHTML(active);
-
-    }
-
-
-    App.setActiveNav();
-
-    App.initHeader();
-
-    return true;
   }
 
 };
@@ -1799,7 +1924,7 @@ const PUBLIC_PAGES = [
    GET CURRENT PAGE
    ========================================================================== */
 
-function getCurrentPage(){
+function getCurrentPage() {
 
   return (
     location.pathname
@@ -1815,7 +1940,7 @@ function getCurrentPage(){
    SUPABASE READY CHECK
    ========================================================================== */
 
-function isSupabaseReady(){
+function isSupabaseReady() {
 
   return !!(
     window.sb &&
@@ -1829,9 +1954,9 @@ function isSupabaseReady(){
    AUTH GUARD
    ========================================================================== */
 
-async function runAuthGuard(){
+async function runAuthGuard() {
 
-  try{
+  try {
 
     const page =
       getCurrentPage();
@@ -1843,30 +1968,36 @@ async function runAuthGuard(){
 
     /*
       Supabase normally loads before this file.
-      If it isn't available, don't redirect blindly.
+
+      If it is not available, do NOT redirect blindly.
     */
 
-    if(!isSupabaseReady()){
+    if (!isSupabaseReady()) {
 
       console.warn(
         "IGCA: Supabase auth is not ready."
       );
 
       return {
-        session:null,
-        isPublic
+        session: null,
+        isPublic: isPublic,
+        redirected: false
       };
     }
 
 
-    const {
-      data,
-      error
-    } =
+    const result =
       await window.sb.auth.getSession();
 
 
-    if(error){
+    const data =
+      result?.data || null;
+
+    const error =
+      result?.error || null;
+
+
+    if (error) {
 
       console.error(
         "IGCA: Failed to get session:",
@@ -1874,8 +2005,10 @@ async function runAuthGuard(){
       );
 
       return {
-        session:null,
-        isPublic
+        session: null,
+        isPublic: isPublic,
+        redirected: false,
+        error: error
       };
     }
 
@@ -1884,55 +2017,59 @@ async function runAuthGuard(){
       data?.session || null;
 
 
-    /* --------------------------------------------------------------
+    /* ----------------------------------------------------------------------
        NOT LOGGED IN
-    -------------------------------------------------------------- */
+       ---------------------------------------------------------------------- */
 
-    if(!session && !isPublic){
+    if (
+      !session &&
+      !isPublic
+    ) {
 
       window.location.replace(
         "login.html"
       );
 
       return {
-        session:null,
-        isPublic,
-        redirected:true
+        session: null,
+        isPublic: isPublic,
+        redirected: true
       };
     }
 
 
-    /* --------------------------------------------------------------
-       LOGGED IN USER ON LOGIN/SIGNUP
-    -------------------------------------------------------------- */
+    /* ----------------------------------------------------------------------
+       LOGGED IN USER ON LOGIN / SIGNUP
+       ---------------------------------------------------------------------- */
 
-    if(
+    if (
       session &&
       (
         page === "login.html" ||
         page === "signup.html"
       )
-    ){
+    ) {
 
       window.location.replace(
         "dashboard.html"
       );
 
       return {
-        session,
-        isPublic,
-        redirected:true
+        session: session,
+        isPublic: isPublic,
+        redirected: true
       };
     }
 
 
     return {
-      session,
-      isPublic,
-      redirected:false
+      session: session,
+      isPublic: isPublic,
+      redirected: false
     };
 
-  }catch(error){
+
+  } catch (error) {
 
     console.error(
       "IGCA: Auth guard error:",
@@ -1940,9 +2077,10 @@ async function runAuthGuard(){
     );
 
     return {
-      session:null,
-      isPublic:false,
-      error
+      session: null,
+      isPublic: false,
+      redirected: false,
+      error: error
     };
   }
 }
@@ -1952,57 +2090,62 @@ async function runAuthGuard(){
    SUPABASE AUTH STATE LISTENER
    ========================================================================== */
 
-function initAuthListener(){
+function initAuthListener() {
 
-  if(!isSupabaseReady()){
+  if (!isSupabaseReady()) {
     return;
   }
 
 
-  /*
-    Keep UI synchronized if the user:
-    - logs in
-    - logs out
-    - session expires
-    - refreshes token
-  */
+  try {
 
-  window.sb.auth.onAuthStateChange(
-    (event, session) => {
+    window.sb.auth.onAuthStateChange(
+      (event, session) => {
 
-      const page =
-        getCurrentPage();
+        const page =
+          getCurrentPage();
 
 
-      if(
-        event === "SIGNED_OUT" &&
-        !PUBLIC_PAGES.includes(page)
-      ){
+        /* SIGNED OUT */
 
-        window.location.replace(
-          "login.html"
-        );
+        if (
+          event === "SIGNED_OUT" &&
+          !PUBLIC_PAGES.includes(page)
+        ) {
 
-        return;
+          window.location.replace(
+            "login.html"
+          );
+
+          return;
+        }
+
+
+        /* LOGGED IN ON LOGIN / SIGNUP */
+
+        if (
+          session &&
+          (
+            page === "login.html" ||
+            page === "signup.html"
+          )
+        ) {
+
+          window.location.replace(
+            "dashboard.html"
+          );
+        }
+
       }
+    );
 
+  } catch (error) {
 
-      if(
-        session &&
-        (
-          page === "login.html" ||
-          page === "signup.html"
-        )
-      ){
-
-        window.location.replace(
-          "dashboard.html"
-        );
-
-      }
-
-    }
-  );
+    console.warn(
+      "IGCA: Auth listener could not be initialized:",
+      error
+    );
+  }
 }
 
 
@@ -2010,66 +2153,74 @@ function initAuthListener(){
    GLOBAL INITIALIZATION
    ========================================================================== */
 
-async function initializeIGCA(){
+async function initializeIGCA() {
 
-  const page =
-    getCurrentPage();
+  try {
 
-
-  /*
-    First make sure authentication state is valid.
-  */
-
-  const auth =
-    await runAuthGuard();
+    const page =
+      getCurrentPage();
 
 
-  /*
-    If auth guard already redirected,
-    stop everything else.
-  */
+    /*
+      First validate authentication.
+    */
 
-  if(auth?.redirected){
-    return;
+    const auth =
+      await runAuthGuard();
+
+
+    /*
+      If auth guard already redirected,
+      stop everything else.
+    */
+
+    if (auth?.redirected) {
+      return;
+    }
+
+
+    /*
+      Public page.
+      No application shell.
+    */
+
+    if (
+      !auth?.session ||
+      auth?.isPublic
+    ) {
+
+      return;
+    }
+
+
+    /*
+      Authenticated application page.
+    */
+
+    App.mountShell(page);
+
+
+    /*
+      Load actual logged-in profile.
+    */
+
+    await App.hydrateUserChrome();
+
+
+    /*
+      Keep auth state synchronized.
+    */
+
+    initAuthListener();
+
+
+  } catch (error) {
+
+    console.error(
+      "IGCA: Initialization failed:",
+      error
+    );
   }
-
-
-  /*
-    Public page.
-    No sidebar/header shell.
-  */
-
-  if(
-    !auth?.session ||
-    auth?.isPublic
-  ){
-
-    return;
-  }
-
-
-  /*
-    Authenticated application page.
-  */
-
-  App.mountShell(page);
-
-
-  /*
-    Load actual logged-in profile
-    from Supabase/API.
-  */
-
-  await App.hydrateUserChrome();
-
-
-  /*
-    Initialize auth state listener
-    after successful authenticated mount.
-  */
-
-  initAuthListener();
-
 }
 
 
@@ -2077,20 +2228,441 @@ async function initializeIGCA(){
    DOM READY
    ========================================================================== */
 
-if(
+if (
   document.readyState === "loading"
-){
+) {
 
   document.addEventListener(
     "DOMContentLoaded",
     initializeIGCA,
     {
-      once:true
+      once: true
     }
   );
 
-}else{
+} else {
 
   initializeIGCA();
-
 }
+
+
+/* ==========================================================================
+   IGCA — RESPONSIVE SIDEBAR
+   Global Shell Navigation
+   ========================================================================== */
+
+(function () {
+
+  "use strict";
+
+
+  function initResponsiveSidebar() {
+
+    const sidebar =
+      document.querySelector(".app-sidebar");
+
+    const header =
+      document.querySelector(".app-header");
+
+    if (!sidebar || !header) {
+      return;
+    }
+
+
+    /* ----------------------------------------------------------------------
+       Prevent duplicate initialization
+       ---------------------------------------------------------------------- */
+
+    if (
+      document.body.dataset.sidebarReady === "true"
+    ) {
+      return;
+    }
+
+    document.body.dataset.sidebarReady = "true";
+
+
+    /* ----------------------------------------------------------------------
+       CREATE OVERLAY
+       ---------------------------------------------------------------------- */
+
+    let overlay =
+      document.querySelector(".sidebar-overlay");
+
+    if (!overlay) {
+
+      overlay =
+        document.createElement("div");
+
+      overlay.className =
+        "sidebar-overlay";
+
+      overlay.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      document.body.appendChild(
+        overlay
+      );
+    }
+
+
+    /* ----------------------------------------------------------------------
+       CREATE HAMBURGER
+       ---------------------------------------------------------------------- */
+
+    let hamburger =
+      document.querySelector(".hamburger");
+
+    if (!hamburger) {
+
+      hamburger =
+        document.createElement("button");
+
+      hamburger.type =
+        "button";
+
+      hamburger.className =
+        "hamburger";
+
+      hamburger.setAttribute(
+        "aria-label",
+        "Open navigation"
+      );
+
+      hamburger.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+
+      hamburger.innerHTML = `
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <path d="M4 6h16"/>
+          <path d="M4 12h16"/>
+          <path d="M4 18h16"/>
+        </svg>
+      `;
+
+      /*
+       * Put hamburger at the beginning of header.
+       */
+
+      header.insertBefore(
+        hamburger,
+        header.firstChild
+      );
+    }
+
+
+    /* ----------------------------------------------------------------------
+       CREATE SIDEBAR CLOSE BUTTON
+       ---------------------------------------------------------------------- */
+
+    let closeButton =
+      sidebar.querySelector(
+        ".sidebar-close-btn"
+      );
+
+    if (!closeButton) {
+
+      closeButton =
+        document.createElement("button");
+
+      closeButton.type =
+        "button";
+
+      closeButton.className =
+        "sidebar-close-btn";
+
+      closeButton.setAttribute(
+        "aria-label",
+        "Close navigation"
+      );
+
+      closeButton.innerHTML = `
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <path d="M6 6l12 12"/>
+          <path d="M18 6L6 18"/>
+        </svg>
+      `;
+
+      sidebar.appendChild(
+        closeButton
+      );
+    }
+
+
+    /* ----------------------------------------------------------------------
+       OPEN
+       ---------------------------------------------------------------------- */
+
+    function openSidebar() {
+
+      /*
+       * Only drawer behavior on mobile.
+       */
+
+      if (
+        window.innerWidth > 700
+      ) {
+        return;
+      }
+
+      document.body.classList.add(
+        "sidebar-open"
+      );
+
+      overlay.classList.add(
+        "active"
+      );
+
+      overlay.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      hamburger.setAttribute(
+        "aria-expanded",
+        "true"
+      );
+
+      hamburger.setAttribute(
+        "aria-label",
+        "Close navigation"
+      );
+    }
+
+
+    /* ----------------------------------------------------------------------
+       CLOSE
+       ---------------------------------------------------------------------- */
+
+    function closeSidebar() {
+
+      document.body.classList.remove(
+        "sidebar-open"
+      );
+
+      overlay.classList.remove(
+        "active"
+      );
+
+      overlay.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      hamburger.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+
+      hamburger.setAttribute(
+        "aria-label",
+        "Open navigation"
+      );
+    }
+
+
+    /* ----------------------------------------------------------------------
+       TOGGLE
+       ---------------------------------------------------------------------- */
+
+    function toggleSidebar() {
+
+      if (
+        document.body.classList.contains(
+          "sidebar-open"
+        )
+      ) {
+
+        closeSidebar();
+
+      } else {
+
+        openSidebar();
+
+      }
+    }
+
+
+    /* ----------------------------------------------------------------------
+       EVENTS
+       ---------------------------------------------------------------------- */
+
+    hamburger.addEventListener(
+      "click",
+      toggleSidebar
+    );
+
+
+    closeButton.addEventListener(
+      "click",
+      closeSidebar
+    );
+
+
+    overlay.addEventListener(
+      "click",
+      closeSidebar
+    );
+
+
+    /* ----------------------------------------------------------------------
+       ESCAPE
+       ---------------------------------------------------------------------- */
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key === "Escape"
+        ) {
+
+          closeSidebar();
+
+        }
+
+      }
+    );
+
+
+    /* ----------------------------------------------------------------------
+       NAV LINK CLICK
+       Mobile drawer automatically closes.
+       ---------------------------------------------------------------------- */
+
+    sidebar.addEventListener(
+      "click",
+      event => {
+
+        const link =
+          event.target.closest(
+            ".nav-link"
+          );
+
+        if (!link) {
+          return;
+        }
+
+        if (
+          window.innerWidth <= 700
+        ) {
+
+          closeSidebar();
+
+        }
+
+      }
+    );
+
+
+    /* ----------------------------------------------------------------------
+       RESIZE
+       ---------------------------------------------------------------------- */
+
+    let resizeTimer = null;
+
+    window.addEventListener(
+      "resize",
+      () => {
+
+        clearTimeout(
+          resizeTimer
+        );
+
+        resizeTimer =
+          setTimeout(
+            () => {
+
+              /*
+               * Desktop/tablet:
+               * remove mobile drawer state.
+               */
+
+              if (
+                window.innerWidth > 700
+              ) {
+
+                closeSidebar();
+
+              }
+
+            },
+            100
+          );
+
+      }
+    );
+
+
+    console.log(
+      "IGCA Responsive Sidebar: initialized"
+    );
+  }
+
+
+  /* ------------------------------------------------------------------------
+     DOM READY
+     ------------------------------------------------------------------------ */
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initResponsiveSidebar
+    );
+
+  } else {
+
+    initResponsiveSidebar();
+
+  }
+
+})();
+
+
+/* ==========================================================================
+   GLOBAL EXPORTS
+   ========================================================================== */
+
+window.NetGraphics =
+  NetGraphics;
+
+window.App =
+  App;
+
+window.PUBLIC_PAGES =
+  PUBLIC_PAGES;
+
+window.getCurrentPage =
+  getCurrentPage;
+
+window.isSupabaseReady =
+  isSupabaseReady;
+
+window.runAuthGuard =
+  runAuthGuard;
+
+window.initAuthListener =
+  initAuthListener;
+
+window.initializeIGCA =
+  initializeIGCA;
