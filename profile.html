@@ -10,133 +10,7 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/animations.css">
 <link rel="stylesheet" href="css/responsive.css">
-
-<style>
-  .profile-header{
-    padding:32px;
-    margin-bottom:24px;
-    position:relative;
-    overflow:hidden;
-  }
-
-  .profile-cover{
-    position:absolute;
-    left:0;
-    right:0;
-    top:0;
-    height:105px;
-    background:
-      linear-gradient(
-        120deg,
-        var(--primary-dark),
-        var(--primary-tint)
-      );
-  }
-
-  .profile-main-row{
-    display:flex;
-    gap:20px;
-    align-items:flex-end;
-    position:relative;
-    padding-top:55px;
-  }
-
-  .profile-main-info{
-    flex:1;
-    min-width:0;
-  }
-
-  .profile-name-row{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-
-  .profile-name-row h1{
-    font-size:24px;
-    margin:0;
-  }
-
-  .profile-actions{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-
-  .profile-layout{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 280px;
-    gap:20px;
-  }
-
-  .exp-item{
-    padding:12px 0;
-    border-bottom:1px solid var(--border);
-    font-size:14px;
-    display:flex;
-    flex-direction:column;
-    gap:3px;
-  }
-
-  .exp-item:last-child{
-    border-bottom:none;
-  }
-
-  .profile-avatar{
-    flex-shrink:0;
-    position:relative;
-    z-index:2;
-    border:4px solid var(--surface);
-  }
-
-  #p-network{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-  }
-
-  @media(max-width:900px){
-
-    .profile-layout{
-      grid-template-columns:1fr;
-    }
-
-    .profile-main-row{
-      align-items:flex-start;
-      flex-direction:column;
-      padding-top:55px;
-    }
-
-    .profile-actions{
-      width:100%;
-    }
-
-  }
-
-  @media(max-width:600px){
-
-    .profile-header{
-      padding:18px;
-    }
-
-    .profile-main-row{
-      gap:14px;
-    }
-
-    .profile-actions{
-      display:grid;
-      grid-template-columns:1fr;
-      width:100%;
-    }
-
-    .profile-actions .btn{
-      width:100%;
-      justify-content:center;
-    }
-
-  }
-</style>
+<link rel="stylesheet" href="css/profile.css">
 </head>
 
 <body>
@@ -152,24 +26,33 @@
     <main class="app-content">
 
       <!-- =========================================================
-           PROFILE HEADER
+           PROFILE HERO
       ========================================================== -->
 
-      <section class="profile-header card">
+      <section class="profile-hero card">
 
-        <div class="profile-cover" aria-hidden="true"></div>
+        <div class="profile-hero-main">
 
-        <div class="profile-main-row">
+          <!-- Avatar -->
 
           <div
-            class="avatar avatar-lg profile-avatar"
-            id="p-avatar">
-            IG
+            class="profile-avatar-wrap"
+            aria-label="Profile photo">
+
+            <div
+              class="avatar avatar-lg profile-avatar"
+              id="p-avatar">
+              IG
+            </div>
+
           </div>
 
-          <div class="profile-main-info">
 
-            <div class="profile-name-row">
+          <!-- Main information -->
+
+          <div class="profile-identity">
+
+            <div class="profile-name-line">
 
               <h1 id="p-name">
                 Loading...
@@ -179,41 +62,49 @@
 
             </div>
 
+
             <p
               id="p-title"
-              class="text-secondary"
-              style="margin-top:4px;font-size:15px;">
+              class="profile-headline">
             </p>
+
 
             <p
               id="p-meta"
-              class="text-secondary"
-              style="margin-top:4px;font-size:13.5px;">
+              class="profile-meta">
             </p>
 
           </div>
 
-<!-- OWN PROFILE -->
-<div
-  class="profile-actions"
-  id="own-profile-actions"
-  style="display:none;">
 
-  <a
-    href="settings.html"
-    class="btn btn-outline">
-    Edit Profile
-  </a>
+          <!-- Own Profile -->
 
-  <a
-    href="posts.html"
-    class="btn btn-primary">
-    + New Post
-  </a>
+          <div
+            class="profile-actions"
+            id="own-profile-actions"
+            style="display:none;">
 
-</div>
+            <a
+              href="settings.html"
+              class="btn btn-outline">
 
-          <!-- OTHER USER PROFILE -->
+              Edit Profile
+
+            </a>
+
+            <a
+              href="posts.html"
+              class="btn btn-primary">
+
+              + New Post
+
+            </a>
+
+          </div>
+
+
+          <!-- Other Profile -->
+
           <div
             class="profile-actions"
             id="other-profile-actions"
@@ -221,6 +112,7 @@
 
             <button
               class="btn btn-primary"
+              id="profile-connect-btn"
               type="button">
 
               Connect
@@ -229,6 +121,7 @@
 
             <button
               class="btn btn-outline"
+              id="profile-message-btn"
               type="button">
 
               Message
@@ -237,6 +130,7 @@
 
             <button
               class="btn btn-outline"
+              id="profile-meeting-btn"
               type="button">
 
               Request Meeting
@@ -245,6 +139,7 @@
 
             <button
               class="btn btn-ghost btn-icon"
+              id="profile-follow-btn"
               type="button"
               title="Follow"
               aria-label="Follow">
@@ -272,166 +167,196 @@
 
 
       <!-- =========================================================
-           PROFILE CONTENT
+           PROFILE BODY
       ========================================================== -->
 
       <div class="profile-layout">
 
-        <div>
+        <!-- =======================================================
+             MAIN COLUMN
+        ======================================================== -->
+
+        <div class="profile-main-column">
+
 
           <!-- ABOUT -->
 
-          <div
-            class="card card-pad"
-            style="margin-bottom:20px;">
+          <section class="profile-section card">
 
-            <h3
-              style="font-size:16px;margin-bottom:10px;">
-              About
-            </h3>
+            <div class="profile-section-head">
 
-            <p
-              class="text-secondary"
-              id="p-about"
-              style="
-                font-size:14.5px;
-                line-height:1.7;
-              ">
-            </p>
+              <h2>
+                About
+              </h2>
 
-          </div>
+            </div>
+
+            <div class="profile-section-body">
+
+              <p
+                id="p-about"
+                class="profile-about">
+              </p>
+
+            </div>
+
+          </section>
 
 
           <!-- EXPERIENCE -->
 
-          <div
-            class="card card-pad"
-            style="margin-bottom:20px;">
+          <section class="profile-section card">
 
-            <h3
-              style="
-                font-size:16px;
-                margin-bottom:14px;
-              ">
+            <div class="profile-section-head">
 
-              Experience
+              <h2>
+                Experience
+              </h2>
 
-            </h3>
+            </div>
 
-            <div class="exp-item">
+            <div class="profile-section-body">
 
-              <strong>
-                Current role
-              </strong>
+              <div class="experience-item">
 
-              <span
-                id="p-exp-current"
-                class="text-secondary">
-              </span>
+                <div class="experience-icon">
+                  <span>
+                    IG
+                  </span>
+                </div>
 
-              <div class="meta">
-                Present
+                <div class="experience-content">
+
+                  <strong>
+                    <span id="p-exp-current">
+                    </span>
+                  </strong>
+
+                  <span class="experience-current">
+                    Current role
+                  </span>
+
+                  <span class="experience-time">
+                    Present
+                  </span>
+
+                </div>
+
               </div>
 
             </div>
 
-          </div>
+          </section>
 
 
           <!-- EXPERTISE -->
 
-          <div
-            class="card card-pad"
-            style="margin-bottom:20px;">
+          <section class="profile-section card">
 
-            <h3
-              style="
-                font-size:16px;
-                margin-bottom:12px;
-              ">
+            <div class="profile-section-head">
 
-              Expertise &amp; Industries
+              <h2>
+                Expertise &amp; Industries
+              </h2>
 
-            </h3>
-
-            <div
-              class="chip-row"
-              id="p-expertise">
             </div>
 
-          </div>
+            <div class="profile-section-body">
+
+              <div
+                class="profile-chips"
+                id="p-expertise">
+              </div>
+
+            </div>
+
+          </section>
 
 
           <!-- POSTS -->
 
-          <div class="card card-pad">
+          <section class="profile-section card">
 
-            <h3
-              style="
-                font-size:16px;
-                margin-bottom:14px;
-              ">
+            <div class="profile-section-head">
 
-              Recent Posts
+              <h2>
+                Recent Posts
+              </h2>
 
-            </h3>
-
-            <div
-              class="grid-3"
-              id="p-posts">
             </div>
 
-          </div>
+            <div class="profile-section-body">
+
+              <div
+                class="profile-posts"
+                id="p-posts">
+              </div>
+
+            </div>
+
+          </section>
 
         </div>
 
 
         <!-- =======================================================
-             RIGHT SIDEBAR
+             SIDEBAR
         ======================================================== -->
 
-        <aside>
-
-          <div
-            class="card card-pad"
-            style="margin-bottom:20px;">
-
-            <h3
-              style="
-                font-size:15px;
-                margin-bottom:12px;
-              ">
-
-              Education &amp; Certifications
-
-            </h3>
-
-            <p
-              class="text-secondary"
-              style="font-size:13.5px;">
-
-              Add education and certifications from Settings.
-
-            </p>
-
-          </div>
+        <aside class="profile-sidebar">
 
 
-          <div class="card card-pad">
+          <!-- EDUCATION -->
 
-            <h3
-              style="
-                font-size:15px;
-                margin-bottom:12px;
-              ">
+          <section class="profile-side-card card">
 
-              Network
+            <div class="profile-side-head">
 
-            </h3>
+              <h3>
+                Education &amp; Certifications
+              </h3>
 
-            <div id="p-network"></div>
+            </div>
 
-          </div>
+            <div class="profile-side-body">
+
+              <div class="profile-side-empty">
+
+                <div class="profile-side-empty-icon">
+                  +
+                </div>
+
+                <p>
+                  Add your education and certifications from Settings.
+                </p>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- NETWORK -->
+
+          <section class="profile-side-card card">
+
+            <div class="profile-side-head">
+
+              <h3>
+                Network
+              </h3>
+
+            </div>
+
+            <div class="profile-side-body">
+
+              <div id="p-network"></div>
+
+            </div>
+
+          </section>
+
 
         </aside>
 
@@ -442,6 +367,7 @@
   </div>
 
 </div>
+
 
 <nav class="bottom-nav"></nav>
 
