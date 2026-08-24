@@ -111,43 +111,755 @@
 .search-bar svg{ width:18px; height:18px; color:var(--text-tertiary); flex-shrink:0; }
 .search-bar input{ flex:1; border:none; outline:none; font-size:15px; padding:10px 0; background:transparent; }
 .search-bar .btn{ flex-shrink:0; }
+/* ========================================================================== 
+   IGCA — APP SHELL
+   Responsive Desktop / Tablet / Mobile Navigation
+   ========================================================================== */
 
-/* ---------- App shell ---------- */
-.app-shell{ display:flex; min-height:100vh; }
-.app-sidebar{
-  width:var(--sidebar-w); background:var(--primary-dark); color:rgba(255,255,255,.82);
-  padding:26px 18px; position:fixed; top:0; left:0; height:100vh; display:flex; flex-direction:column; z-index:60;
-  overflow-y:auto;
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
 }
-.app-sidebar .brand{ color:#fff; padding:0 10px 26px; }
-.nav-group{ margin-bottom:6px; }
-.nav-label{ font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:rgba(255,255,255,.35); padding:18px 12px 8px; }
-.nav-link{
-  display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:10px; font-size:14.5px;
-  color:rgba(255,255,255,.78); font-weight:500; transition:.15s;
-}
-.nav-link svg{ width:19px; height:19px; flex-shrink:0; opacity:.85; }
-.nav-link:hover{ background:rgba(255,255,255,.07); color:#fff; }
-.nav-link.active{ background:linear-gradient(90deg, rgba(173,138,77,.28), rgba(173,138,77,.05)); color:#fff; box-shadow:inset 3px 0 0 var(--accent); }
-.sidebar-footer{ margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); }
-.sidebar-profile{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; }
-.sidebar-profile:hover{ background:rgba(255,255,255,.06); }
-.sidebar-profile .name{ color:#fff; font-size:13.5px; font-weight:600; }
-.sidebar-profile .role{ color:rgba(255,255,255,.5); font-size:12px; }
 
-.app-main{ margin-left:var(--sidebar-w); flex:1; min-width:0; display:flex; flex-direction:column; }
-.app-header{
-  height:var(--header-h); background:var(--surface); border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between; padding:0 32px; position:sticky; top:0; z-index:50;
-}
-.app-header .search-bar{ width:400px; box-shadow:none; background:var(--surface-secondary); border-color:transparent; }
-.header-icon-btn{ position:relative; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); }
-.header-icon-btn:hover{ background:var(--surface-secondary); }
-.header-icon-btn svg{ width:20px; height:20px; }
-.dot-flag{ position:absolute; top:8px; right:8px; width:8px; height:8px; border-radius:50%; background:var(--danger); border:2px solid var(--surface); }
-.app-content{ padding:32px; flex:1; }
-.hamburger{ display:none; }
 
+/* ========================================================================== 
+   SIDEBAR
+   ========================================================================== */
+
+.app-sidebar {
+  width: var(--sidebar-w);
+  background: var(--primary-dark);
+  color: rgba(255,255,255,.82);
+
+  padding: 26px 18px;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: var(--sidebar-w);
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  z-index: 1000;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  border-right: 1px solid rgba(255,255,255,.06);
+
+  transition:
+    transform .28s ease,
+    width .25s ease,
+    box-shadow .25s ease;
+}
+
+
+/* Sidebar scrollbar */
+
+.app-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.app-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.12);
+  border-radius: 99px;
+}
+
+
+/* Brand */
+
+.app-sidebar .brand {
+  color: #fff;
+  padding: 0 10px 26px;
+  flex-shrink: 0;
+}
+
+
+/* ========================================================================== 
+   NAVIGATION
+   ========================================================================== */
+
+.nav-group {
+  margin-bottom: 6px;
+}
+
+.nav-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+
+  color: rgba(255,255,255,.34);
+
+  padding: 18px 12px 8px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  min-height: 43px;
+
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  font-size: 14px;
+  color: rgba(255,255,255,.78);
+  font-weight: 500;
+
+  transition:
+    background .18s ease,
+    color .18s ease,
+    transform .18s ease;
+}
+
+.nav-link svg {
+  width: 19px;
+  height: 19px;
+
+  flex: 0 0 19px;
+
+  opacity: .85;
+}
+
+.nav-link:hover {
+  background: rgba(255,255,255,.07);
+  color: #fff;
+}
+
+.nav-link.active {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(173,138,77,.28),
+      rgba(173,138,77,.05)
+    );
+
+  color: #fff;
+
+  box-shadow:
+    inset 3px 0 0 var(--accent);
+}
+
+
+/* ========================================================================== 
+   SIDEBAR FOOTER
+   ========================================================================== */
+
+.sidebar-footer {
+  margin-top: auto;
+
+  padding-top: 16px;
+
+  border-top:
+    1px solid rgba(255,255,255,.1);
+
+  flex-shrink: 0;
+}
+
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  transition: background .18s ease;
+}
+
+.sidebar-profile:hover {
+  background: rgba(255,255,255,.06);
+}
+
+.sidebar-profile .name {
+  color: #fff;
+
+  font-size: 13.5px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-profile .role {
+  color: rgba(255,255,255,.5);
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+
+/* ========================================================================== 
+   MAIN
+   ========================================================================== */
+
+.app-main {
+  margin-left: var(--sidebar-w);
+
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  transition:
+    margin-left .28s ease;
+}
+
+
+/* ========================================================================== 
+   HEADER
+   ========================================================================== */
+
+.app-header {
+  height: var(--header-h);
+
+  background: var(--surface);
+
+  border-bottom:
+    1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+
+  padding: 0 32px;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 900;
+}
+
+
+/* Header left area */
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  min-width: 0;
+}
+
+
+/* Header right area */
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  margin-left: auto;
+
+  flex-shrink: 0;
+}
+
+
+/* ========================================================================== 
+   HEADER BRAND
+   ========================================================================== */
+
+.header-brand-title {
+  font-family: var(--font-display, var(--font-body));
+
+  font-size: 16px;
+  font-weight: 700;
+
+  letter-spacing: .08em;
+
+  color: var(--text-primary);
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ========================================================================== 
+   HEADER SEARCH
+   ========================================================================== */
+
+.app-header .search-bar {
+  width: 400px;
+
+  box-shadow: none;
+
+  background: var(--surface-secondary);
+
+  border-color: transparent;
+
+  flex-shrink: 1;
+}
+
+
+/* ========================================================================== 
+   HEADER ICON BUTTON
+   ========================================================================== */
+
+.header-icon-btn {
+  position: relative;
+
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--text-secondary);
+
+  border: 0;
+  background: transparent;
+
+  transition:
+    background .18s ease,
+    color .18s ease,
+    transform .18s ease;
+}
+
+.header-icon-btn:hover {
+  background: var(--surface-secondary);
+  color: var(--primary-dark);
+}
+
+.header-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dot-flag {
+  position: absolute;
+
+  top: 7px;
+  right: 7px;
+
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: var(--danger);
+
+  border: 2px solid var(--surface);
+}
+
+
+/* ========================================================================== 
+   CONTENT
+   ========================================================================== */
+
+.app-content {
+  padding: 32px;
+
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+/* ========================================================================== 
+   MOBILE MENU BUTTON
+   ========================================================================== */
+
+.hamburger {
+  width: 40px;
+  height: 40px;
+
+  flex: 0 0 40px;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: transparent;
+
+  color: var(--text-primary);
+
+  cursor: pointer;
+
+  transition:
+    background .18s ease,
+    color .18s ease;
+}
+
+.hamburger:hover {
+  background: var(--surface-secondary);
+}
+
+.hamburger svg {
+  width: 21px;
+  height: 21px;
+}
+
+
+/* ========================================================================== 
+   SIDEBAR CLOSE BUTTON
+   Added by dashboard/app shell JS
+   ========================================================================== */
+
+.sidebar-close-btn {
+  position: absolute;
+
+  top: 18px;
+  right: 16px;
+
+  width: 36px;
+  height: 36px;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255,255,255,.1);
+
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.06);
+
+  color: rgba(255,255,255,.85);
+
+  cursor: pointer;
+
+  z-index: 10;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+}
+
+.sidebar-close-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* ========================================================================== 
+   SIDEBAR OVERLAY
+   ========================================================================== */
+
+.sidebar-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 950;
+
+  background: rgba(11,29,53,.48);
+
+  backdrop-filter: blur(2px);
+
+  opacity: 0;
+  visibility: hidden;
+
+  pointer-events: none;
+
+  transition:
+    opacity .25s ease,
+    visibility .25s ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+
+  pointer-events: auto;
+}
+
+
+/* ========================================================================== 
+   SIDEBAR OPEN STATE
+   ========================================================================== */
+
+body.sidebar-open {
+  overflow: hidden;
+}
+
+body.sidebar-open .app-sidebar {
+  transform: translateX(0);
+}
+
+
+/* ========================================================================== 
+   TABLET
+   ========================================================================== */
+
+@media (max-width: 1100px) {
+
+  :root {
+    --sidebar-w: 82px;
+  }
+
+  .app-sidebar {
+    width: 82px;
+
+    padding:
+      22px 10px;
+  }
+
+  .app-sidebar .brand {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /*
+     Hide text but keep icons.
+  */
+
+  .app-sidebar .brand span,
+  .app-sidebar .nav-link span,
+  .app-sidebar .nav-label,
+  .app-sidebar .sidebar-profile .name,
+  .app-sidebar .sidebar-profile .role {
+    display: none;
+  }
+
+  .app-sidebar .brand {
+    gap: 0;
+  }
+
+  .nav-link {
+    justify-content: center;
+
+    padding: 11px 8px;
+  }
+
+  .nav-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .sidebar-profile {
+    justify-content: center;
+    padding: 10px 5px;
+  }
+
+  .app-main {
+    margin-left: 82px;
+  }
+
+  .app-header {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .app-header .search-bar {
+    width: min(360px, 42vw);
+  }
+
+  .header-brand-title {
+    font-size: 14px;
+  }
+}
+
+
+/* ========================================================================== 
+   TABLET / SMALL LAPTOP
+   ========================================================================== */
+
+@media (max-width: 850px) {
+
+  .header-brand-title {
+    display: none;
+  }
+
+  .app-header {
+    gap: 10px;
+  }
+
+  .app-header .search-bar {
+    width: min(320px, 45vw);
+  }
+}
+
+
+/* ========================================================================== 
+   MOBILE
+   ========================================================================== */
+
+@media (max-width: 700px) {
+
+  :root {
+    --sidebar-w: 264px;
+    --header-h: 64px;
+  }
+
+  .app-sidebar {
+    width: 264px;
+
+    transform: translateX(-105%);
+
+    padding:
+      20px 16px;
+
+    box-shadow:
+      18px 0 45px rgba(0,0,0,.16);
+  }
+
+  .app-sidebar .brand {
+    justify-content: flex-start;
+
+    padding:
+      0 48px 22px 10px;
+  }
+
+  .app-sidebar .brand span,
+  .app-sidebar .nav-link span,
+  .app-sidebar .nav-label,
+  .app-sidebar .sidebar-profile .name,
+  .app-sidebar .sidebar-profile .role {
+    display: initial;
+  }
+
+  .app-sidebar .nav-link {
+    justify-content: flex-start;
+
+    padding:
+      11px 12px;
+  }
+
+  .app-sidebar .sidebar-profile {
+    justify-content: flex-start;
+
+    padding:
+      10px 12px;
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  .app-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .app-header {
+    height: 64px;
+
+    padding:
+      0 14px;
+
+    gap: 8px;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  /*
+     Indo Gulf Capital header branding
+     hidden on mobile.
+  */
+
+  .header-brand-title {
+    display: none;
+  }
+
+  /*
+     Hide large header search on mobile.
+  */
+
+  .app-header .search-bar {
+    display: none;
+  }
+
+  .app-header-right {
+    gap: 2px;
+  }
+
+  .header-icon-btn {
+    width: 38px;
+    height: 38px;
+
+    flex-basis: 38px;
+  }
+
+  .app-content {
+    padding:
+      22px 16px;
+  }
+}
+
+
+/* ========================================================================== 
+   VERY SMALL PHONES
+   ========================================================================== */
+
+@media (max-width: 420px) {
+
+  .app-header {
+    padding:
+      0 10px;
+  }
+
+  .app-header-right {
+    gap: 0;
+  }
+
+  .header-icon-btn {
+    width: 36px;
+    height: 36px;
+
+    flex-basis: 36px;
+  }
+
+  .app-content {
+    padding:
+      18px 13px;
+  }
+}
+
+
+/* ========================================================================== 
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .app-sidebar,
+  .app-main,
+  .sidebar-overlay,
+  .header-icon-btn,
+  .hamburger {
+    transition: none !important;
+  }
+}
 /* ---------- Page heading ---------- */
 .page-head{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; gap:20px; flex-wrap:wrap; }
 .page-head h1{ font-size:26px; }
@@ -285,6 +997,7 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
   min-height: 38px;
 }
@@ -453,4 +1166,40 @@
     border-radius: 10px;
   }
 
+}
+
+/* =========================================================
+   IGCA HEADER BRAND TITLE
+   ========================================================= */
+
+.header-brand-title {
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-right: auto;
+}
+
+
+/* =========================================================
+   IGCA — HEADER RIGHT ACTIONS
+   ========================================================= */
+
+.app-header {
+  display: flex;
+  align-items: center;
+}
+
+.app-header .header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-header .header-brand-title {
+  margin-left: 12px;
 }
