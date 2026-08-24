@@ -64,31 +64,32 @@
      ------------------------------------------------------------------------ */
 
   const NOTIFICATION_TYPES = new Set([
-    "connection",
-    "message",
-    "post",
-    "like",
-    "comment",
-    "appointment",
-    "activity"
-  ]);
+  "connection",
+  "message",
+  "post",
+  "like",
+  "comment",
+  "appointment",
+  "system",
+  "follow"
+]);
 
-  function normalizeNotificationType(type) {
-    const value = String(type || "activity")
-      .trim()
-      .toLowerCase();
+ function normalizeNotificationType(type) {
+  const value = String(type || "system")
+    .trim()
+    .toLowerCase();
 
-    if (NOTIFICATION_TYPES.has(value)) {
-      return value;
-    }
-
-    console.warn(
-      "IGCA unknown notification type, using activity:",
-      value
-    );
-
-    return "activity";
+  if (NOTIFICATION_TYPES.has(value)) {
+    return value;
   }
+
+  console.warn(
+    "IGCA unknown notification type, using system:",
+    value
+  );
+
+  return "system";
+}
 
   function logSupabaseError(label, error) {
     console.error(`IGCA ${label}:`, {
@@ -859,6 +860,126 @@
 
       return rejectedConnection;
     },
+
+
+    /* ======================================================================
+   REMOVE CONNECTION + NOTIFICATION
+   ====================================================================== */
+
+async removeConnection(connectionId) {
+  const user = await this.user();
+
+  if (!user) {
+    throw new Error("Not authenticated.");
+  }
+
+  if (!connectionId) {
+    throw new Error("Connection ID is required.");
+  }
+
+  /*
+   * Find accepted connection where current user
+   * is one of the two members.
+   */
+  const {
+    data: connection,
+    error: fetchError
+  } = await sb
+    .from("connections")
+    .select(`
+      id,
+      requester_id,
+      addressee_id,
+      status,
+      created_at
+    `)
+    .eq("id", connectionId)
+    .eq("status", "accepted")
+    .or(
+      `requester_id.eq.${user.id},addressee_id.eq.${user.id}`
+    )
+    .maybeSingle();
+
+  if (fetchError) {
+    logSupabaseError(
+      "remove connection fetch error",
+      fetchError
+    );
+
+    throw fetchError;
+  }
+
+  if (!connection) {
+    throw new Error(
+      "Accepted connection not found."
+    );
+  }
+
+  /*
+   * Determine the other user.
+   */
+  const otherUserId =
+    connection.requester_id === user.id
+      ? connection.addressee_id
+      : connection.requester_id;
+
+  /*
+   * Remove connection.
+   */
+  const {
+    data,
+    error
+  } = await sb
+    .from("connections")
+    .delete()
+    .eq("id", connection.id)
+    .eq("status", "accepted")
+    .or(
+      `requester_id.eq.${user.id},addressee_id.eq.${user.id}`
+    )
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    logSupabaseError(
+      "remove connection error",
+      error
+    );
+
+    throw error;
+  }
+
+  /*
+   * Notify the other person.
+   */
+  if (otherUserId && otherUserId !== user.id) {
+    try {
+      const actor =
+        await this.getNotificationActor();
+
+      await this.createNotification({
+        userId: otherUserId,
+        type: "connection",
+        title: "Connection removed",
+        body:
+          `${actor.name} removed you from their connections.`,
+        link: "network.html"
+      });
+
+    } catch (notificationError) {
+      /*
+       * Connection removal should remain successful
+       * even if notification fails.
+       */
+      logSupabaseError(
+        "remove connection notification error",
+        notificationError
+      );
+    }
+  }
+
+  return data || true;
+},
 
     /* ======================================================================
        ALL CONNECTIONS
