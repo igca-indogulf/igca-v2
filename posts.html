@@ -6,169 +6,260 @@
 
   <title>Posts — IGCA</title>
 
+  <!-- CORE -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- PAGE -->
   <link rel="stylesheet" href="css/posts.css">
 </head>
 
 <body>
 
-  <main class="posts-page">
+  <!-- =========================================================
+       IGCA APP SHELL
+  ========================================================== -->
 
-    <!-- HEADER -->
-    <header class="posts-header">
-      <div>
-        <h1>Posts</h1>
-        <p>Share ideas, updates and insights with your network.</p>
-      </div>
+  <div class="app-shell">
 
-      <button
-        type="button"
-        class="primary-btn"
-        id="newPostBtn"
-      >
-        + Create Post
-      </button>
-    </header>
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar"></aside>
+
+    <!-- MAIN -->
+    <div class="app-main">
+
+      <!-- HEADER -->
+      <header class="app-header"></header>
+
+      <!-- CONTENT -->
+      <main class="app-content">
+
+        <div class="posts-page">
+
+          <!-- =====================================================
+               PAGE HEADER
+          ====================================================== -->
+
+          <section class="posts-header">
+
+            <div class="posts-heading">
+
+              <span class="posts-eyebrow">
+                IGCA COMMUNITY
+              </span>
+
+              <h1>Posts</h1>
+
+              <p>
+                Share ideas, updates and insights with your network.
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              class="primary-btn"
+              id="newPostBtn"
+            >
+              + Create Post
+            </button>
+
+          </section>
 
 
-    <!-- CREATE POST -->
-    <section
-      class="create-post-card"
-      id="createPostCard"
-    >
+          <!-- =====================================================
+               CREATE POST
+          ====================================================== -->
 
-      <div class="create-post-header">
-        <div class="avatar" id="currentUserAvatar">
-          U
-        </div>
-
-        <div>
-          <strong id="currentUserName">
-            Loading...
-          </strong>
-
-          <span>Share something with your network</span>
-        </div>
-      </div>
-
-
-      <textarea
-        id="postBody"
-        placeholder="What's on your mind?"
-        maxlength="5000"
-      ></textarea>
-
-
-      <div class="create-post-footer">
-
-        <span id="postCharCount">
-          0 / 5000
-        </span>
-
-        <div class="create-actions">
-
-          <button
-            type="button"
-            class="secondary-btn"
-            id="cancelPostBtn"
+          <section
+            class="create-post-card"
+            id="createPostCard"
           >
-            Cancel
-          </button>
 
-          <button
-            type="button"
-            class="primary-btn"
-            id="publishPostBtn"
-          >
-            Publish Post
-          </button>
+            <div class="create-post-header">
+
+              <div
+                class="avatar"
+                id="currentUserAvatar"
+              >
+                U
+              </div>
+
+              <div class="create-user-info">
+
+                <strong id="currentUserName">
+                  Loading...
+                </strong>
+
+                <span>
+                  Share something with your network
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <textarea
+              id="postBody"
+              placeholder="What's on your mind?"
+              maxlength="5000"
+            ></textarea>
+
+
+            <div class="create-post-footer">
+
+              <span id="postCharCount">
+                0 / 5000
+              </span>
+
+              <div class="create-actions">
+
+                <button
+                  type="button"
+                  class="secondary-btn"
+                  id="cancelPostBtn"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  class="primary-btn"
+                  id="publishPostBtn"
+                >
+                  Publish Post
+                </button>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- =====================================================
+               FEED
+          ====================================================== -->
+
+          <section class="feed-section">
+
+            <div class="section-title">
+
+              <div>
+                <span class="section-kicker">
+                  COMMUNITY
+                </span>
+
+                <h2>Your Feed</h2>
+              </div>
+
+              <button
+                type="button"
+                class="refresh-btn"
+                id="refreshPostsBtn"
+              >
+                ↻ Refresh
+              </button>
+
+            </div>
+
+
+            <!-- POSTS -->
+            <div
+              id="postsFeed"
+              class="posts-feed"
+            ></div>
+
+
+            <!-- LOADING -->
+            <div
+              id="postsLoading"
+              class="state-box"
+            >
+              <div class="state-loader"></div>
+              <span>Loading posts...</span>
+            </div>
+
+
+            <!-- EMPTY -->
+            <div
+              id="postsEmpty"
+              class="state-box hidden"
+            >
+
+              <div class="empty-icon">
+                📝
+              </div>
+
+              <h3>No posts yet</h3>
+
+              <p>
+                Be the first person to share something with the IGCA community.
+              </p>
+
+              <button
+                type="button"
+                class="primary-btn"
+                id="emptyCreateBtn"
+              >
+                Create First Post
+              </button>
+
+            </div>
+
+
+            <!-- ERROR -->
+            <div
+              id="postsError"
+              class="state-box error-state hidden"
+            >
+
+              <div class="empty-icon">
+                ⚠
+              </div>
+
+              <h3>Unable to load posts</h3>
+
+              <p id="postsErrorText">
+                Something went wrong.
+              </p>
+
+              <button
+                type="button"
+                class="primary-btn"
+                id="retryPostsBtn"
+              >
+                Try Again
+              </button>
+
+            </div>
+
+          </section>
 
         </div>
 
-      </div>
+      </main>
 
-    </section>
+    </div>
 
-
-    <!-- FEED -->
-    <section class="feed-section">
-
-      <div class="section-title">
-        <h2>Your Feed</h2>
-
-        <button
-          type="button"
-          class="refresh-btn"
-          id="refreshPostsBtn"
-        >
-          ↻ Refresh
-        </button>
-      </div>
+  </div>
 
 
-      <div
-        id="postsFeed"
-        class="posts-feed"
-      ></div>
+  <!-- =========================================================
+       MOBILE NAV
+  ========================================================== -->
+
+  <nav class="bottom-nav"></nav>
 
 
-      <!-- LOADING -->
-      <div
-        id="postsLoading"
-        class="state-box"
-      >
-        Loading posts...
-      </div>
+  <!-- =========================================================
+       EDIT POST MODAL
+  ========================================================== -->
 
-
-      <!-- EMPTY -->
-      <div
-        id="postsEmpty"
-        class="state-box hidden"
-      >
-        <div class="empty-icon">📝</div>
-
-        <h3>No posts yet</h3>
-
-        <p>
-          Be the first person to share something.
-        </p>
-
-        <button
-          type="button"
-          class="primary-btn"
-          id="emptyCreateBtn"
-        >
-          Create First Post
-        </button>
-      </div>
-
-
-      <!-- ERROR -->
-      <div
-        id="postsError"
-        class="state-box error-state hidden"
-      >
-        <h3>Unable to load posts</h3>
-
-        <p id="postsErrorText">
-          Something went wrong.
-        </p>
-
-        <button
-          type="button"
-          class="primary-btn"
-          id="retryPostsBtn"
-        >
-          Try Again
-        </button>
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- EDIT POST MODAL -->
   <div
     class="modal hidden"
     id="editPostModal"
@@ -181,14 +272,22 @@
       <div class="modal-header">
 
         <div>
+          <span class="modal-kicker">
+            POST
+          </span>
+
           <h2>Edit Post</h2>
-          <p>Update your post.</p>
+
+          <p>
+            Update your post.
+          </p>
         </div>
 
         <button
           type="button"
           class="modal-close"
           id="closeEditModalBtn"
+          aria-label="Close"
         >
           ×
         </button>
@@ -199,6 +298,7 @@
       <textarea
         id="editPostBody"
         maxlength="5000"
+        placeholder="Update your post..."
       ></textarea>
 
 
@@ -227,7 +327,10 @@
   </div>
 
 
-  <!-- COMMENTS MODAL -->
+  <!-- =========================================================
+       COMMENTS MODAL
+  ========================================================== -->
+
   <div
     class="modal hidden"
     id="commentsModal"
@@ -240,16 +343,24 @@
       <div class="modal-header">
 
         <div>
+
+          <span class="modal-kicker">
+            DISCUSSION
+          </span>
+
           <h2>Comments</h2>
+
           <p id="commentsCount">
             0 comments
           </p>
+
         </div>
 
         <button
           type="button"
           class="modal-close"
           id="closeCommentsBtn"
+          aria-label="Close"
         >
           ×
         </button>
@@ -270,6 +381,7 @@
           id="commentInput"
           placeholder="Write a comment..."
           maxlength="1000"
+          autocomplete="off"
         >
 
         <button
@@ -287,14 +399,16 @@
   </div>
 
 
-  <!-- SUPABASE -->
+  <!-- =========================================================
+       SCRIPTS
+  ========================================================== -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- YOUR CONFIG -->
   <script src="js/config.js"></script>
-
-  <!-- YOUR BACKEND -->
   <script src="js/backend.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
 
   <!-- POSTS -->
   <script src="js/posts.js"></script>
