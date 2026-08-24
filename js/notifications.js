@@ -5,6 +5,36 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
   "use strict";
+  /* ========================================================================
+     GLOBAL NOTIFICATION BELL
+     ======================================================================== */
+
+  async function refreshGlobalNotificationBell() {
+    try {
+      if (
+        typeof IGCA_API === "undefined" ||
+        typeof IGCA_API.unreadNotificationCount !== "function"
+      ) {
+        return;
+      }
+
+      const count =
+        await IGCA_API.unreadNotificationCount();
+
+      updateBellCount(count);
+
+      console.log(
+        "🔔 IGCA unread notification count:",
+        count
+      );
+
+    } catch (error) {
+      console.error(
+        "IGCA global notification count error:",
+        error
+      );
+    }
+  }
 
   /* ========================================================================
      SHELL
@@ -131,6 +161,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   function getIcon(type) {
     return icons[type] || icons.activity;
   }
+  /* ========================================================================
+     GLOBAL BELL COUNT
+     ======================================================================== */
+
+  async function loadGlobalBellCount() {
+    try {
+      if (
+        typeof IGCA_API === "undefined" ||
+        typeof IGCA_API.unreadNotificationCount !== "function"
+      ) {
+        return;
+      }
+
+      const count =
+        await IGCA_API.unreadNotificationCount();
+
+      updateBellCount(count);
+
+      console.log(
+        "IGCA global unread notification count:",
+        count
+      );
+
+    } catch (error) {
+      console.error(
+        "IGCA global bell count error:",
+        error
+      );
+    }
+  }
 
   /* ========================================================================
      BELL COUNT
@@ -231,17 +291,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const unreadCount =
-      notifications.filter(
-        notification =>
-          !notification.read_at
-      ).length;
+   const unreadCount =
+  notifications.filter(
+    notification =>
+      !notification.read_at
+  ).length;
 
     list.innerHTML =
       notifications
         .map(notification => {
           const unread =
-            !notification.read_at;
+  !notification.read_at;
 
           return `
             <article
@@ -548,6 +608,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             IGCA_API.markAllNotificationsRead();
 
           await loadNotifications();
+          
 
         } catch (error) {
           console.error(
@@ -677,6 +738,7 @@ document.addEventListener("DOMContentLoaded", async () => {
      ======================================================================== */
 
   await loadNotifications();
+  await refreshGlobalNotificationBell();
 
   /* ========================================================================
      START REALTIME
