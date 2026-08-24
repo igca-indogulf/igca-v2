@@ -1,0 +1,522 @@
+/* ==========================================================================
+   IGCA — Professional Profile
+   Clean professional-network profile
+   ========================================================================== */
+
+
+/* ==========================================================================
+   PROFILE HERO
+   ========================================================================== */
+
+.profile-hero {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 22px;
+  padding: 0;
+  background: var(--surface);
+}
+
+
+/*
+   No gradient / blue banner.
+   Clean neutral professional header.
+*/
+
+.profile-hero-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 190px;
+  padding: 30px;
+}
+
+
+/* ==========================================================================
+   AVATAR
+   ========================================================================== */
+
+.profile-avatar-wrap {
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  width: 112px;
+  height: 112px;
+  min-width: 112px;
+  min-height: 112px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  border: 5px solid var(--surface);
+
+  background: var(--primary-dark);
+
+  color: #fff;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 0 0 1px var(--border),
+    0 8px 24px rgba(0,0,0,.08);
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* ==========================================================================
+   IDENTITY
+   ========================================================================== */
+
+.profile-identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-name-line h1 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -.3px;
+}
+
+.profile-headline {
+  margin: 7px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.profile-meta {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+
+/* ==========================================================================
+   ACTIONS
+   ========================================================================== */
+
+.profile-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.profile-actions .btn {
+  min-height: 38px;
+}
+
+
+/* ==========================================================================
+   PROFILE BODY
+   ========================================================================== */
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 22px;
+  align-items: start;
+}
+
+.profile-main-column {
+  min-width: 0;
+}
+
+.profile-sidebar {
+  min-width: 0;
+}
+
+
+/* ==========================================================================
+   SECTIONS
+   ========================================================================== */
+
+.profile-section {
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.profile-section:last-child {
+  margin-bottom: 0;
+}
+
+.profile-section-head {
+  padding: 20px 22px 0;
+}
+
+.profile-section-head h2 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.profile-section-body {
+  padding: 16px 22px 22px;
+}
+
+
+/* ==========================================================================
+   ABOUT
+   ========================================================================== */
+
+.profile-about {
+  margin: 0;
+
+  font-size: 14.5px;
+  line-height: 1.75;
+
+  color: var(--text);
+}
+
+
+/* ==========================================================================
+   EXPERIENCE
+   ========================================================================== */
+
+.experience-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.experience-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: var(--primary-dark);
+
+  color: #fff;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.experience-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  min-width: 0;
+}
+
+.experience-content strong {
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+
+.experience-current {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.experience-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+
+/* ==========================================================================
+   EXPERTISE
+   ========================================================================== */
+
+.profile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-chips .chip {
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  font-size: 12.5px;
+}
+
+
+/* ==========================================================================
+   POSTS
+   ========================================================================== */
+
+.profile-posts {
+  min-height: 80px;
+}
+
+.profile-posts > .empty-state {
+  margin: 0;
+}
+
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+
+.profile-side-card {
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.profile-side-card:last-child {
+  margin-bottom: 0;
+}
+
+.profile-side-head {
+  padding: 18px 18px 0;
+}
+
+.profile-side-head h3 {
+  margin: 0;
+
+  font-size: 15px;
+  line-height: 1.4;
+
+  font-weight: 700;
+}
+
+.profile-side-body {
+  padding: 14px 18px 18px;
+}
+
+
+/* ==========================================================================
+   SIDEBAR EMPTY STATE
+   ========================================================================== */
+
+.profile-side-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-side-empty-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  border: 1px solid var(--border);
+
+  color: var(--text-secondary);
+
+  font-size: 18px;
+}
+
+.profile-side-empty p {
+  margin: 0;
+
+  font-size: 12.5px;
+  line-height: 1.5;
+
+  color: var(--text-secondary);
+}
+
+
+/* ==========================================================================
+   VERIFY BADGE
+   ========================================================================== */
+
+#p-verify {
+  display: inline-flex;
+  align-items: center;
+}
+
+
+/* ==========================================================================
+   NETWORK
+   ========================================================================== */
+
+#p-network {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+/* ==========================================================================
+   BUTTON STATES
+   ========================================================================== */
+
+.profile-actions .btn:disabled {
+  opacity: .65;
+  cursor: default;
+}
+
+
+/* ==========================================================================
+   TABLET
+   ========================================================================== */
+
+@media (max-width: 1000px) {
+
+  .profile-layout {
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 18px;
+  }
+
+  .profile-hero-main {
+    flex-wrap: wrap;
+  }
+
+  .profile-identity {
+    min-width: calc(100% - 150px);
+  }
+
+  .profile-actions {
+    width: 100%;
+    justify-content: flex-start;
+    padding-left: 132px;
+  }
+
+}
+
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media (max-width: 760px) {
+
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .profile-side-card,
+  .profile-side-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .profile-hero-main {
+    min-height: auto;
+
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr);
+
+    gap: 16px;
+
+    padding: 22px;
+  }
+
+  .profile-avatar {
+    width: 88px;
+    height: 88px;
+    min-width: 88px;
+    min-height: 88px;
+  }
+
+  .profile-name-line h1 {
+    font-size: 22px;
+  }
+
+  .profile-actions {
+    grid-column: 1 / -1;
+
+    width: 100%;
+
+    padding-left: 0;
+
+    justify-content: flex-start;
+  }
+
+  .profile-actions .btn {
+    flex: 1;
+  }
+
+}
+
+
+/* ==========================================================================
+   SMALL MOBILE
+   ========================================================================== */
+
+@media (max-width: 520px) {
+
+  .profile-hero-main {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+
+  .profile-avatar-wrap {
+    margin-bottom: 2px;
+  }
+
+  .profile-avatar {
+    width: 78px;
+    height: 78px;
+    min-width: 78px;
+    min-height: 78px;
+
+    font-size: 22px;
+  }
+
+  .profile-name-line h1 {
+    font-size: 21px;
+  }
+
+  .profile-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .profile-actions .btn {
+    width: 100%;
+  }
+
+  .profile-section-head {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .profile-section-body {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .profile-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+}
